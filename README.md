@@ -171,7 +171,7 @@ canvas.preview.dragging{cursor:grabbing}
         <img id="topLogoAT" class="top-logo" alt="Логотип (компания)" title="Логотип (компания)">
     </div>
     <div class="top-buttons">
-        <a href="https://stlcalc.tb.ru/page4" class="top-nav-btn" target="_blank" rel="noopener noreferrer">Генератор паспортов</a>
+        <a href="https://tonic-spb.github.io/stlcalc/passport.html" class="top-nav-btn" target="_blank" rel="noopener noreferrer">Генератор паспортов</a>
         <a href="https://stlcalc.tb.ru/page5" class="top-nav-btn" target="_blank" rel="noopener noreferrer">Базовый расчет стоимости</a>
     </div>
 </div>
