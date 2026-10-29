@@ -289,7 +289,8 @@ canvas.preview.dragging{cursor:grabbing}
 <footer class="site-footer">
     Генератор заявок v59 (21092026). ООО "Аврора Карбон Технолоджи". Все права защищены. 2026г.
 </footer>
-</div>
+<!-- </div> -->
+
 
 <script>
 (async function(){
