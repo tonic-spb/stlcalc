@@ -59,9 +59,9 @@ canvas.preview{width:100%;height:695px;max-width:100%;background:#fff;border-rad
 .preview-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:6px}
 .preview-caption{font-size:.72rem;color:var(--muted)}
 .preview-btns{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
-.btn-download,.btn-download-no-logo,.btn-production{font-size:1.44rem;padding:8px 20px;border-radius:10px;background:var(--accent);color:#fff;border:none;cursor:pointer}
-.btn-download:hover,.btn-download-no-logo:hover,.btn-production:hover{background:var(--accent-hover)}
-.btn-download:disabled,.btn-download-no-logo:disabled,.btn-production:disabled{opacity:.4;cursor:not-allowed}
+.btn-download,.btn-download-no-,.btn-production{font-size:1.44rem;padding:8px 20px;border-radius:10px;background:var(--accent);color:#fff;border:none;cursor:pointer}
+.btn-download:hover,.btn-download-no-:hover,.btn-production:hover{background:var(--accent-hover)}
+.btn-download:disabled,.btn-download-no-:disabled,.btn-production:disabled{opacity:.4;cursor:not-allowed}
 .btn-reset{font-size:1.6rem;line-height:1;padding:8px 16px;border-radius:10px;background:transparent;color:var(--muted);border:1px solid var(--border);cursor:pointer}
 .btn-hd{font-size:1.2rem;padding:8px 16px;border-radius:10px;background:transparent;color:var(--accent);border:1px solid var(--accent);cursor:pointer;font-weight:600;transition:background .15s}
 .btn-hd:hover{background:color-mix(in srgb,var(--accent)15%,transparent)}
@@ -108,7 +108,7 @@ canvas.preview.dragging{cursor:grabbing}
 .req-preview-wrap{border-top:1px solid var(--border);padding-top:16px}
 .req-preview-caption{margin-bottom:8px}
 .req-preview{background:#fff;color:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:24px 28px;font-family:Calibri,Arial,sans-serif;font-size:.92rem;line-height:1.55;max-width:780px;overflow-x:auto}
-.req-preview img.req-logo{width:auto;height:20px;margin-bottom:14px;display:block}
+.req-preview img.req-{width:auto;height:20px;margin-bottom:14px;display:block}
 .req-preview .req-title{font-weight:700;font-size:1.05rem;margin:0 0 8px}
 .req-preview table.req-dateline{width:100%;border-collapse:collapse;font-weight:700;margin-bottom:12px}
 .req-preview table.req-dateline td{padding:0;border:none}
@@ -157,7 +157,7 @@ canvas.preview.dragging{cursor:grabbing}
 .group-label{display:block;min-height:4.2em;line-height:1.4}
 .group-field input{font:inherit;font-size:.95rem;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
 .group-field input:focus{outline:none;border-color:var(--accent)}
-@media(max-width:768px){.floating-panel{right:8px;width:130px}.drag-handle{height:18px}.floating-dropzone{padding:12px 6px;font-size:.75rem}.floating-dropzone .icon{font-size:1.4rem}.floating-info{padding:8px 6px}.floating-info-title{font-size:.58rem}.floating-info-value{font-size:.82rem}.floating-info-postproc-list{font-size:.72rem}.top-logo{height:36px}.group-label{min-height:auto}}
+@media(max-width:768px){.floating-panel{right:8px;width:130px}.drag-handle{height:18px}.floating-dropzone{padding:12px 6px;font-size:.75rem}.floating-dropzone .icon{font-size:1.4rem}.floating-info{padding:8px 6px}.floating-info-title{font-size:.58rem}.floating-info-value{font-size:.82rem}.floating-info-postproc-list{font-size:.72rem}.top-{height:36px}.group-label{min-height:auto}}
 </style>
 </head>
 <body>
@@ -298,7 +298,7 @@ let LOGO_DATA_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAA
 let LETTERHEAD_LOGO_DATA_URI = LOGO_DATA_URI;
 
 try {
-    const wmRes = await fetch('https://stlcalc.tb.ru/page14');
+    const wmRes = await fetch('https://tonic-spb.github.io/stlcalc/logo_wm');
     if (wmRes.ok) {
         const htmlText = await wmRes.text();
         const dummy = document.createElement('div');
@@ -314,7 +314,7 @@ try {
 } catch (e) { console.warn('Ошибка загрузки logo_wm', e); }
 
 try {
-    const atRes = await fetch('https://stlcalc.tb.ru/logo_at');
+    const atRes = await fetch('https://tonic-spb.github.io/stlcalc/logo_at');
     if (atRes.ok) {
         const htmlText = await atRes.text();
         const dummy = document.createElement('div');
