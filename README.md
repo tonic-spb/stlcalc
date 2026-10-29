@@ -1,7 +1,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=0.9">
+<meta name="viewport" content="width=device-width, initial-scale=0.5">
 <title>Калькулятор объёма 3D-модели</title>
 <style>
 :root{--bg:#f5f8fb;--panel:#ffffff;--border:#dbe4ee;--text:#14212e;--muted:#5c6d7d;--accent:#0061ae;--accent-hover:#004d8a;--ok:#1a7f45;--ok-bg:#e9f7ef;--err:#b3261e;--err-bg:#fdecea;--warn:#8a5a00;--warn-bg:#fff4e0;--canvas-bg:#eef2f7}
