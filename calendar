@@ -1,0 +1,2735 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Производственный календарь 3D-печати (MES Lite) — v1 [101126175600]</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            925: '#0b111e',
+                            950: '#060a12'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Пользовательские скроллбары и анимации для полноэкранного режима */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.7);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.9);
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.9); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 12px 2px rgba(239, 68, 68, 0.35); }
+        }
+        .unsaved-pulse {
+            animation: pulse-border 2s infinite;
+        }
+
+        .day-cell-3m {
+            min-height: 92px;
+            transition: all 0.15s ease;
+        }
+        .day-cell-1m {
+            min-height: 148px;
+            transition: all 0.15s ease;
+        }
+        .day-cell-3m:hover, .day-cell-1m:hover {
+            transform: translateY(-1px);
+            z-index: 10;
+        }
+
+        /* Полосатая подложка для дней простоя принтеров */
+        .idle-printer-bg {
+            background-image: repeating-linear-gradient(
+                -45deg,
+                rgba(16, 185, 129, 0.03),
+                rgba(16, 185, 129, 0.03) 8px,
+                rgba(16, 185, 129, 0.08) 8px,
+                rgba(16, 185, 129, 0.08) 16px
+            );
+        }
+
+        .drag-over-active {
+            border-color: #3b82f6 !important;
+            background-color: rgba(59, 130, 246, 0.15) !important;
+            transform: scale(1.01);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+
+    <!-- ==================== ВЕРХНЯЯ ПАНЕЛЬ (ШАПКА MES) ==================== -->
+    <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 lg:px-5 py-2.5 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- Логотип, название и штамп версии -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 flex items-center justify-center shadow-md shadow-indigo-500/20 border border-indigo-400/30">
+                    <i class="fa-solid fa-cubes-stacked text-white text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">3D-Print MES Календарь</h1>
+                        <span class="px-2 py-0.5 text-[11px] font-mono font-semibold rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" title="Версия и штамп генерации кода (ДДММГГЧЧММСС)">
+                            v1 • 101126175600
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 hidden sm:block">Оперативное планирование запусков 3D-печати, постобработки и отгрузок</p>
+                </div>
+            </div>
+
+            <!-- Статус синхронизации JSON и индикатор несохраненных изменений -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <!-- Индикатор состояния файла обмена -->
+                <div id="syncStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-800/90 border border-slate-700 text-slate-300">
+                    <span id="syncStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="syncStatusText">Ожидание файла обмена...</span>
+                </div>
+
+                <!-- Кнопка Загрузить / Синхронизировать JSON -->
+                <button onclick="openSyncModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-sm" title="Открыть окно загрузки или синхронизации файла обмена JSON">
+                    <i class="fa-solid fa-cloud-arrow-down text-cyan-400"></i>
+                    <span>Файл обмена (Импорт)</span>
+                </button>
+
+                <!-- Кнопка Сохранить JSON (Экспорт) -->
+                <button id="btnSaveJsonHeader" onclick="saveExchangeFile()" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400/30 transition shadow-md shadow-emerald-600/20" title="Сохранить актуальный календарь в файл обмена JSON">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Сохранить JSON</span>
+                </button>
+
+                <!-- Кнопка Справочники -->
+                <button onclick="openDirectoriesModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition" title="Управление сотрудниками и типами производственных этапов">
+                    <i class="fa-solid fa-sliders text-amber-400"></i>
+                    <span class="hidden md:inline">Справочники</span>
+                </button>
+
+                <!-- Главная кнопка: Новый заказ -->
+                <button onclick="openOrderModal()" class="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white border border-indigo-400/40 shadow-lg shadow-indigo-600/30 transition transform active:scale-95">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Новый заказ</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== ПАНЕЛЬ KPI И СВОДНОЙ ЗАГРУЗКИ НА 3 МЕСЯЦА ==================== -->
+    <section class="bg-slate-900/60 border-b border-slate-800/80 px-3 lg:px-5 py-2.5">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            <!-- KPI 1: Активные заказы -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] text-slate-400 font-medium">Заказов в плане</div>
+                    <div id="kpiTotalOrders" class="text-lg sm:text-xl font-bold text-white font-mono">0</div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </div>
+            </div>
+
+            <!-- KPI 2: Запуски печати (Оборудование) -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] text-slate-400 font-medium">Запусков печати (3 мес)</div>
+                    <div id="kpiPrintLaunches" class="text-lg sm:text-xl font-bold text-blue-400 font-mono">0</div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <i class="fa-solid fa-print"></i>
+                </div>
+            </div>
+
+            <!-- KPI 3: Простой оборудования (Окна в 3 мес) -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] text-slate-400 font-medium">Дней без запуска (Окна)</div>
+                    <div class="flex items-baseline gap-1.5">
+                        <span id="kpiIdleDays" class="text-lg sm:text-xl font-bold text-emerald-400 font-mono">0</span>
+                        <span id="kpiIdlePercent" class="text-[11px] text-slate-400 font-mono">0%</span>
+                    </div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400" title="Дни в 3-месячном окне, когда не запланирован запуск принтеров (свободная мощность)">
+                    <i class="fa-solid fa-Calendar-check"></i>
+                </div>
+            </div>
+
+            <!-- KPI 4: Распаковка и Пескоструй -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] text-slate-400 font-medium">Распаковка / Пескоструй</div>
+                    <div id="kpiPostProcess" class="text-lg sm:text-xl font-bold text-amber-400 font-mono">0</div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <i class="fa-solid fa-spray-can-sparkles"></i>
+                </div>
+            </div>
+
+            <!-- KPI 5: Сортировка и Упаковка -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] text-slate-400 font-medium">Упаковка и сортировка</div>
+                    <div id="kpiPackaging" class="text-lg sm:text-xl font-bold text-purple-400 font-mono">0</div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                    <i class="fa-solid fa-boxes-packing"></i>
+                </div>
+            </div>
+
+            <!-- KPI 6: Отгрузки (Дедлайны) -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] text-slate-400 font-medium">Отгрузок (Крайний срок)</div>
+                    <div id="kpiShipments" class="text-lg sm:text-xl font-bold text-rose-400 font-mono">0</div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== ПАНЕЛЬ НАВИГАЦИИ, ПОИСКА И ФИЛЬТРОВ ==================== -->
+    <section class="bg-slate-900/90 border-b border-slate-800 px-3 lg:px-5 py-2.5">
+        <div class="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
+            
+            <!-- Левая группа: Переключение периода (3 месяца) и Режима вида -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Управление месяцами -->
+                <div class="flex items-center bg-slate-800/90 border border-slate-700 rounded-xl p-1">
+                    <button onclick="shiftMonths(-1)" class="px-2.5 py-1 rounded-lg hover:bg-slate-700 text-slate-300 transition text-xs font-medium" title="Сдвинуть на 1 месяц назад">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button onclick="resetToCurrentMonth()" class="px-3 py-1 rounded-lg hover:bg-slate-700 text-xs font-semibold text-indigo-300 transition" title="Перейти к текущему месяцу">
+                        Сегодня
+                    </button>
+                    <span id="currentPeriodLabel" class="px-3 py-1 text-xs sm:text-sm font-bold text-white min-w-[190px] text-center">
+                        Ноябрь 2026 — Январь 2027
+                    </span>
+                    <button onclick="shiftMonths(1)" class="px-2.5 py-1 rounded-lg hover:bg-slate-700 text-slate-300 transition text-xs font-medium" title="Сдвинуть на 1 месяц вперед">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Переключатель режимов отображения -->
+                <div class="flex items-center bg-slate-800/90 border border-slate-700 rounded-xl p-1">
+                    <button id="viewBtn3m" onclick="setViewMode('3m')" class="px-3 py-1 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white shadow">
+                        <i class="fa-solid fa-table-columns mr-1"></i> 3 Месяца
+                    </button>
+                    <button id="viewBtn1m" onclick="setViewMode('1m')" class="px-3 py-1 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+                        <i class="fa-solid fa-calendar-days mr-1"></i> 1 Месяц (Крупно)
+                    </button>
+                    <button id="viewBtnList" onclick="setViewMode('list')" class="px-3 py-1 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+                        <i class="fa-solid fa-list-check mr-1"></i> Реестр заказов
+                    </button>
+                </div>
+
+                <!-- Переключатель подсветки простоев оборудования -->
+                <label class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/70 border border-slate-700/80 cursor-pointer select-none text-xs text-slate-300 hover:border-emerald-500/50 transition">
+                    <input type="checkbox" id="toggleShowIdle" checked onchange="renderAll()" class="rounded bg-slate-900 border-slate-600 text-emerald-500 focus:ring-0">
+                    <span>Окна / Простой принтеров</span>
+                </label>
+            </div>
+
+            <!-- Правая группа: Поиск по КП/Счету/Заявке/Клиенту + Фильтры -->
+            <div class="flex flex-wrap items-center gap-2 flex-1 xl:justify-end">
+                <!-- Поиск -->
+                <div class="relative flex-1 min-w-[220px] max-w-md">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        oninput="renderAll()"
+                        placeholder="Поиск: Клиент, № заявки, КП, Счет, Заказ в пр-во..."
+                        class="w-full pl-8 pr-8 py-1.5 bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition"
+                    >
+                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Фильтр по виду активности -->
+                <select id="filterActivity" onchange="renderAll()" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+                    <option value="ALL">Все этапы производства</option>
+                </select>
+
+                <!-- Фильтр по ответственному исполнителю этапа -->
+                <select id="filterAssignee" onchange="renderAll()" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+                    <option value="ALL">Исполнитель: Все</option>
+                </select>
+
+                <!-- Фильтр по создателю заказа -->
+                <select id="filterCreator" onchange="renderAll()" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+                    <option value="ALL">Кто внес заказ: Все</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Легенда активностей (динамическая из справочника) -->
+        <div class="flex flex-wrap items-center justify-between gap-2 mt-2.5 pt-2 border-t border-slate-800/80 text-[11px]">
+            <div id="activityLegendContainer" class="flex flex-wrap items-center gap-2">
+                <!-- Заполняется JS -->
+            </div>
+            <div class="flex items-center gap-3 text-slate-400">
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/40 inline-block"></span>
+                    <span>Окно (Нет запусков печати)</span>
+                </span>
+                <span class="inline-flex items-center gap-1">
+                    <span class="font-mono text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded">Созд:</span> Автор заказа
+                </span>
+                <span class="inline-flex items-center gap-1">
+                    <span class="font-mono text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded">Исп:</span> Ответственный за этап
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== ОСНОВНАЯ РАБОЧАЯ ОБЛАСТЬ КАЛЕНДАРЯ ==================== -->
+    <main class="flex-1 px-2 sm:px-4 lg:px-5 py-3 flex flex-col">
+        
+        <!-- Баннер несохраненных изменений (показывается, когда unsavedChanges = true) -->
+        <div id="unsavedBanner" class="hidden mb-3 px-4 py-2.5 rounded-xl bg-amber-500/15 border-2 border-amber-500/60 text-amber-200 flex flex-wrap items-center justify-between gap-3 unsaved-pulse">
+            <div class="flex items-center gap-2.5 text-xs sm:text-sm font-medium">
+                <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base"></i>
+                <span>
+                    <strong>Внимание! В календаре есть несохраненные изменения.</strong> 
+                    Обязательно выгрузите обновленный JSON-файл обмена на внешний сервер/диск перед закрытием вкладки, чтобы команда видела актуальный план!
+                </span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="saveExchangeFile()" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                    <i class="fa-solid fa-download mr-1"></i> Сохранить JSON-файл обмена
+                </button>
+                <button onclick="copyJsonToClipboard()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-200 border border-amber-500/40 font-semibold text-xs transition">
+                    <i class="fa-solid fa-copy mr-1"></i> Скопировать JSON-код
+                </button>
+            </div>
+        </div>
+
+        <!-- Контейнер для сетки на 3 месяца / 1 месяц -->
+        <div id="calendarViewport" class="flex-1">
+            <!-- Динамически рендерится через JS -->
+        </div>
+
+        <!-- Контейнер для Реестра заказов (табличный вид) -->
+        <div id="registryViewport" class="hidden flex-1">
+            <!-- Динамически рендерится через JS -->
+        </div>
+
+    </main>
+
+    <!-- ==================== ПОДВАЛ И БЛОК ВЕРСИОННОСТИ ==================== -->
+    <footer class="mt-auto bg-slate-900 border-t border-slate-800 px-4 lg:px-6 py-5 text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto space-y-4">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono font-bold">
+                        Версия кода: v1
+                    </span>
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+                        Штамп генерации (ДДММГГЧЧММСС): <strong class="text-white">101126175600</strong>
+                    </span>
+                </div>
+                <div class="text-slate-400">
+                    Система планирования и диспетчеризации аддитивного производства (3D-печать) • Формат обмена: <span class="font-mono text-slate-300">JSON MES-3D v1</span>
+                </div>
+            </div>
+
+            <!-- Блок "Изменения в версии" -->
+            <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-200 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-code-branch text-indigo-400"></i>
+                    <span>Изменения в версии (История релизов и доработок)</span>
+                </h3>
+                <div class="space-y-2 text-xs text-slate-300">
+                    <div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+                        <span class="font-mono font-semibold text-emerald-400 shrink-0">[v1 — 101126175600]</span>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300">
+                            <li>Разработан полноэкранный производственный календарь на 3 месяца вперед с режимами «3 месяца», «1 месяц (Подробно)» и «Реестр заказов».</li>
+                            <li>Внедрена система цветных производственных этапов (Запуск печати, Распаковка принтера, Пескоструйная обработка, Упаковка товара, Отгрузка товара) с возможностью добавления пользовательских активностей.</li>
+                            <li>Реализована карточка заказа с обязательными полями (Клиент, № заявки в печать), дополнительными идентификаторами (№ КП, № Счета, № Заказа в производство), выбором создателя заказа (Антон, Иван, Юрий, Михаил + расширение списка) и назначением ответственного за каждый отдельный запуск печати и каждый этап постобработки.</li>
+                            <li>Добавлена автоматическая индикация простоя принтеров («Окно / Простой принтеров») в дни без запланированных запусков печати.</li>
+                            <li>Реализован модуль обмена через JSON: стартовое окно синхронизации, Drag-and-Drop перетаскивание файла мышкой, загрузка по URL/WebDAV/FTP-шлюзу, вставка JSON-кода, строгая валидация схемы и блокировка случайного закрытия страницы (<code class="font-mono text-amber-300">beforeunload</code>) при наличии несохраненных изменений.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== МОДАЛЬНОЕ ОКНО 1: СИНХРОНИЗАЦИЯ И ЗАГРУЗКА JSON ==================== -->
+    <div id="syncModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-3 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl my-auto">
+            <!-- Шапка модалки -->
+            <div class="flex items-start justify-between gap-4 pb-4 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-white">Синхронизация производственного календаря (JSON)</h2>
+                        <p class="text-xs text-slate-400">Загрузите актуальный файл обмена с внешнего диска/сервера перед началом работы</p>
+                    </div>
+                </div>
+                <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition" title="Закрыть окно">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Блок ошибки валидации JSON (скрыт по умолчанию) -->
+            <div id="jsonErrorAlert" class="hidden mt-4 p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/50 text-rose-200 text-xs space-y-1">
+                <div class="font-bold flex items-center gap-2 text-rose-300">
+                    <i class="fa-solid fa-circle-xmark text-sm"></i>
+                    <span>Ошибка формата файла обмена!</span>
+                </div>
+                <p id="jsonErrorText" class="font-mono text-[11px] text-rose-200 break-words"></p>
+            </div>
+
+            <!-- Успешное уведомление внутри модалки -->
+            <div id="jsonSuccessAlert" class="hidden mt-4 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/50 text-emerald-200 text-xs flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+                <span id="jsonSuccessText">Файл обмена успешно проверен и загружен!</span>
+            </div>
+
+            <!-- Вкладки способов обмена -->
+            <div class="flex flex-wrap gap-1.5 mt-4 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+                <button onclick="switchSyncTab('file')" id="syncTabBtnFile" class="flex-1 py-2 px-3 rounded-lg bg-indigo-600 text-white transition">
+                    <i class="fa-solid fa-file-import mr-1.5"></i> Файл / Drag & Drop
+                </button>
+                <button onclick="switchSyncTab('url')" id="syncTabBtnUrl" class="flex-1 py-2 px-3 rounded-lg text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-globe mr-1.5"></i> Ссылка / Сервер (URL/FTP)
+                </button>
+                <button onclick="switchSyncTab('raw')" id="syncTabBtnRaw" class="flex-1 py-2 px-3 rounded-lg text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-code mr-1.5"></i> Вставить / Скопировать JSON
+                </button>
+            </div>
+
+            <!-- Вкладка 1: Drag-and-Drop и кнопка Открыть файл обмена -->
+            <div id="syncTabContentFile" class="mt-4 space-y-4">
+                <div
+                    id="dropZone"
+                    ondragover="handleDragOver(event)"
+                    ondragleave="handleDragLeave(event)"
+                    ondrop="handleDropFile(event)"
+                    onclick="triggerFileInput()"
+                    class="border-2 border-dashed border-slate-700 hover:border-indigo-500 bg-slate-950/60 hover:bg-slate-900/80 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition flex flex-col items-center justify-center gap-3"
+                >
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-2xl">
+                        <i class="fa-solid fa-file-arrow-up"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-white">Перетащите JSON-файл обмена сюда мышкой</p>
+                        <p class="text-xs text-slate-400 mt-1">или нажмите на эту область для выбора файла с локального / сетевого диска</p>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-center gap-2 mt-1">
+                        <span class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow">
+                            <i class="fa-solid fa-folder-open mr-1.5"></i> Открыть файл обмена (.json)
+                        </span>
+                    </div>
+                    <input type="file" id="hiddenFileInput" accept=".json,application/json" class="hidden" onchange="handleFileSelect(event)">
+                </div>
+            </div>
+
+            <!-- Вкладка 2: Загрузка по ссылке / внешнему хранилищу (HTTP / WebDAV / FTP-шлюз) -->
+            <div id="syncTabContentUrl" class="hidden mt-4 space-y-3">
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <label class="block text-xs font-semibold text-slate-300">
+                        Прямая ссылка на JSON-файл обмена (HTTP / HTTPS / WebDAV / Корпоративный сервер / FTP-шлюз):
+                    </label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input
+                            type="url"
+                            id="remoteJsonUrlInput"
+                            placeholder="https://server.company.ru/shared/mes_calendar_3d.json"
+                            class="flex-1 bg-slate-900 border border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none"
+                        >
+                        <button onclick="loadJsonFromUrl()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition shrink-0">
+                            <i class="fa-solid fa-cloud-arrow-down mr-1.5"></i> Загрузить по ссылке
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Протокол / Тип хранилища (для будущей интеграции):</label>
+                            <select id="storageProtocolSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200">
+                                <option value="https">HTTPS / REST JSON (Прямая ссылка)</option>
+                                <option value="webdav">WebDAV (Яндекс.Диск / Nextcloud / OwnCloud)</option>
+                                <option value="ftp_bridge">FTP / SFTP через HTTP-прокси шлюз</option>
+                                <option value="smb_local">Сетевая папка (SMB / Локальный диск)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Токен доступа / заголовки авторизации (опционально):</label>
+                            <input type="password" id="remoteAuthToken" placeholder="Bearer токен или пусто для открытого источника" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-mono">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        <i class="fa-solid fa-circle-info text-cyan-400 mr-1"></i>
+                        Примечание: URL внешнего хранилища сохраняется в настройках браузера. Для автоматического скачивания по прямой ссылке сервер должен отдавать корректный JSON и разрешать кросс-доменные запросы (CORS).
+                    </p>
+                </div>
+            </div>
+
+            <!-- Вкладка 3: Прямая вставка / копирование JSON-кода -->
+            <div id="syncTabContentRaw" class="hidden mt-4 space-y-3">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-slate-300">JSON-код календаря производства:</label>
+                        <button onclick="fillRawTextareaWithCurrent()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium">
+                            Показать текущий JSON-код календаря
+                        </button>
+                    </div>
+                    <textarea
+                        id="rawJsonTextarea"
+                        rows="7"
+                        placeholder='Вставьте сюда содержимое файла обмена JSON (начинается с {"meta": ...})'
+                        class="w-full bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl p-3 text-xs font-mono text-emerald-300 focus:outline-none"
+                    ></textarea>
+                    <div class="flex flex-wrap gap-2 justify-end">
+                        <button onclick="copyJsonToClipboard()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700">
+                            <i class="fa-solid fa-copy mr-1.5"></i> Скопировать текущий JSON в буфер
+                        </button>
+                        <button onclick="applyRawJsonFromTextarea()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow">
+                            <i class="fa-solid fa-check mr-1.5"></i> Применить вставленный JSON-код
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Нижняя панель стартового окна: Демо-данные или Продолжить -->
+            <div class="mt-5 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="text-xs text-slate-400">
+                    Статус базы: <strong id="modalOrdersCountLabel" class="text-white">Загружены демонстрационные заказы</strong>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                    <button onclick="loadDemoDataAndClose()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-1.5"></i> Сбросить на демо-план
+                    </button>
+                    <button onclick="closeSyncModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-600/20">
+                        Перейти к календарю <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== МОДАЛЬНОЕ ОКНО 2: СОЗДАНИЕ / РЕДАКТИРОВАНИЕ ЗАКАЗА ==================== -->
+    <div id="orderModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl my-auto max-h-[94vh] flex flex-col">
+            
+            <!-- Шапка формы заказа -->
+            <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-800 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-lg">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h2 id="orderModalTitle" class="text-base sm:text-lg font-bold text-white">Заведение нового заказа в производство</h2>
+                        <p class="text-xs text-slate-400">Заполните идентификаторы заказа и распределите даты этапов и ответственных</p>
+                    </div>
+                </div>
+                <button onclick="closeOrderModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Ошибка валидации формы заказа -->
+            <div id="orderFormError" class="hidden mt-3 p-3 rounded-xl bg-rose-500/15 border border-rose-500/50 text-rose-200 text-xs font-medium shrink-0"></div>
+
+            <!-- Тело формы со скроллом -->
+            <div class="overflow-y-auto pr-1 mt-4 space-y-5 flex-1">
+                <input type="hidden" id="editOrderId">
+
+                <!-- Секция 1: Основные и обязательные реквизиты заказа -->
+                <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-id-card"></i> 1. Идентификация заказа и клиент
+                        </h3>
+                        <span class="text-[11px] text-rose-400 font-medium">* — обязательные поля</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <!-- Название клиента (Обязательно) -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-200 mb-1">
+                                Название клиента <span class="text-rose-400">*</span>
+                            </label>
+                            <input type="text" id="orderClientInput" placeholder="Например: КБ «АэроТех» / ООО Полимер" class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        </div>
+
+                        <!-- Номер заявки в печать (Обязательно) -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-200 mb-1">
+                                Номер заявки в печать <span class="text-rose-400">*</span>
+                            </label>
+                            <input type="text" id="orderPrintReqInput" placeholder="Напр.: ЗП-2026-114" class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none">
+                        </div>
+
+                        <!-- Кто вносит заказ (Выпадающий список + быстрое добавление) -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs font-semibold text-slate-200">
+                                    Кто вносит заказ (Автор) <span class="text-rose-400">*</span>
+                                </label>
+                                <button type="button" onclick="promptQuickAddEmployee()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold">
+                                    + Сотрудник
+                                </button>
+                            </div>
+                            <select id="orderCreatorSelect" class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                                <!-- Заполняется из справочника сотрудников -->
+                            </select>
+                        </div>
+
+                        <!-- Коммерческое предложение (КП) -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">
+                                Коммерческое предложение (№ КП)
+                            </label>
+                            <input type="text" id="orderKpInput" placeholder="Напр.: КП-845/11" class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none">
+                        </div>
+
+                        <!-- Номер счета (Счет) -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">
+                                Номер счета (Счет)
+                            </label>
+                            <input type="text" id="orderInvoiceInput" placeholder="Напр.: СЧ-1092" class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none">
+                        </div>
+
+                        <!-- Номер заказа в производство -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">
+                                Заказ в производство (№ ЗПр)
+                            </label>
+                            <input type="text" id="orderProdNumInput" placeholder="Напр.: ПР-5501" class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Примечание (технология, материал, кол-во деталей) -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">
+                            Технический комментарий (принтер, материал, кол-во деталей, особенности)
+                        </label>
+                        <input type="text" id="orderNotesInput" placeholder="Напр.: SLS PA12 серый, 140 деталей, контроль геометрии" class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Секция 2: ЗАПУСКИ ПЕЧАТИ (Может быть 1, 2, 3 и более запусков) -->
+                <div class="bg-blue-950/20 border border-blue-500/30 rounded-xl p-4 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> 2. График запусков печати (Оборудование)
+                            </h3>
+                            <p class="text-[11px] text-slate-400">Для крупного заказа укажите все необходимые запуски принтера (1, 2, 3 или более) и ответственного оператора</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-300">Кол-во запусков:</span>
+                            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5">
+                                <button type="button" onclick="setPrintLaunchesCount(1)" class="px-2 py-1 text-xs font-bold rounded hover:bg-blue-600 hover:text-white transition">1</button>
+                                <button type="button" onclick="setPrintLaunchesCount(2)" class="px-2 py-1 text-xs font-bold rounded hover:bg-blue-600 hover:text-white transition">2</button>
+                                <button type="button" onclick="setPrintLaunchesCount(3)" class="px-2 py-1 text-xs font-bold rounded hover:bg-blue-600 hover:text-white transition">3</button>
+                                <button type="button" onclick="setPrintLaunchesCount(4)" class="px-2 py-1 text-xs font-bold rounded hover:bg-blue-600 hover:text-white transition">4</button>
+                            </div>
+                            <button type="button" onclick="addStageRow('print_launch')" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow">
+                                <i class="fa-solid fa-plus mr-1"></i> Добавить запуск
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="printLaunchesContainer" class="space-y-2">
+                        <!-- Динамические строки запусков печати -->
+                    </div>
+                </div>
+
+                <!-- Секция 3: ПОСТОБРАБОТКА, УПАКОВКА И КРАЙНИЙ СРОК ОТГРУЗКИ -->
+                <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                                <i class="fa-solid fa-gears"></i> 3. Распаковка, пескоструй, упаковка и крайний срок отгрузки
+                            </h3>
+                            <p class="text-[11px] text-slate-400">Назначьте плановые даты и ответственного исполнителя по каждому этапу</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="autoFillSubsequentDates()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold transition" title="Рассчитать даты распаковки, пескоструя, упаковки и отгрузки автоматически после последнего запуска печати">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Авто-расчет дат от печати
+                            </button>
+                            <button type="button" onclick="addStageRow('custom')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-semibold transition">
+                                <i class="fa-solid fa-plus mr-1"></i> + Доп. этап (распаковка / пескоструй / др.)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="otherStagesContainer" class="space-y-2">
+                        <!-- Динамические строки для распаковки, пескоструя, упаковки, отгрузки и кастомных этапов -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Подвал модального окна заказа -->
+            <div class="mt-4 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div>
+                    <button type="button" id="btnDeleteOrderModal" onclick="deleteCurrentOrder()" class="hidden px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold transition">
+                        <i class="fa-solid fa-trash-can mr-1.5"></i> Удалить заказ
+                    </button>
+                </div>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button type="button" onclick="closeOrderModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+                        Отмена
+                    </button>
+                    <button type="button" onclick="saveOrderFromModal()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-indigo-600/30 transition">
+                        <i class="fa-solid fa-check mr-1.5"></i> Сохранить заказ в календарь
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== МОДАЛЬНОЕ ОКНО 3: ДЕТАЛИ ДНЯ (ИНСПЕКТОР ДАТЫ) ==================== -->
+    <div id="dayInspectorModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-3 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-5 shadow-2xl my-auto">
+            <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                <div>
+                    <h2 id="dayInspectorTitle" class="text-base sm:text-lg font-bold text-white">План работ на день</h2>
+                    <p id="dayInspectorSubtitle" class="text-xs text-slate-400"></p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="dayInspectorAddOrderBtn" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition">
+                        <i class="fa-solid fa-plus mr-1"></i> Заказ на эту дату
+                    </button>
+                    <button onclick="closeDayInspector()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="dayInspectorBody" class="mt-4 space-y-2.5 max-h-[65vh] overflow-y-auto pr-1">
+                <!-- Заполняется динамически -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== МОДАЛЬНОЕ ОКНО 4: СПРАВОЧНИКИ (СОТРУДНИКИ И АКТИВНОСТИ) ==================== -->
+    <div id="directoriesModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-3 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full p-5 sm:p-6 shadow-2xl my-auto max-h-[92vh] flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-white">Справочники производства</h2>
+                        <p class="text-xs text-slate-400">Добавление новых сотрудников и расширение списка производственных активностей</p>
+                    </div>
+                </div>
+                <button onclick="closeDirectoriesModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto pr-1 mt-4 grid grid-cols-1 md:grid-cols-2 gap-5 flex-1">
+                
+                <!-- Справочник 1: Сотрудники -->
+                <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+                            <i class="fa-solid fa-users"></i> Сотрудники (Авторы и Исполнители)
+                        </h3>
+                        <p class="text-[11px] text-slate-400">Используются при выборе «Кто вносит заказ» и при назначении ответственных за этапы.</p>
+                        <div id="employeesListContainer" class="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+                            <!-- Список сотрудников -->
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-800 space-y-2">
+                        <label class="block text-xs font-semibold text-slate-300">Добавить нового сотрудника:</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="newEmployeeNameInput" placeholder="Имя (напр. Сергей)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <input type="text" id="newEmployeeRoleInput" placeholder="Должность / Роль" class="w-32 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <button onclick="addEmployeeFromDirectory()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shrink-0">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Справочник 2: Виды активностей (Этапы производства) -->
+                <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                            <i class="fa-solid fa-tags"></i> Виды активностей (Этапы)
+                        </h3>
+                        <p class="text-[11px] text-slate-400">Вы можете добавить новые технологические операции (например: «Отжиг», «Галтовка», «Покраска», «ОТК»).</p>
+                        <div id="activitiesListContainer" class="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+                            <!-- Список активностей -->
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-800 space-y-2">
+                        <label class="block text-xs font-semibold text-slate-300">Добавить новую активность в календарь:</label>
+                        <input type="text" id="newActivityNameInput" placeholder="Название (напр.: Галтовка / Контроль ОТК)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <div class="flex gap-2">
+                            <select id="newActivityColorSelect" class="bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white flex-1">
+                                <option value="teal">Бирюзовый (Teal)</option>
+                                <option value="blue">Синий (Blue)</option>
+                                <option value="amber">Янтарный (Amber)</option>
+                                <option value="purple">Фиолетовый (Purple)</option>
+                                <option value="rose">Красный (Rose)</option>
+                                <option value="emerald">Изумрудный (Emerald)</option>
+                                <option value="pink">Розовый (Pink)</option>
+                                <option value="indigo">Индиго (Indigo)</option>
+                            </select>
+                            <select id="newActivityCategorySelect" class="bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white flex-1">
+                                <option value="manual">Ручной этап / Постобработка</option>
+                                <option value="equipment">Загрузка принтера (Оборудование)</option>
+                                <option value="deadline">Контрольный срок / Отгрузка</option>
+                            </select>
+                            <button onclick="addActivityFromDirectory()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shrink-0">
+                                Добавить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end shrink-0">
+                <button onclick="closeDirectoriesModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold">
+                    Готово
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Всплывающее уведомление (Toast) -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ==================== JAVASCRIPT ЛОГИКА ПРИЛОЖЕНИЯ ==================== -->
+    <script>
+        /**
+         * КОНСТАНТЫ ВЕРСИИ И ШТАМПА ГЕНЕРАЦИИ КОДА
+         */
+        const APP_VERSION = 'v1';
+        const APP_TIMESTAMP = '101126175600'; // Формат ДДММГГЧЧММСС
+        const STORAGE_KEY = 'mes_3d_print_calendar_v1_state';
+        const REMOTE_URL_KEY = 'mes_3d_print_remote_url';
+
+        /**
+         * ЦВЕТОВЫЕ ТЕМЫ ДЛЯ ЭТАПОВ ПРОИЗВОДСТВА
+         */
+        const COLOR_PALETTES = {
+            blue: {
+                bg: 'bg-blue-500/20',
+                border: 'border-blue-500/50',
+                text: 'text-blue-200',
+                badge: 'bg-blue-600 text-white',
+                dot: 'bg-blue-400'
+            },
+            teal: {
+                bg: 'bg-cyan-500/20',
+                border: 'border-cyan-500/50',
+                text: 'text-cyan-200',
+                badge: 'bg-cyan-600 text-white',
+                dot: 'bg-cyan-400'
+            },
+            amber: {
+                bg: 'bg-amber-500/20',
+                border: 'border-amber-500/50',
+                text: 'text-amber-200',
+                badge: 'bg-amber-500 text-slate-950',
+                dot: 'bg-amber-400'
+            },
+            purple: {
+                bg: 'bg-purple-500/20',
+                border: 'border-purple-500/50',
+                text: 'text-purple-200',
+                badge: 'bg-purple-600 text-white',
+                dot: 'bg-purple-400'
+            },
+            rose: {
+                bg: 'bg-rose-500/25',
+                border: 'border-rose-500/60',
+                text: 'text-rose-200',
+                badge: 'bg-rose-600 text-white',
+                dot: 'bg-rose-400'
+            },
+            emerald: {
+                bg: 'bg-emerald-500/20',
+                border: 'border-emerald-500/50',
+                text: 'text-emerald-200',
+                badge: 'bg-emerald-600 text-white',
+                dot: 'bg-emerald-400'
+            },
+            pink: {
+                bg: 'bg-pink-500/20',
+                border: 'border-pink-500/50',
+                text: 'text-pink-200',
+                badge: 'bg-pink-600 text-white',
+                dot: 'bg-pink-400'
+            },
+            indigo: {
+                bg: 'bg-indigo-500/20',
+                border: 'border-indigo-500/50',
+                text: 'text-indigo-200',
+                badge: 'bg-indigo-600 text-white',
+                dot: 'bg-indigo-400'
+            }
+        };
+
+        /**
+         * БАЗОВЫЕ АКТИВНОСТИ ПО УМОЛЧАНИЮ (5 обязательных + возможность расширения)
+         */
+        const DEFAULT_ACTIVITIES = [
+            {
+                id: 'print_launch',
+                name: 'Запуск печати',
+                shortName: 'Печать',
+                color: 'blue',
+                icon: 'fa-print',
+                category: 'equipment', // Влияет на индикатор загрузки/простоя принтеров
+                isSystem: true
+            },
+            {
+                id: 'printer_unpack',
+                name: 'Распаковка принтера',
+                shortName: 'Распаковка',
+                color: 'teal',
+                icon: 'fa-box-open',
+                category: 'manual',
+                isSystem: true
+            },
+            {
+                id: 'sandblasting',
+                name: 'Пескоструйная обработка',
+                shortName: 'Пескоструй',
+                color: 'amber',
+                icon: 'fa-spray-can-sparkles',
+                category: 'manual',
+                isSystem: true
+            },
+            {
+                id: 'packaging',
+                name: 'Упаковка товара',
+                shortName: 'Упаковка/Сорт.',
+                color: 'purple',
+                icon: 'fa-boxes-packing',
+                category: 'manual',
+                isSystem: true
+            },
+            {
+                id: 'shipping',
+                name: 'Отгрузка товара',
+                shortName: 'Отгрузка (Срок)',
+                color: 'rose',
+                icon: 'fa-truck-fast',
+                category: 'deadline',
+                isSystem: true
+            }
+        ];
+
+        /**
+         * БАЗОВЫЕ СОТРУДНИКИ ПО УМОЛЧАНИЮ (Антон, Иван, Юрий, Михаил)
+         */
+        const DEFAULT_EMPLOYEES = [
+            { id: 'emp_anton', name: 'Антон', role: 'Менеджер / Инженер' },
+            { id: 'emp_ivan', name: 'Иван', role: 'Оператор 3D-печати' },
+            { id: 'emp_yuri', name: 'Юрий', role: 'Инженер постобработки' },
+            { id: 'emp_mikhail', name: 'Михаил', role: 'Мастер участка / Логистика' }
+        ];
+
+        /**
+         * ГЛОБАЛЬНОЕ СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+         */
+        let appState = {
+            meta: {
+                app: 'MES_3D_PRINT_CALENDAR',
+                version: APP_VERSION,
+                generatedAt: APP_TIMESTAMP,
+                lastSavedAt: null,
+                lastSavedBy: 'Система'
+            },
+            employees: JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES)),
+            activities: JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES)),
+            orders: []
+        };
+
+        // Состояние интерфейса
+        let viewMode = '3m'; // '3m' | '1m' | 'list'
+        let startMonthDate = new Date(); // Первый месяц из отображаемых 3 месяцев
+        startMonthDate.setDate(1);
+        startMonthDate.setHours(0, 0, 0, 0);
+
+        let unsavedChanges = false;
+        let lastLoadedFileName = null;
+
+        /**
+         * ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ РАБОТЫ С ДАТАМИ
+         */
+        function formatDateISO(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function addDaysISO(baseDateObj, daysOffset) {
+            const d = new Date(baseDateObj.getTime());
+            d.setDate(d.getDate() + daysOffset);
+            return formatDateISO(d);
+        }
+
+        function formatHumanDate(isoStr) {
+            if (!isoStr) return '—';
+            const parts = isoStr.split('-');
+            if (parts.length !== 3) return isoStr;
+            return `${parts[2]}.${parts[1]}.${parts[0]}`;
+        }
+
+        const MONTH_NAMES_RU = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        const WEEKDAYS_SHORT_RU = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+        /**
+         * ГЕНЕРАЦИЯ РЕАЛИСТИЧНЫХ ДЕМО-ДАННЫХ НА 3 МЕСЯЦА ОТ ТЕКУЩЕЙ ДАТЫ
+         */
+        function generateDemoOrders() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            return [
+                {
+                    id: 'ORD-1001',
+                    clientName: 'АО «АэроКомпозит»',
+                    printRequestNumber: 'ЗП-2026-401',
+                    kpNumber: 'КП-1104/26',
+                    invoiceNumber: 'СЧ-8821',
+                    prodOrderNumber: 'ПР-3011',
+                    createdBy: 'Антон',
+                    notes: 'SLS печать PA12 (3 полные камеры, 210 корпусов датчиков)',
+                    createdAt: formatDateISO(today),
+                    stages: [
+                        { id: 'st_101', activityId: 'print_launch', runNumber: 1, date: addDaysISO(today, 0), assignee: 'Иван', note: 'Камера #1 (70 шт)' },
+                        { id: 'st_102', activityId: 'print_launch', runNumber: 2, date: addDaysISO(today, 2), assignee: 'Иван', note: 'Камера #2 (70 шт)' },
+                        { id: 'st_103', activityId: 'printer_unpack', runNumber: 1, date: addDaysISO(today, 2), assignee: 'Юрий', note: 'Распаковка Камеры #1' },
+                        { id: 'st_104', activityId: 'print_launch', runNumber: 3, date: addDaysISO(today, 4), assignee: 'Иван', note: 'Камера #3 (70 шт)' },
+                        { id: 'st_105', activityId: 'printer_unpack', runNumber: 2, date: addDaysISO(today, 4), assignee: 'Юрий', note: 'Распаковка Камеры #2' },
+                        { id: 'st_106', activityId: 'sandblasting', runNumber: 1, date: addDaysISO(today, 5), assignee: 'Юрий', note: 'Пескоструй партий 1-2' },
+                        { id: 'st_107', activityId: 'printer_unpack', runNumber: 3, date: addDaysISO(today, 6), assignee: 'Юрий', note: 'Распаковка Камеры #3' },
+                        { id: 'st_108', activityId: 'sandblasting', runNumber: 2, date: addDaysISO(today, 6), assignee: 'Юрий', note: 'Финишный пескоструй' },
+                        { id: 'st_109', activityId: 'packaging', runNumber: 1, date: addDaysISO(today, 7), assignee: 'Михаил', note: 'Сортировка по комплектам и тара' },
+                        { id: 'st_110', activityId: 'shipping', runNumber: 1, date: addDaysISO(today, 9), assignee: 'Антон', note: 'Крайний срок отгрузки ТК Деловые Линии' }
+                    ]
+                },
+                {
+                    id: 'ORD-1002',
+                    clientName: 'ООО «МедТехника Плюс»',
+                    printRequestNumber: 'ЗП-2026-408',
+                    kpNumber: 'КП-1119/26',
+                    invoiceNumber: 'СЧ-8845',
+                    prodOrderNumber: 'ПР-3015',
+                    createdBy: 'Юрий',
+                    notes: 'Фотополимер SLA + MJF кронштейны (2 запуска печати)',
+                    createdAt: formatDateISO(today),
+                    stages: [
+                        { id: 'st_201', activityId: 'print_launch', runNumber: 1, date: addDaysISO(today, 5), assignee: 'Иван', note: 'Запуск #1 MJF' },
+                        { id: 'st_202', activityId: 'print_launch', runNumber: 2, date: addDaysISO(today, 8), assignee: 'Иван', note: 'Запуск #2 MJF' },
+                        { id: 'st_203', activityId: 'printer_unpack', runNumber: 1, date: addDaysISO(today, 9), assignee: 'Юрий', note: 'Распаковка обоих блоков' },
+                        { id: 'st_204', activityId: 'sandblasting', runNumber: 1, date: addDaysISO(today, 10), assignee: 'Юрий', note: 'Стеклоструйная очистка' },
+                        { id: 'st_205', activityId: 'packaging', runNumber: 1, date: addDaysISO(today, 11), assignee: 'Михаил', note: 'Индивидуальная упаковка' },
+                        { id: 'st_206', activityId: 'shipping', runNumber: 1, date: addDaysISO(today, 13), assignee: 'Юрий', note: 'Максимальный срок сдачи клиенту' }
+                    ]
+                },
+                {
+                    id: 'ORD-1003',
+                    clientName: 'НПО «Робототехника»',
+                    printRequestNumber: 'ЗП-2026-415',
+                    kpNumber: 'КП-1140/26',
+                    invoiceNumber: 'СЧ-8902',
+                    prodOrderNumber: 'ПР-3022',
+                    createdBy: 'Михаил',
+                    notes: 'Крупногабаритные кожухи редукторов, ПА-СВ30 (2 запуска)',
+                    createdAt: formatDateISO(today),
+                    stages: [
+                        { id: 'st_301', activityId: 'print_launch', runNumber: 1, date: addDaysISO(today, 17), assignee: 'Иван', note: 'Запуск №1 кожухи верхние' },
+                        { id: 'st_302', activityId: 'print_launch', runNumber: 2, date: addDaysISO(today, 19), assignee: 'Иван', note: 'Запуск №2 кожухи нижние' },
+                        { id: 'st_303', activityId: 'printer_unpack', runNumber: 1, date: addDaysISO(today, 20), assignee: 'Юрий', note: 'Охлаждение и распаковка' },
+                        { id: 'st_304', activityId: 'sandblasting', runNumber: 1, date: addDaysISO(today, 21), assignee: 'Юрий', note: 'Очистка каналов' },
+                        { id: 'st_305', activityId: 'packaging', runNumber: 1, date: addDaysISO(today, 22), assignee: 'Михаил', note: 'Паллетирование' },
+                        { id: 'st_306', activityId: 'shipping', runNumber: 1, date: addDaysISO(today, 24), assignee: 'Михаил', note: 'Крайний срок отгрузки со склада' }
+                    ]
+                },
+                {
+                    id: 'ORD-1004',
+                    clientName: 'КБ «ЭлектроДрайв»',
+                    printRequestNumber: 'ЗП-2026-429',
+                    kpNumber: 'КП-1180/26',
+                    invoiceNumber: 'СЧ-8990',
+                    prodOrderNumber: 'ПР-3040',
+                    createdBy: 'Иван',
+                    notes: 'Серийная партия 500 коннекторов (3 запуска в следующем месяце)',
+                    createdAt: formatDateISO(today),
+                    stages: [
+                        { id: 'st_401', activityId: 'print_launch', runNumber: 1, date: addDaysISO(today, 34), assignee: 'Иван', note: 'Серия 1/3' },
+                        { id: 'st_402', activityId: 'print_launch', runNumber: 2, date: addDaysISO(today, 36), assignee: 'Иван', note: 'Серия 2/3' },
+                        { id: 'st_403', activityId: 'print_launch', runNumber: 3, date: addDaysISO(today, 38), assignee: 'Иван', note: 'Серия 3/3' },
+                        { id: 'st_404', activityId: 'printer_unpack', runNumber: 1, date: addDaysISO(today, 39), assignee: 'Юрий', note: 'Полная выемка' },
+                        { id: 'st_405', activityId: 'sandblasting', runNumber: 1, date: addDaysISO(today, 40), assignee: 'Юрий', note: 'Галтовка + пескоструй' },
+                        { id: 'st_406', activityId: 'packaging', runNumber: 1, date: addDaysISO(today, 41), assignee: 'Михаил', note: 'Фасовка по 50 шт' },
+                        { id: 'st_407', activityId: 'shipping', runNumber: 1, date: addDaysISO(today, 43), assignee: 'Антон', note: 'Отгрузка по договору' }
+                    ]
+                },
+                {
+                    id: 'ORD-1005',
+                    clientName: 'ООО «ПромАвтоматика»',
+                    printRequestNumber: 'ЗП-2026-440',
+                    kpNumber: 'КП-1205/26',
+                    invoiceNumber: 'СЧ-9050',
+                    prodOrderNumber: 'ПР-3055',
+                    createdBy: 'Антон',
+                    notes: 'Плановый заказ на 3-й месяц (корпуса терминалов)',
+                    createdAt: formatDateISO(today),
+                    stages: [
+                        { id: 'st_501', activityId: 'print_launch', runNumber: 1, date: addDaysISO(today, 64), assignee: 'Иван', note: 'Запуск #1' },
+                        { id: 'st_502', activityId: 'print_launch', runNumber: 2, date: addDaysISO(today, 66), assignee: 'Иван', note: 'Запуск #2' },
+                        { id: 'st_503', activityId: 'printer_unpack', runNumber: 1, date: addDaysISO(today, 67), assignee: 'Юрий', note: 'Распаковка' },
+                        { id: 'st_504', activityId: 'sandblasting', runNumber: 1, date: addDaysISO(today, 68), assignee: 'Юрий', note: 'Пескоструй' },
+                        { id: 'st_505', activityId: 'packaging', runNumber: 1, date: addDaysISO(today, 69), assignee: 'Михаил', note: 'Упаковка' },
+                        { id: 'st_506', activityId: 'shipping', runNumber: 1, date: addDaysISO(today, 71), assignee: 'Антон', note: 'Крайний срок отгрузки' }
+                    ]
+                }
+            ];
+        }
+
+        /**
+         * ЗАЩИТА ОТ ЗАКРЫТИЯ ВКЛАДКИ БЕЗ СОХРАНЕНИЯ (beforeunload)
+         */
+        window.addEventListener('beforeunload', function (e) {
+            if (unsavedChanges) {
+                const msg = 'У вас есть несохраненные изменения в производственном календаре! Сохраните файл обмена JSON перед выходом.';
+                e.preventDefault();
+                e.returnValue = msg;
+                return msg;
+            }
+        });
+
+        /**
+         * УПРАВЛЕНИЕ ФЛАГОМ НЕСОХРАНЕННЫХ ИЗМЕНЕНИЙ
+         */
+        function markAsUnsaved(reasonText) {
+            unsavedChanges = true;
+            saveToLocalStorageCache();
+            updateSyncStatusUI(reasonText || 'Есть несохраненные изменения!');
+        }
+
+        function markAsSaved(sourceLabel) {
+            unsavedChanges = false;
+            appState.meta.lastSavedAt = new Date().toLocaleString('ru-RU');
+            saveToLocalStorageCache();
+            updateSyncStatusUI(sourceLabel || 'Все изменения сохранены в JSON');
+        }
+
+        function updateSyncStatusUI(customText) {
+            const badge = document.getElementById('syncStatusBadge');
+            const dot = document.getElementById('syncStatusDot');
+            const text = document.getElementById('syncStatusText');
+            const banner = document.getElementById('unsavedBanner');
+            const saveBtn = document.getElementById('btnSaveJsonHeader');
+
+            if (unsavedChanges) {
+                badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 border border-amber-500/60 text-amber-200';
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping';
+                text.textContent = customText || 'Не сохранено в файл обмена!';
+                banner.classList.remove('hidden');
+                saveBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 border border-amber-300 transition shadow-lg shadow-amber-500/30 animate-pulse';
+            } else {
+                badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium bg-emerald-500/15 border border-emerald-500/40 text-emerald-200';
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+                text.textContent = customText || (lastLoadedFileName ? `Синхронизировано: ${lastLoadedFileName}` : 'Данные актуальны');
+                banner.classList.add('hidden');
+                saveBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400/30 transition shadow-md shadow-emerald-600/20';
+            }
+        }
+
+        function saveToLocalStorageCache() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (err) {
+                console.warn('Не удалось сохранить локальный кэш:', err);
+            }
+        }
+
+        /**
+         * ПОЛУЧЕНИЕ ОБЪЕКТА АКТИВНОСТИ ПО ID
+         */
+        function getActivityById(actId) {
+            return appState.activities.find(a => a.id === actId) || {
+                id: actId,
+                name: actId,
+                shortName: actId,
+                color: 'indigo',
+                icon: 'fa-circle-dot',
+                category: 'manual'
+            };
+        }
+
+        /**
+         * ОБНОВЛЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ ФИЛЬТРОВ И ЛЕГЕНДЫ
+         */
+        function populateFiltersAndLegend() {
+            const actSelect = document.getElementById('filterActivity');
+            const assSelect = document.getElementById('filterAssignee');
+            const creSelect = document.getElementById('filterCreator');
+
+            const prevAct = actSelect.value || 'ALL';
+            const prevAss = assSelect.value || 'ALL';
+            const prevCre = creSelect.value || 'ALL';
+
+            actSelect.innerHTML = `<option value="ALL">Все этапы (${appState.activities.length})</option>` +
+                appState.activities.map(a => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.name)}</option>`).join('');
+
+            assSelect.innerHTML = `<option value="ALL">Исполнитель: Все (${appState.employees.length})</option>` +
+                appState.employees.map(e => `<option value="${escapeHtml(e.name)}">Исп: ${escapeHtml(e.name)}</option>`).join('');
+
+            creSelect.innerHTML = `<option value="ALL">Кто внес заказ: Все</option>` +
+                appState.employees.map(e => `<option value="${escapeHtml(e.name)}">Созд: ${escapeHtml(e.name)}</option>`).join('');
+
+            actSelect.value = [...actSelect.options].some(o => o.value === prevAct) ? prevAct : 'ALL';
+            assSelect.value = [...assSelect.options].some(o => o.value === prevAss) ? prevAss : 'ALL';
+            creSelect.value = [...creSelect.options].some(o => o.value === prevCre) ? prevCre : 'ALL';
+
+            // Рендер легенды активностей
+            const legendContainer = document.getElementById('activityLegendContainer');
+            legendContainer.innerHTML = appState.activities.map(a => {
+                const pal = COLOR_PALETTES[a.color] || COLOR_PALETTES.indigo;
+                return `
+                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md ${pal.bg} ${pal.text} border ${pal.border}">
+                        <i class="fa-solid ${escapeHtml(a.icon || 'fa-circle')} text-[10px]"></i>
+                        <span class="font-medium">${escapeHtml(a.name)}</span>
+                    </span>
+                `;
+            }).join('');
+        }
+
+        /**
+         * ФИЛЬТРАЦИЯ ЗАКАЗОВ И ЭТАПОВ
+         */
+        function getFilteredStagesMap() {
+            const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            const filterAct = document.getElementById('filterActivity').value;
+            const filterAss = document.getElementById('filterAssignee').value;
+            const filterCre = document.getElementById('filterCreator').value;
+
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (query.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            // Карта всех дней: dateISO -> массив событий
+            const dayEventsMap = {};
+            // Отдельная карта для отслеживания реальных запусков оборудования (даже при фильтрах или с учетом фильтров)
+            const equipmentBusyDates = new Set();
+
+            appState.orders.forEach(order => {
+                // Сначала отметим дни, когда оборудование занято в целом по производству
+                (order.stages || []).forEach(st => {
+                    const act = getActivityById(st.activityId);
+                    if (act.category === 'equipment' && st.date) {
+                        equipmentBusyDates.add(st.date);
+                    }
+                });
+
+                // Проверка фильтра по создателю заказа
+                if (filterCre !== 'ALL' && order.createdBy !== filterCre) return;
+
+                // Проверка поискового запроса (Клиент, Заявка, КП, Счет, Заказ в пр-во, комментарий)
+                if (query) {
+                    const haystack = [
+                        order.clientName,
+                        order.printRequestNumber,
+                        order.kpNumber,
+                        order.invoiceNumber,
+                        order.prodOrderNumber,
+                        order.notes,
+                        order.createdBy
+                    ].filter(Boolean).join(' ').toLowerCase();
+
+                    if (!haystack.includes(query)) return;
+                }
+
+                // Перебираем этапы заказа
+                const printRunsTotal = (order.stages || []).filter(s => s.activityId === 'print_launch').length;
+
+                (order.stages || []).forEach(stage => {
+                    if (!stage.date) return;
+                    if (filterAct !== 'ALL' && stage.activityId !== filterAct) return;
+                    if (filterAss !== 'ALL' && stage.assignee !== filterAss) return;
+
+                    if (!dayEventsMap[stage.date]) {
+                        dayEventsMap[stage.date] = [];
+                    }
+
+                    dayEventsMap[stage.date].push({
+                        orderId: order.id,
+                        clientName: order.clientName,
+                        printRequestNumber: order.printRequestNumber,
+                        kpNumber: order.kpNumber || '',
+                        invoiceNumber: order.invoiceNumber || '',
+                        prodOrderNumber: order.prodOrderNumber || '',
+                        createdBy: order.createdBy,
+                        orderNotes: order.notes || '',
+                        stageId: stage.id,
+                        activityId: stage.activityId,
+                        runNumber: stage.runNumber || 1,
+                        printRunsTotal: printRunsTotal,
+                        date: stage.date,
+                        assignee: stage.assignee || 'Не назначен',
+                        stageNote: stage.note || ''
+                    });
+                });
+            });
+
+            // Сортируем этапы внутри каждого дня по приоритету: Запуск печати -> Распаковка -> Пескоструй -> Упаковка -> Отгрузка
+            const priorityOrder = {
+                'print_launch': 1,
+                'printer_unpack': 2,
+                'sandblasting': 3,
+                'packaging': 4,
+                'shipping': 5
+            };
+
+            Object.keys(dayEventsMap).forEach(dateKey => {
+                dayEventsMap[dateKey].sort((a, b) => {
+                    const pA = priorityOrder[a.activityId] || 10;
+                    const pB = priorityOrder[b.activityId] || 10;
+                    if (pA !== pB) return pA - pB;
+                    return (a.runNumber || 1) - (b.runNumber || 1);
+                });
+            });
+
+            return { dayEventsMap, equipmentBusyDates };
+        }
+
+        /**
+         * РАСЧЕТ KPI НА ПЕРИОД 3 МЕСЯЦЕВ
+         */
+        function updateKPIs(equipmentBusyDates) {
+            const mStart = new Date(startMonthDate.getFullYear(), startMonthDate.getMonth(), 1);
+            const mEnd = new Date(startMonthDate.getFullYear(), startMonthDate.getMonth() + 3, 0);
+
+            const startISO = formatDateISO(mStart);
+            const endISO = formatDateISO(mEnd);
+
+            let printLaunches3m = 0;
+            let postProcess3m = 0;
+            let packaging3m = 0;
+            let shipments3m = 0;
+
+            appState.orders.forEach(order => {
+                (order.stages || []).forEach(st => {
+                    if (!st.date || st.date < startISO || st.date > endISO) return;
+                    if (st.activityId === 'print_launch') printLaunches3m++;
+                    else if (st.activityId === 'printer_unpack' || st.activityId === 'sandblasting') postProcess3m++;
+                    else if (st.activityId === 'packaging') packaging3m++;
+                    else if (st.activityId === 'shipping') shipments3m++;
+                    else {
+                        const act = getActivityById(st.activityId);
+                        if (act.category === 'equipment') printLaunches3m++;
+                        else if (act.category === 'deadline') shipments3m++;
+                        else postProcess3m++;
+                    }
+                });
+            });
+
+            // Подсчет дней простоя принтеров (Окон) в 3-месячном интервале
+            let totalDaysIn3m = 0;
+            let idleDaysIn3m = 0;
+            const cursor = new Date(mStart.getTime());
+            while (cursor <= mEnd) {
+                totalDaysIn3m++;
+                const iso = formatDateISO(cursor);
+                if (!equipmentBusyDates.has(iso)) {
+                    idleDaysIn3m++;
+                }
+                cursor.setDate(cursor.getDate() + 1);
+            }
+
+            const idlePercent = totalDaysIn3m > 0 ? Math.round((idleDaysIn3m / totalDaysIn3m) * 100) : 0;
+
+            document.getElementById('kpiTotalOrders').textContent = appState.orders.length;
+            document.getElementById('kpiPrintLaunches').textContent = printLaunches3m;
+            document.getElementById('kpiIdleDays').textContent = `${idleDaysIn3m} / ${totalDaysIn3m}`;
+            document.getElementById('kpiIdlePercent').textContent = `(${idlePercent}% свободно)`;
+            document.getElementById('kpiPostProcess').textContent = postProcess3m;
+            document.getElementById('kpiPackaging').textContent = packaging3m;
+            document.getElementById('kpiShipments').textContent = shipments3m;
+        }
+
+        /**
+         * ГЛАВНАЯ ФУНКЦИЯ РЕНДЕРА КАЛЕНДАРЯ И РЕЕСТРА
+         */
+        function renderAll() {
+            populateFiltersAndLegend();
+            const { dayEventsMap, equipmentBusyDates } = getFilteredStagesMap();
+            updateKPIs(equipmentBusyDates);
+
+            // Обновляем заголовок периода
+            const m1 = new Date(startMonthDate.getFullYear(), startMonthDate.getMonth(), 1);
+            const m3 = new Date(startMonthDate.getFullYear(), startMonthDate.getMonth() + 2, 1);
+
+            if (viewMode === '1m') {
+                document.getElementById('currentPeriodLabel').textContent = `${MONTH_NAMES_RU[m1.getMonth()]} ${m1.getFullYear()}`;
+            } else {
+                document.getElementById('currentPeriodLabel').textContent =
+                    `${MONTH_NAMES_RU[m1.getMonth()]} ${m1.getFullYear()} — ${MONTH_NAMES_RU[m3.getMonth()]} ${m3.getFullYear()}`;
+            }
+
+            const calViewport = document.getElementById('calendarViewport');
+            const regViewport = document.getElementById('registryViewport');
+
+            if (viewMode === 'list') {
+                calViewport.classList.add('hidden');
+                regViewport.classList.remove('hidden');
+                renderRegistryView();
+            } else {
+                regViewport.classList.add('hidden');
+                calViewport.classList.remove('hidden');
+                renderCalendarGrid(dayEventsMap, equipmentBusyDates);
+            }
+        }
+
+        /**
+         * РЕНДЕР СЕТКИ КАЛЕНДАРЯ (3 МЕСЯЦА НА ЭКРАНЕ ИЛИ 1 МЕСЯЦ КРУПНО)
+         */
+        function renderCalendarGrid(dayEventsMap, equipmentBusyDates) {
+            const container = document.getElementById('calendarViewport');
+            const showIdleHighlight = document.getElementById('toggleShowIdle').checked;
+            const todayISO = formatDateISO(new Date());
+
+            const monthsCount = viewMode === '3m' ? 3 : 1;
+            const gridWrapperClass = viewMode === '3m'
+                ? 'grid grid-cols-1 xl:grid-cols-3 gap-4'
+                : 'grid grid-cols-1 gap-4';
+
+            let html = `<div class="${gridWrapperClass}">`;
+
+            for (let mOffset = 0; mOffset < monthsCount; mOffset++) {
+                const monthDate = new Date(startMonthDate.getFullYear(), startMonthDate.getMonth() + mOffset, 1);
+                const year = monthDate.getFullYear();
+                const month = monthDate.getMonth();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                // День недели 1-го числа (0=Пн ... 6=Вс)
+                let firstDayIndex = monthDate.getDay() - 1;
+                if (firstDayIndex < 0) firstDayIndex = 6;
+
+                // Считаем статистику конкретного месяца
+                let monthPrintRuns = 0;
+                let monthIdleDays = 0;
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const iso = formatDateISO(new Date(year, month, d));
+                    if (!equipmentBusyDates.has(iso)) monthIdleDays++;
+                    const evs = dayEventsMap[iso] || [];
+                    evs.forEach(e => {
+                        if (getActivityById(e.activityId).category === 'equipment') monthPrintRuns++;
+                    });
+                }
+
+                html += `
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-xl">
+                        <!-- Шапка месяца -->
+                        <div class="bg-slate-900 px-3.5 py-2.5 border-b border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm sm:text-base font-extrabold text-white tracking-tight">
+                                    ${MONTH_NAMES_RU[month]} ${year}
+                                </span>
+                                <span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                                    ${daysInMonth} дн.
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2 text-[11px]">
+                                <span class="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-300 border border-blue-500/30 font-mono" title="Запусков печати в этом месяце">
+                                    <i class="fa-solid fa-print mr-1"></i>${monthPrintRuns} зап.
+                                </span>
+                                <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono" title="Дней без запуска печати (окна оборудования)">
+                                    Окон: ${monthIdleDays} дн.
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Дни недели -->
+                        <div class="grid grid-cols-7 bg-slate-950/80 border-b border-slate-800 text-center py-1.5 text-[11px] font-bold text-slate-400">
+                            ${WEEKDAYS_SHORT_RU.map((w, idx) => `<div class="${idx >= 5 ? 'text-amber-400/80' : ''}">${w}</div>`).join('')}
+                        </div>
+
+                        <!-- Ячейки дней месяца -->
+                        <div class="grid grid-cols-7 gap-px bg-slate-800/80 flex-1">
+                `;
+
+                // Пустые ячейки перед 1-м числом месяца
+                for (let empty = 0; empty < firstDayIndex; empty++) {
+                    html += `<div class="bg-slate-950/60 min-h-[70px]"></div>`;
+                }
+
+                // Ячейки реальных дней месяца
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const cellDate = new Date(year, month, day);
+                    const isoDate = formatDateISO(cellDate);
+                    const isToday = isoDate === todayISO;
+                    const dayOfWeek = (firstDayIndex + day - 1) % 7;
+                    const isWeekend = dayOfWeek >= 5;
+
+                    const events = dayEventsMap[isoDate] || [];
+                    const isEquipmentIdle = !equipmentBusyDates.has(isoDate);
+
+                    const cellHeightClass = viewMode === '3m' ? 'day-cell-3m' : 'day-cell-1m';
+                    const idleBgClass = (showIdleHighlight && isEquipmentIdle) ? 'idle-printer-bg' : '';
+                    const todayBorderClass = isToday
+                        ? 'ring-2 ring-inset ring-indigo-500 bg-indigo-950/20'
+                        : 'bg-slate-925 hover:bg-slate-900';
+
+                    const maxVisibleEvents = viewMode === '3m' ? 3 : 6;
+                    const visibleEvents = events.slice(0, maxVisibleEvents);
+                    const hiddenCount = Math.max(0, events.length - maxVisibleEvents);
+
+                    html += `
+                        <div
+                            onclick="openDayInspector('${isoDate}')"
+                            class="${cellHeightClass} ${todayBorderClass} ${idleBgClass} p-1.5 flex flex-col justify-between cursor-pointer relative group"
+                        >
+                            <!-- Верхняя строка ячейки: Число + Индикатор простоя/загрузки -->
+                            <div class="flex items-center justify-between gap-1 mb-1">
+                                <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded ${
+                                    isToday
+                                        ? 'bg-indigo-600 text-white shadow'
+                                        : isWeekend
+                                            ? 'text-amber-400'
+                                            : 'text-slate-300'
+                                }">
+                                    ${day}
+                                </span>
+
+                                <div class="flex items-center gap-1">
+                                    ${showIdleHighlight && isEquipmentIdle ? `
+                                        <span class="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 leading-tight" title="Нет запланированных запусков 3D-принтеров — свободное окно оборудования">
+                                            Окно
+                                        </span>
+                                    ` : ''}
+                                    <button
+                                        onclick="event.stopPropagation(); openOrderModalForDate('${isoDate}')"
+                                        class="opacity-0 group-hover:opacity-100 transition w-5 h-5 rounded bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white flex items-center justify-center text-[10px]"
+                                        title="Запланировать заказ на ${formatHumanDate(isoDate)}"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Список событий дня -->
+                            <div class="space-y-1 flex-1 flex flex-col justify-start">
+                                ${visibleEvents.map(ev => renderDayEventBadge(ev, viewMode)).join('')}
+                                ${hiddenCount > 0 ? `
+                                    <div class="text-[10px] font-semibold text-center py-0.5 rounded bg-slate-800/90 text-indigo-300 border border-slate-700">
+                                        + еще ${hiddenCount} эт.
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Добиваем сетку пустыми ячейками до кратности 7
+                const totalCells = firstDayIndex + daysInMonth;
+                const trailingEmpty = (7 - (totalCells % 7)) % 7;
+                for (let t = 0; t < trailingEmpty; t++) {
+                    html += `<div class="bg-slate-950/60 min-h-[70px]"></div>`;
+                }
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        /**
+         * РЕНДЕР МИНИ-КАРТОЧКИ ЭТАПА В ЯЧЕЙКЕ ДНЯ
+         */
+        function renderDayEventBadge(ev, mode) {
+            const act = getActivityById(ev.activityId);
+            const pal = COLOR_PALETTES[act.color] || COLOR_PALETTES.indigo;
+
+            const runBadge = (ev.activityId === 'print_launch' && ev.printRunsTotal > 1)
+                ? ` #${ev.runNumber}/${ev.printRunsTotal}`
+                : (ev.runNumber > 1 ? ` #${ev.runNumber}` : '');
+
+            if (mode === '3m') {
+                // Компактный, но информативный вид для 3-месячного экрана
+                return `
+                    <div
+                        onclick="event.stopPropagation(); openOrderModal('${ev.orderId}')"
+                        class="px-1.5 py-1 rounded-md border ${pal.bg} ${pal.border} ${pal.text} text-[10px] leading-tight hover:brightness-125 transition"
+                        title="${escapeHtml(act.name)}${runBadge} | Клиент: ${escapeHtml(ev.clientName)} | Заявка: ${escapeHtml(ev.printRequestNumber)} | Созд: ${escapeHtml(ev.createdBy)} → Исп: ${escapeHtml(ev.assignee)}"
+                    >
+                        <div class="flex items-center justify-between gap-1 font-bold truncate">
+                            <span class="truncate">
+                                <i class="fa-solid ${escapeHtml(act.icon)} mr-1 opacity-90"></i>${escapeHtml(act.shortName || act.name)}${runBadge}
+                            </span>
+                            <span class="font-mono text-[9px] opacity-90 shrink-0">${escapeHtml(ev.printRequestNumber)}</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-1 text-[9px] opacity-90 mt-0.5 truncate">
+                            <span class="truncate font-medium">${escapeHtml(ev.clientName)}</span>
+                            <span class="font-mono shrink-0 bg-slate-950/50 px-1 rounded" title="Создал: ${escapeHtml(ev.createdBy)} | Исполнитель: ${escapeHtml(ev.assignee)}">
+                                ${escapeHtml(ev.createdBy.slice(0,3))}→${escapeHtml(ev.assignee)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Подробный вид для режима 1 месяца
+                return `
+                    <div
+                        onclick="event.stopPropagation(); openOrderModal('${ev.orderId}')"
+                        class="p-2 rounded-lg border ${pal.bg} ${pal.border} ${pal.text} text-xs leading-snug hover:brightness-125 transition space-y-1"
+                    >
+                        <div class="flex items-center justify-between gap-1 font-bold">
+                            <span><i class="fa-solid ${escapeHtml(act.icon)} mr-1"></i>${escapeHtml(act.name)}${runBadge}</span>
+                            <span class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-slate-950/60">${escapeHtml(ev.printRequestNumber)}</span>
+                        </div>
+                        <div class="font-semibold text-white truncate">${escapeHtml(ev.clientName)}</div>
+                        <div class="flex flex-wrap items-center justify-between gap-1 text-[10px] pt-0.5 border-t border-white/10">
+                            <span>Созд: <strong>${escapeHtml(ev.createdBy)}</strong></span>
+                            <span>Исп: <strong class="underline">${escapeHtml(ev.assignee)}</strong></span>
+                        </div>
+                        ${(ev.kpNumber || ev.invoiceNumber || ev.prodOrderNumber) ? `
+                            <div class="flex flex-wrap gap-1 text-[9px] font-mono opacity-85">
+                                ${ev.kpNumber ? `<span class="bg-slate-950/50 px-1 rounded">${escapeHtml(ev.kpNumber)}</span>` : ''}
+                                ${ev.invoiceNumber ? `<span class="bg-slate-950/50 px-1 rounded">${escapeHtml(ev.invoiceNumber)}</span>` : ''}
+                                ${ev.prodOrderNumber ? `<span class="bg-slate-950/50 px-1 rounded">${escapeHtml(ev.prodOrderNumber)}</span>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * РЕНДЕР РЕЕСТРА ЗАКАЗОВ (ТАБЛИЧНЫЙ ВИД ВСЕХ ЗАКАЗОВ И ИХ ЭТАПОВ)
+         */
+        function renderRegistryView() {
+            const container = document.getElementById('registryViewport');
+            const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            const filterCre = document.getElementById('filterCreator').value;
+            const filterAss = document.getElementById('filterAssignee').value;
+            const filterAct = document.getElementById('filterActivity').value;
+
+            const filteredOrders = appState.orders.filter(order => {
+                if (filterCre !== 'ALL' && order.createdBy !== filterCre) return false;
+                if (filterAss !== 'ALL' && !(order.stages || []).some(s => s.assignee === filterAss)) return false;
+                if (filterAct !== 'ALL' && !(order.stages || []).some(s => s.activityId === filterAct)) return false;
+
+                if (query) {
+                    const hay = [
+                        order.clientName,
+                        order.printRequestNumber,
+                        order.kpNumber,
+                        order.invoiceNumber,
+                        order.prodOrderNumber,
+                        order.notes,
+                        order.createdBy
+                    ].filter(Boolean).join(' ').toLowerCase();
+                    if (!hay.includes(query)) return false;
+                }
+                return true;
+            });
+
+            if (filteredOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center space-y-3">
+                        <i class="fa-solid fa-folder-open text-3xl text-slate-500"></i>
+                        <div class="text-sm font-bold text-white">Заказы по заданным критериям не найдены</div>
+                        <button onclick="openOrderModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">
+                            + Добавить новый заказ
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase text-[11px]">
+                                    <th class="py-3 px-4">Клиент и № Заявки</th>
+                                    <th class="py-3 px-3">КП / Счет / Заказ в пр-во</th>
+                                    <th class="py-3 px-3">Кто внес заказ</th>
+                                    <th class="py-3 px-4">Запуски печати (Даты и Исп.)</th>
+                                    <th class="py-3 px-4">Постобработка и Упаковка</th>
+                                    <th class="py-3 px-3">Крайний срок отгрузки</th>
+                                    <th class="py-3 px-3 text-right">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/80">
+                                ${filteredOrders.map(order => {
+                                    const launches = (order.stages || []).filter(s => s.activityId === 'print_launch');
+                                    const otherStages = (order.stages || []).filter(s => s.activityId !== 'print_launch' && s.activityId !== 'shipping');
+                                    const shipStage = (order.stages || []).find(s => s.activityId === 'shipping');
+
+                                    return `
+                                        <tr class="hover:bg-slate-800/40 transition">
+                                            <td class="py-3 px-4 align-top">
+                                                <div class="font-bold text-white text-sm">${escapeHtml(order.clientName)}</div>
+                                                <div class="inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-mono text-[11px]">
+                                                    <i class="fa-solid fa-hashtag text-[10px]"></i> ${escapeHtml(order.printRequestNumber)}
+                                                </div>
+                                                ${order.notes ? `<div class="text-[11px] text-slate-400 mt-1 max-w-xs">${escapeHtml(order.notes)}</div>` : ''}
+                                            </td>
+                                            <td class="py-3 px-3 align-top font-mono space-y-1 text-[11px]">
+                                                <div><span class="text-slate-500">КП:</span> <span class="text-slate-200">${escapeHtml(order.kpNumber || '—')}</span></div>
+                                                <div><span class="text-slate-500">Счет:</span> <span class="text-slate-200">${escapeHtml(order.invoiceNumber || '—')}</span></div>
+                                                <div><span class="text-slate-500">ЗПр:</span> <span class="text-slate-200">${escapeHtml(order.prodOrderNumber || '—')}</span></div>
+                                            </td>
+                                            <td class="py-3 px-3 align-top">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 font-semibold">
+                                                    <i class="fa-solid fa-user-pen text-indigo-400 text-[10px]"></i>
+                                                    ${escapeHtml(order.createdBy)}
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 align-top">
+                                                <div class="flex flex-wrap gap-1.5">
+                                                    ${launches.length > 0 ? launches.map(l => `
+                                                        <div class="px-2 py-1 rounded-lg bg-blue-500/15 border border-blue-500/30 text-blue-200 text-[11px]">
+                                                            <div class="font-bold">Запуск #${l.runNumber || 1}: <span class="font-mono">${formatHumanDate(l.date)}</span></div>
+                                                            <div class="text-[10px] text-blue-300">Исп: <strong>${escapeHtml(l.assignee)}</strong> ${l.note ? `(${escapeHtml(l.note)})` : ''}</div>
+                                                        </div>
+                                                    `).join('') : '<span class="text-slate-500">Нет запусков</span>'}
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-4 align-top">
+                                                <div class="flex flex-wrap gap-1.5">
+                                                    ${otherStages.map(st => {
+                                                        const act = getActivityById(st.activityId);
+                                                        const pal = COLOR_PALETTES[act.color] || COLOR_PALETTES.indigo;
+                                                        return `
+                                                            <div class="px-2 py-1 rounded-lg ${pal.bg} border ${pal.border} ${pal.text} text-[11px]">
+                                                                <div class="font-semibold">${escapeHtml(act.shortName || act.name)}: <span class="font-mono">${formatHumanDate(st.date)}</span></div>
+                                                                <div class="text-[10px] opacity-90">Исп: <strong>${escapeHtml(st.assignee)}</strong></div>
+                                                            </div>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-3 align-top">
+                                                ${shipStage ? `
+                                                    <div class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/50 text-rose-200 inline-block">
+                                                        <div class="font-bold font-mono">${formatHumanDate(shipStage.date)}</div>
+                                                        <div class="text-[10px]">Исп: <strong>${escapeHtml(shipStage.assignee)}</strong></div>
+                                                    </div>
+                                                ` : '<span class="text-slate-500">Не указан</span>'}
+                                            </td>
+                                            <td class="py-3 px-3 align-top text-right">
+                                                <button onclick="openOrderModal('${order.id}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700 transition font-semibold">
+                                                    <i class="fa-solid fa-pen-to-square mr-1"></i> Изменить
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * НАВИГАЦИЯ ПО МЕСЯЦАМ И ПЕРЕКЛЮЧЕНИЕ ВИДОВ
+         */
+        function shiftMonths(delta) {
+            startMonthDate = new Date(startMonthDate.getFullYear(), startMonthDate.getMonth() + delta, 1);
+            renderAll();
+        }
+
+        function resetToCurrentMonth() {
+            const now = new Date();
+            startMonthDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            renderAll();
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            const btn3m = document.getElementById('viewBtn3m');
+            const btn1m = document.getElementById('viewBtn1m');
+            const btnList = document.getElementById('viewBtnList');
+
+            [btn3m, btn1m, btnList].forEach(b => {
+                b.className = 'px-3 py-1 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white';
+            });
+
+            const activeClass = 'px-3 py-1 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white shadow';
+            if (mode === '3m') btn3m.className = activeClass;
+            if (mode === '1m') btn1m.className = activeClass;
+            if (mode === 'list') btnList.className = activeClass;
+
+            renderAll();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            renderAll();
+        }
+
+        /**
+         * ИНСПЕКТОР КОНКРЕТНОГО ДНЯ (ПРИ КЛИКЕ НА ЯЧЕЙКУ КАЛЕНДАРЯ)
+         */
+        function openDayInspector(isoDate) {
+            const { dayEventsMap, equipmentBusyDates } = getFilteredStagesMap();
+            const events = dayEventsMap[isoDate] || [];
+            const isEquipmentIdle = !equipmentBusyDates.has(isoDate);
+
+            document.getElementById('dayInspectorTitle').textContent = `План производства на ${formatHumanDate(isoDate)}`;
+            document.getElementById('dayInspectorSubtitle').innerHTML = isEquipmentIdle
+                ? `<span class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>Окно оборудования: На этот день запусков 3D-принтеров не запланировано</span>`
+                : `<span class="text-blue-400 font-semibold"><i class="fa-solid fa-print mr-1"></i>Оборудование загружено: Запланированы запуски 3D-печати</span>`;
+
+            const addBtn = document.getElementById('dayInspectorAddOrderBtn');
+            addBtn.onclick = function () {
+                closeDayInspector();
+                openOrderModalForDate(isoDate);
+            };
+
+            const body = document.getElementById('dayInspectorBody');
+            if (events.length === 0) {
+                body.innerHTML = `
+                    <div class="p-6 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-2">
+                        <div class="text-slate-400 text-xs">На выбранную дату (${formatHumanDate(isoDate)}) нет запланированных этапов производства.</div>
+                    </div>
+                `;
+            } else {
+                body.innerHTML = events.map(ev => {
+                    const act = getActivityById(ev.activityId);
+                    const pal = COLOR_PALETTES[act.color] || COLOR_PALETTES.indigo;
+                    return `
+                        <div class="p-3.5 rounded-xl bg-slate-950 border ${pal.border} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-md text-xs font-bold ${pal.badge}">
+                                        <i class="fa-solid ${escapeHtml(act.icon)} mr-1"></i>${escapeHtml(act.name)} ${ev.runNumber > 1 || ev.activityId === 'print_launch' ? `#${ev.runNumber}` : ''}
+                                    </span>
+                                    <span class="font-mono text-xs font-bold text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded border border-indigo-500/30">
+                                        Заявка: ${escapeHtml(ev.printRequestNumber)}
+                                    </span>
+                                    <span class="font-bold text-white text-sm">${escapeHtml(ev.clientName)}</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-300 pt-1">
+                                    <span>Создал заказ: <strong class="text-white">${escapeHtml(ev.createdBy)}</strong></span>
+                                    <span>•</span>
+                                    <span>Ответственный за этап: <strong class="text-emerald-300">${escapeHtml(ev.assignee)}</strong></span>
+                                    ${ev.stageNote ? `<span>• Прим.: <em>${escapeHtml(ev.stageNote)}</em></span>` : ''}
+                                </div>
+                                <div class="flex flex-wrap gap-2 text-[11px] font-mono text-slate-400">
+                                    ${ev.kpNumber ? `<span>КП: ${escapeHtml(ev.kpNumber)}</span>` : ''}
+                                    ${ev.invoiceNumber ? `<span>Счет: ${escapeHtml(ev.invoiceNumber)}</span>` : ''}
+                                    ${ev.prodOrderNumber ? `<span>Заказ в пр-во: ${escapeHtml(ev.prodOrderNumber)}</span>` : ''}
+                                </div>
+                            </div>
+                            <button onclick="closeDayInspector(); openOrderModal('${ev.orderId}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700 shrink-0">
+                                <i class="fa-solid fa-pen mr-1"></i> Открыть заказ
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('dayInspectorModal').classList.remove('hidden');
+        }
+
+        function closeDayInspector() {
+            document.getElementById('dayInspectorModal').classList.add('hidden');
+        }
+
+        /**
+         * МОДАЛЬНОЕ ОКНО СОЗДАНИЯ И РЕДАКТИРОВАНИЯ ЗАКАЗА
+         */
+        function populateCreatorSelect(selectedName) {
+            const sel = document.getElementById('orderCreatorSelect');
+            sel.innerHTML = appState.employees.map(emp =>
+                `<option value="${escapeHtml(emp.name)}">${escapeHtml(emp.name)} (${escapeHtml(emp.role || 'Сотрудник')})</option>`
+            ).join('');
+            if (selectedName && [...sel.options].some(o => o.value === selectedName)) {
+                sel.value = selectedName;
+            }
+        }
+
+        function getEmployeeOptionsHtml(selectedName) {
+            return appState.employees.map(emp => {
+                const isSel = emp.name === selectedName ? 'selected' : '';
+                return `<option value="${escapeHtml(emp.name)}" ${isSel}>${escapeHtml(emp.name)}</option>`;
+            }).join('');
+        }
+
+        function getActivityOptionsHtml(selectedActId, excludePrintLaunch) {
+            return appState.activities
+                .filter(a => !excludePrintLaunch || a.id !== 'print_launch')
+                .map(act => {
+                    const isSel = act.id === selectedActId ? 'selected' : '';
+                    return `<option value="${escapeHtml(act.id)}" ${isSel}>${escapeHtml(act.name)}</option>`;
+                }).join('');
+        }
+
+        function openOrderModal(orderId = null, defaultDateISO = null) {
+            document.getElementById('orderFormError').classList.add('hidden');
+            const baseDate = defaultDateISO ? new Date(defaultDateISO) : new Date();
+
+            const printContainer = document.getElementById('printLaunchesContainer');
+            const otherContainer = document.getElementById('otherStagesContainer');
+            printContainer.innerHTML = '';
+            otherContainer.innerHTML = '';
+
+            if (orderId) {
+                const order = appState.orders.find(o => o.id === orderId);
+                if (!order) return;
+
+                document.getElementById('orderModalTitle').textContent = `Редактирование заказа: ${order.clientName} (${order.printRequestNumber})`;
+                document.getElementById('editOrderId').value = order.id;
+                document.getElementById('orderClientInput').value = order.clientName || '';
+                document.getElementById('orderPrintReqInput').value = order.printRequestNumber || '';
+                document.getElementById('orderKpInput').value = order.kpNumber || '';
+                document.getElementById('orderInvoiceInput').value = order.invoiceNumber || '';
+                document.getElementById('orderProdNumInput').value = order.prodOrderNumber || '';
+                document.getElementById('orderNotesInput').value = order.notes || '';
+                populateCreatorSelect(order.createdBy);
+
+                document.getElementById('btnDeleteOrderModal').classList.remove('hidden');
+
+                const launches = (order.stages || []).filter(s => s.activityId === 'print_launch');
+                const others = (order.stages || []).filter(s => s.activityId !== 'print_launch');
+
+                launches.forEach((st, idx) => {
+                    appendPrintLaunchRow(idx + 1, st.date, st.assignee, st.note || '');
+                });
+
+                others.forEach(st => {
+                    appendOtherStageRow(st.activityId, st.date, st.assignee, st.note || '');
+                });
+            } else {
+                // Новый заказ
+                document.getElementById('orderModalTitle').textContent = 'Заведение нового заказа в производство';
+                document.getElementById('editOrderId').value = '';
+                document.getElementById('orderClientInput').value = '';
+                document.getElementById('orderPrintReqInput').value = '';
+                document.getElementById('orderKpInput').value = '';
+                document.getElementById('orderInvoiceInput').value = '';
+                document.getElementById('orderProdNumInput').value = '';
+                document.getElementById('orderNotesInput').value = '';
+                populateCreatorSelect(appState.employees[0]?.name || 'Антон');
+
+                document.getElementById('btnDeleteOrderModal').classList.add('hidden');
+
+                // По умолчанию создаем 1 запуск печати и обязательные этапы (Распаковка, Пескоструй, Упаковка, Отгрузка)
+                const d0 = formatDateISO(baseDate);
+                const d1 = addDaysISO(baseDate, 1);
+                const d2 = addDaysISO(baseDate, 2);
+                const d3 = addDaysISO(baseDate, 3);
+                const d4 = addDaysISO(baseDate, 4);
+
+                appendPrintLaunchRow(1, d0, 'Иван', 'Запуск #1');
+                appendOtherStageRow('printer_unpack', d1, 'Юрий', 'Распаковка после печати');
+                appendOtherStageRow('sandblasting', d2, 'Юрий', 'Пескоструйная очистка');
+                appendOtherStageRow('packaging', d3, 'Михаил', 'Сортировка и упаковка');
+                appendOtherStageRow('shipping', d4, 'Антон', 'Максимальный (крайний) срок отгрузки');
+            }
+
+            document.getElementById('orderModal').classList.remove('hidden');
+        }
+
+        function openOrderModalForDate(isoDate) {
+            openOrderModal(null, isoDate);
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.add('hidden');
+        }
+
+        /**
+         * ДОБАВЛЕНИЕ СТРОКИ ЗАПУСКА ПЕЧАТИ В ФОРМЕ ЗАКАЗА
+         */
+        function appendPrintLaunchRow(runIndex, dateVal, assigneeVal, noteVal) {
+            const container = document.getElementById('printLaunchesContainer');
+            const row = document.createElement('div');
+            row.className = 'print-launch-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/90 border border-blue-500/30 rounded-xl p-2.5';
+
+            row.innerHTML = `
+                <div class="sm:col-span-3 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-blue-600 text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 launch-index-badge">${runIndex}</span>
+                    <span class="text-xs font-bold text-blue-300">Запуск печати</span>
+                </div>
+                <div class="sm:col-span-3">
+                    <input type="date" value="${escapeHtml(dateVal || '')}" class="stage-date w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:border-blue-500 focus:outline-none">
+                </div>
+                <div class="sm:col-span-3">
+                    <select class="stage-assignee w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none">
+                        ${getEmployeeOptionsHtml(assigneeVal || 'Иван')}
+                    </select>
+                </div>
+                <div class="sm:col-span-2">
+                    <input type="text" value="${escapeHtml(noteVal || '')}" placeholder="Принтер / Партия" class="stage-note w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none">
+                </div>
+                <div class="sm:col-span-1 flex justify-end">
+                    <button type="button" onclick="removeStageRow(this)" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition" title="Удалить этот запуск">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+            renumberPrintLaunchRows();
+        }
+
+        function renumberPrintLaunchRows() {
+            const rows = document.querySelectorAll('#printLaunchesContainer .print-launch-row');
+            rows.forEach((r, idx) => {
+                const badge = r.querySelector('.launch-index-badge');
+                if (badge) badge.textContent = idx + 1;
+            });
+        }
+
+        function setPrintLaunchesCount(targetCount) {
+            const container = document.getElementById('printLaunchesContainer');
+            const currentRows = container.querySelectorAll('.print-launch-row');
+            const currentCount = currentRows.length;
+
+            // Определяем последнюю дату запуска
+            let lastDateStr = formatDateISO(new Date());
+            if (currentCount > 0) {
+                const lastInput = currentRows[currentCount - 1].querySelector('.stage-date');
+                if (lastInput && lastInput.value) lastDateStr = lastInput.value;
+            }
+
+            if (targetCount > currentCount) {
+                for (let i = currentCount; i < targetCount; i++) {
+                    const nextDate = addDaysISO(new Date(lastDateStr), (i - currentCount + 1) * 2);
+                    appendPrintLaunchRow(i + 1, nextDate, 'Иван', `Запуск #${i + 1}`);
+                }
+            } else if (targetCount < currentCount) {
+                for (let i = currentCount - 1; i >= targetCount; i--) {
+                    currentRows[i].remove();
+                }
+                renumberPrintLaunchRows();
+            }
+        }
+
+        /**
+         * ДОБАВЛЕНИЕ СТРОКИ ЭТАПА ПОСТОБРАБОТКИ / ОТГРУЗКИ
+         */
+        function appendOtherStageRow(activityId, dateVal, assigneeVal, noteVal) {
+            const container = document.getElementById('otherStagesContainer');
+            const row = document.createElement('div');
+            const isShipping = activityId === 'shipping';
+            row.className = `other-stage-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center rounded-xl p-2.5 border ${
+                isShipping ? 'bg-rose-950/20 border-rose-500/40' : 'bg-slate-900/90 border-slate-800'
+            }`;
+
+            row.innerHTML = `
+                <div class="sm:col-span-3">
+                    <select class="stage-activity w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white focus:border-indigo-500 focus:outline-none">
+                        ${getActivityOptionsHtml(activityId, true)}
+                    </select>
+                </div>
+                <div class="sm:col-span-3">
+                    <input type="date" value="${escapeHtml(dateVal || '')}" class="stage-date w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:border-indigo-500 focus:outline-none">
+                </div>
+                <div class="sm:col-span-3">
+                    <select class="stage-assignee w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                        ${getEmployeeOptionsHtml(assigneeVal || 'Юрий')}
+                    </select>
+                </div>
+                <div class="sm:col-span-2">
+                    <input type="text" value="${escapeHtml(noteVal || '')}" placeholder="Комментарий к этапу" class="stage-note w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                </div>
+                <div class="sm:col-span-1 flex justify-end">
+                    <button type="button" onclick="removeStageRow(this)" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition" title="Удалить этап">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function addStageRow(type) {
+            if (type === 'print_launch') {
+                const rows = document.querySelectorAll('#printLaunchesContainer .print-launch-row');
+                let baseDate = new Date();
+                if (rows.length > 0) {
+                    const lastVal = rows[rows.length - 1].querySelector('.stage-date').value;
+                    if (lastVal) baseDate = new Date(lastVal);
+                }
+                appendPrintLaunchRow(rows.length + 1, addDaysISO(baseDate, 2), 'Иван', `Запуск #${rows.length + 1}`);
+            } else {
+                appendOtherStageRow('printer_unpack', formatDateISO(new Date()), 'Юрий', '');
+            }
+        }
+
+        function removeStageRow(btn) {
+            const row = btn.closest('.print-launch-row, .other-stage-row');
+            if (row) {
+                row.remove();
+                renumberPrintLaunchRows();
+            }
+        }
+
+        /**
+         * АВТО-РАСЧЕТ ДАТ РАСПАКОВКИ, ПЕСКОСТРУЯ, УПАКОВКИ И ОТГРУЗКИ ОТ ПОСЛЕДНЕГО ЗАПУСКА ПЕЧАТИ
+         */
+        function autoFillSubsequentDates() {
+            const launchDates = [...document.querySelectorAll('#printLaunchesContainer .stage-date')]
+                .map(i => i.value)
+                .filter(Boolean)
+                .sort();
+
+            const lastLaunchISO = launchDates.length > 0 ? launchDates[launchDates.length - 1] : formatDateISO(new Date());
+            const baseDate = new Date(lastLaunchISO);
+
+            let offset = 1;
+            const otherRows = document.querySelectorAll('#otherStagesContainer .other-stage-row');
+            otherRows.forEach(row => {
+                const dateInp = row.querySelector('.stage-date');
+                if (dateInp) {
+                    dateInp.value = addDaysISO(baseDate, offset);
+                    offset++;
+                }
+            });
+            showToast('Даты этапов постобработки и отгрузки пересчитаны от последнего запуска печати', 'info');
+        }
+
+        /**
+         * СОХРАНЕНИЕ ЗАКАЗА ИЗ МОДАЛЬНОГО ОКНА
+         */
+        function saveOrderFromModal() {
+            const clientName = document.getElementById('orderClientInput').value.trim();
+            const printReq = document.getElementById('orderPrintReqInput').value.trim();
+            const createdBy = document.getElementById('orderCreatorSelect').value;
+            const kpNum = document.getElementById('orderKpInput').value.trim();
+            const invNum = document.getElementById('orderInvoiceInput').value.trim();
+            const prodNum = document.getElementById('orderProdNumInput').value.trim();
+            const notes = document.getElementById('orderNotesInput').value.trim();
+            const editId = document.getElementById('editOrderId').value;
+
+            const errBox = document.getElementById('orderFormError');
+            if (!clientName || !printReq) {
+                errBox.textContent = 'Пожалуйста, заполните обязательные поля: «Название клиента» и «Номер заявки в печать»!';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            const stages = [];
+
+            // Собираем запуски печати
+            const launchRows = document.querySelectorAll('#printLaunchesContainer .print-launch-row');
+            launchRows.forEach((row, idx) => {
+                const dateVal = row.querySelector('.stage-date').value;
+                const assigneeVal = row.querySelector('.stage-assignee').value;
+                const noteVal = row.querySelector('.stage-note').value.trim();
+                if (dateVal) {
+                    stages.push({
+                        id: 'st_pl_' + Date.now() + '_' + idx,
+                        activityId: 'print_launch',
+                        runNumber: idx + 1,
+                        date: dateVal,
+                        assignee: assigneeVal,
+                        note: noteVal
+                    });
+                }
+            });
+
+            // Собираем остальные этапы
+            const otherRows = document.querySelectorAll('#otherStagesContainer .other-stage-row');
+            otherRows.forEach((row, idx) => {
+                const actId = row.querySelector('.stage-activity').value;
+                const dateVal = row.querySelector('.stage-date').value;
+                const assigneeVal = row.querySelector('.stage-assignee').value;
+                const noteVal = row.querySelector('.stage-note').value.trim();
+                if (dateVal) {
+                    stages.push({
+                        id: 'st_ot_' + Date.now() + '_' + idx,
+                        activityId: actId,
+                        runNumber: 1,
+                        date: dateVal,
+                        assignee: assigneeVal,
+                        note: noteVal
+                    });
+                }
+            });
+
+            if (stages.length === 0) {
+                errBox.textContent = 'Добавьте хотя бы одну дату запуска печати или этапа производства!';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            if (editId) {
+                const idx = appState.orders.findIndex(o => o.id === editId);
+                if (idx !== -1) {
+                    appState.orders[idx] = {
+                        ...appState.orders[idx],
+                        clientName,
+                        printRequestNumber: printReq,
+                        kpNumber: kpNum,
+                        invoiceNumber: invNum,
+                        prodOrderNumber: prodNum,
+                        createdBy,
+                        notes,
+                        stages
+                    };
+                }
+                showToast(`Заказ «${clientName}» (${printReq}) обновлен`, 'success');
+            } else {
+                const newOrder = {
+                    id: 'ORD-' + Date.now(),
+                    clientName,
+                    printRequestNumber: printReq,
+                    kpNumber: kpNum,
+                    invoiceNumber: invNum,
+                    prodOrderNumber: prodNum,
+                    createdBy,
+                    notes,
+                    createdAt: formatDateISO(new Date()),
+                    stages
+                };
+                appState.orders.unshift(newOrder);
+                showToast(`Новый заказ «${clientName}» (${printReq}) добавлен в план`, 'success');
+            }
+
+            markAsUnsaved('Внесены изменения в заказы — сохраните JSON!');
+            closeOrderModal();
+            renderAll();
+        }
+
+        function deleteCurrentOrder() {
+            const editId = document.getElementById('editOrderId').value;
+            if (!editId) return;
+            const order = appState.orders.find(o => o.id === editId);
+            appState.orders = appState.orders.filter(o => o.id !== editId);
+            markAsUnsaved('Удален заказ — сохраните JSON!');
+            closeOrderModal();
+            renderAll();
+            showToast(`Заказ ${order ? order.printRequestNumber : ''} удален из плана`, 'info');
+        }
+
+        /**
+         * МОДАЛЬНОЕ ОКНО СПРАВОЧНИКОВ (СОТРУДНИКИ И АКТИВНОСТИ)
+         */
+        function openDirectoriesModal() {
+            renderDirectoriesLists();
+            document.getElementById('directoriesModal').classList.remove('hidden');
+        }
+
+        function closeDirectoriesModal() {
+            document.getElementById('directoriesModal').classList.add('hidden');
+            renderAll();
+        }
+
+        function renderDirectoriesLists() {
+            const empContainer = document.getElementById('employeesListContainer');
+            empContainer.innerHTML = appState.employees.map(emp => `
+                <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs">
+                    <div>
+                        <span class="font-bold text-white">${escapeHtml(emp.name)}</span>
+                        <span class="text-slate-400 ml-2">${escapeHtml(emp.role || '')}</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">Активен</span>
+                </div>
+            `).join('');
+
+            const actContainer = document.getElementById('activitiesListContainer');
+            actContainer.innerHTML = appState.activities.map(act => {
+                const pal = COLOR_PALETTES[act.color] || COLOR_PALETTES.indigo;
+                const catLabel = act.category === 'equipment' ? 'Оборудование' : (act.category === 'deadline' ? 'Срок/Отгрузка' : 'Ручной этап');
+                return `
+                    <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full ${pal.dot}"></span>
+                            <span class="font-bold text-white">${escapeHtml(act.name)}</span>
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded">${catLabel}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addEmployeeFromDirectory() {
+            const nameInp = document.getElementById('newEmployeeNameInput');
+            const roleInp = document.getElementById('newEmployeeRoleInput');
+            const name = nameInp.value.trim();
+            const role = roleInp.value.trim() || 'Специалист';
+
+            if (!name) {
+                showToast('Введите имя нового сотрудника', 'error');
+                return;
+            }
+            if (appState.employees.some(e => e.name.toLowerCase() === name.toLowerCase())) {
+                showToast('Сотрудник с таким именем уже есть в списке', 'error');
+                return;
+            }
+
+            appState.employees.push({
+                id: 'emp_' + Date.now(),
+                name,
+                role
+            });
+
+            nameInp.value = '';
+            roleInp.value = '';
+            markAsUnsaved('Добавлен сотрудник — сохраните JSON!');
+            renderDirectoriesLists();
+            showToast(`Сотрудник «${name}» добавлен в справочник`, 'success');
+        }
+
+        function promptQuickAddEmployee() {
+            openDirectoriesModal();
+            setTimeout(() => document.getElementById('newEmployeeNameInput').focus(), 100);
+        }
+
+        function addActivityFromDirectory() {
+            const nameInp = document.getElementById('newActivityNameInput');
+            const colorSel = document.getElementById('newActivityColorSelect');
+            const catSel = document.getElementById('newActivityCategorySelect');
+
+            const name = nameInp.value.trim();
+            if (!name) {
+                showToast('Введите название нового производственного этапа', 'error');
+                return;
+            }
+
+            const newAct = {
+                id: 'act_' + Date.now(),
+                name: name,
+                shortName: name.slice(0, 14),
+                color: colorSel.value,
+                icon: catSel.value === 'equipment' ? 'fa-microchip' : (catSel.value === 'deadline' ? 'fa-flag-checkered' : 'fa-screwdriver-wrench'),
+                category: catSel.value,
+                isSystem: false
+            };
+
+            appState.activities.push(newAct);
+            nameInp.value = '';
+            markAsUnsaved('Добавлен вид активности — сохраните JSON!');
+            renderDirectoriesLists();
+            showToast(`Этап «${name}» добавлен в календарь`, 'success');
+        }
+
+        /**
+         * МОДУЛЬ ОБМЕНА ДАННЫМИ ЧЕРЕЗ JSON (ВАЛИДАЦИЯ, DRAG-AND-DROP, URL, СКАЧИВАНИЕ)
+         */
+        function openSyncModal() {
+            document.getElementById('jsonErrorAlert').classList.add('hidden');
+            document.getElementById('jsonSuccessAlert').classList.add('hidden');
+            document.getElementById('modalOrdersCountLabel').textContent = `В календаре сейчас заказов: ${appState.orders.length}`;
+            document.getElementById('syncModal').classList.remove('hidden');
+        }
+
+        function closeSyncModal() {
+            document.getElementById('syncModal').classList.add('hidden');
+        }
+
+        function switchSyncTab(tab) {
+            const tabs = ['file', 'url', 'raw'];
+            tabs.forEach(t => {
+                const content = document.getElementById('syncTabContent' + t.charAt(0).toUpperCase() + t.slice(1));
+                const btn = document.getElementById('syncTabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+                if (t === tab) {
+                    content.classList.remove('hidden');
+                    btn.className = 'flex-1 py-2 px-3 rounded-lg bg-indigo-600 text-white transition';
+                } else {
+                    content.classList.add('hidden');
+                    btn.className = 'flex-1 py-2 px-3 rounded-lg text-slate-400 hover:text-white transition';
+                }
+            });
+            if (tab === 'raw') {
+                fillRawTextareaWithCurrent();
+            }
+        }
+
+        function showJsonValidationError(msg) {
+            const errAlert = document.getElementById('jsonErrorAlert');
+            const errText = document.getElementById('jsonErrorText');
+            document.getElementById('jsonSuccessAlert').classList.add('hidden');
+            errText.textContent = msg;
+            errAlert.classList.remove('hidden');
+        }
+
+        function showJsonValidationSuccess(msg) {
+            const succAlert = document.getElementById('jsonSuccessAlert');
+            const succText = document.getElementById('jsonSuccessText');
+            document.getElementById('jsonErrorAlert').classList.add('hidden');
+            succText.textContent = msg;
+            succAlert.classList.remove('hidden');
+        }
+
+        /**
+         * СТРОГАЯ ВАЛИДАЦИЯ СТРУКТУРЫ JSON ФАЙЛА ОБМЕНА
+         */
+        function validateAndApplyExchangeJson(rawString, sourceName) {
+            let parsed;
+            try {
+                parsed = JSON.parse(rawString);
+            } catch (err) {
+                showJsonValidationError(`Файл не является корректным JSON-документом. Техническая причина: ${err.message}`);
+                return false;
+            }
+
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                showJsonValidationError('Корень JSON-файла должен быть объектом с полями "orders", "employees", "activities".');
+                return false;
+            }
+
+            if (!Array.isArray(parsed.orders)) {
+                showJsonValidationError('Отсутствует или поврежден обязательный массив заказов "orders" (не соответствует схеме календаря 3D-печати).');
+                return false;
+            }
+
+            // Проверяем каждый заказ на наличие обязательных полей
+            for (let i = 0; i < parsed.orders.length; i++) {
+                const ord = parsed.orders[i];
+                if (!ord.clientName || !ord.printRequestNumber || !Array.isArray(ord.stages)) {
+                    showJsonValidationError(`Ошибка в заказе #${i + 1}: отсутствуют обязательные поля "clientName", "printRequestNumber" или массив этапов "stages".`);
+                    return false;
+                }
+            }
+
+            // Применяем валидные данные
+            appState = {
+                meta: {
+                    app: 'MES_3D_PRINT_CALENDAR',
+                    version: APP_VERSION,
+                    generatedAt: APP_TIMESTAMP,
+                    lastSavedAt: parsed.meta?.lastSavedAt || new Date().toLocaleString('ru-RU')
+                },
+                employees: Array.isArray(parsed.employees) && parsed.employees.length > 0
+                    ? parsed.employees
+                    : JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES)),
+                activities: Array.isArray(parsed.activities) && parsed.activities.length > 0
+                    ? parsed.activities
+                    : JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES)),
+                orders: parsed.orders
+            };
+
+            lastLoadedFileName = sourceName || 'файл обмена';
+            markAsSaved(`Загружен: ${lastLoadedFileName} (${appState.orders.length} зак.)`);
+            renderAll();
+
+            document.getElementById('modalOrdersCountLabel').textContent = `В календаре сейчас заказов: ${appState.orders.length}`;
+            showJsonValidationSuccess(`Успешно загружен файл обмена «${lastLoadedFileName}»! Заказов: ${appState.orders.length}, Сотрудников: ${appState.employees.length}.`);
+            showToast(`Календарь обновлен из «${lastLoadedFileName}»`, 'success');
+            return true;
+        }
+
+        /**
+         * DRAG AND DROP И ВЫБОР ФАЙЛА С ДИСКА
+         */
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('dropZone').classList.add('drag-over-active');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('dropZone').classList.remove('drag-over-active');
+        }
+
+        function handleDropFile(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('dropZone').classList.remove('drag-over-active');
+
+            const files = e.dataTransfer?.files;
+            if (!files || files.length === 0) return;
+            readUploadedFile(files[0]);
+        }
+
+        function triggerFileInput() {
+            document.getElementById('hiddenFileInput').value = '';
+            document.getElementById('hiddenFileInput').click();
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            readUploadedFile(files[0]);
+        }
+
+        function readUploadedFile(file) {
+            if (!file.name.toLowerCase().endsWith('.json') && file.type !== 'application/json') {
+                showJsonValidationError(`Выбранный файл «${file.name}» не имеет расширения .json! Пожалуйста, выберите JSON-файл обмена.`);
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                validateAndApplyExchangeJson(evt.target.result, file.name);
+            };
+            reader.onerror = function () {
+                showJsonValidationError('Не удалось прочитать файл с диска.');
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        /**
+         * ЗАГРУЗКА ПО ССЫЛКЕ (URL / WEBDAV / FTP-ШЛЮЗ)
+         */
+        async function loadJsonFromUrl() {
+            const urlInp = document.getElementById('remoteJsonUrlInput');
+            const tokenInp = document.getElementById('remoteAuthToken');
+            const url = urlInp.value.trim();
+
+            if (!url) {
+                showJsonValidationError('Введите URL-адрес файла обмена на внешнем сервере.');
+                return;
+            }
+
+            try {
+                localStorage.setItem(REMOTE_URL_KEY, url);
+                const headers = { 'Accept': 'application/json' };
+                if (tokenInp.value.trim()) {
+                    headers['Authorization'] = tokenInp.value.trim();
+                }
+
+                const response = await fetch(url, { method: 'GET', headers, cache: 'no-store' });
+                if (!response.ok) {
+                    showJsonValidationError(`Сервер вернул ошибку HTTP ${response.status} (${response.statusText}) при обращении к ${url}`);
+                    return;
+                }
+                const text = await response.text();
+                validateAndApplyExchangeJson(text, url.split('/').pop() || 'Удаленный сервер');
+            } catch (err) {
+                showJsonValidationError(`Не удалось загрузить файл по ссылке (${url}). Проверьте доступность сервера и настройки CORS. Детали: ${err.message}`);
+            }
+        }
+
+        /**
+         * РАБОТА С RAW JSON КОДОМ В ТЕКСТОВОМ ПОЛЕ
+         */
+        function fillRawTextareaWithCurrent() {
+            const payload = buildExportPayload();
+            document.getElementById('rawJsonTextarea').value = JSON.stringify(payload, null, 2);
+        }
+
+        function applyRawJsonFromTextarea() {
+            const raw = document.getElementById('rawJsonTextarea').value.trim();
+            if (!raw) {
+                showJsonValidationError('Поле JSON-кода пустое. Вставьте код календаря перед применением.');
+                return;
+            }
+            validateAndApplyExchangeJson(raw, 'Вставленный JSON-код');
+        }
+
+        function loadDemoDataAndClose() {
+            appState.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
+            appState.activities = JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES));
+            appState.orders = generateDemoOrders();
+            markAsSaved('Демо-план производства (v1)');
+            renderAll();
+            closeSyncModal();
+            showToast('Загружен демонстрационный план на 3 месяца', 'info');
+        }
+
+        /**
+         * СОХРАНЕНИЕ (ВЫГРУЗКА) JSON-ФАЙЛА ОБМЕНА
+         */
+        function buildExportPayload() {
+            return {
+                meta: {
+                    app: 'MES_3D_PRINT_CALENDAR',
+                    version: APP_VERSION,
+                    codeTimestamp: APP_TIMESTAMP,
+                    exportedAt: new Date().toISOString(),
+                    lastSavedAt: new Date().toLocaleString('ru-RU')
+                },
+                employees: appState.employees,
+                activities: appState.activities,
+                orders: appState.orders
+            };
+        }
+
+        async function saveExchangeFile() {
+            const payload = buildExportPayload();
+            const jsonString = JSON.stringify(payload, null, 2);
+            const defaultFileName = lastLoadedFileName && lastLoadedFileName.endsWith('.json')
+                ? lastLoadedFileName
+                : `mes_3d_calendar_${APP_VERSION}.json`;
+
+            // Если браузер поддерживает прямой выбор файла для перезаписи на сетевом/локальном диске
+            if (window.showSaveFilePicker) {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: defaultFileName,
+                        types: [{
+                            description: 'Файл обмена производственного календаря JSON',
+                            accept: { 'application/json': ['.json'] }
+                        }]
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(jsonString);
+                    await writable.close();
+
+                    lastLoadedFileName = handle.name;
+                    markAsSaved(`Сохранено на диск: ${handle.name}`);
+                    showToast(`Файл обмена «${handle.name}» успешно сохранен!`, 'success');
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                    // При ограничении в iframe переходим к стандартному скачиванию
+                }
+            }
+
+            // Стандартное скачивание файла .json
+            const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = defaultFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            markAsSaved(`Выгружен файл: ${defaultFileName}`);
+            showToast(`Файл обмена «${defaultFileName}» сохранен! Загрузите его на общий сервер.`, 'success');
+        }
+
+        function copyJsonToClipboard() {
+            const payload = buildExportPayload();
+            const jsonString = JSON.stringify(payload, null, 2);
+
+            const tempArea = document.createElement('textarea');
+            tempArea.value = jsonString;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            try {
+                document.execCommand('copy');
+                markAsSaved('JSON-код скопирован в буфер обмена');
+                showToast('JSON-код календаря скопирован в буфер обмена!', 'success');
+            } catch (e) {
+                showToast('Не удалось скопировать автоматически, скопируйте из вкладки JSON-код', 'error');
+            }
+            document.body.removeChild(tempArea);
+        }
+
+        /**
+         * УТИЛИТЫ (TOAST УВЕДОМЛЕНИЯ И ЭКРАНИРОВАНИЕ HTML)
+         */
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const colorClasses = type === 'success'
+                ? 'bg-emerald-950/95 border-emerald-500/60 text-emerald-200'
+                : type === 'error'
+                    ? 'bg-rose-950/95 border-rose-500/60 text-rose-200'
+                    : 'bg-slate-900/95 border-indigo-500/60 text-slate-100';
+
+            const iconClass = type === 'success'
+                ? 'fa-circle-check text-emerald-400'
+                : type === 'error'
+                    ? 'fa-triangle-exclamation text-rose-400'
+                    : 'fa-circle-info text-indigo-400';
+
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs font-semibold backdrop-blur-md transition-all duration-300 ${colorClasses}`;
+            toast.innerHTML = `<i class="fa-solid ${iconClass} text-sm"></i><span>${escapeHtml(message)}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        /**
+         * ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+         */
+        window.onload = function () {
+            // Восстанавливаем сохраненный URL внешнего хранилища, если есть
+            const savedRemoteUrl = localStorage.getItem(REMOTE_URL_KEY);
+            if (savedRemoteUrl) {
+                document.getElementById('remoteJsonUrlInput').value = savedRemoteUrl;
+            }
+
+            // Проверяем наличие локального кэша или загружаем демо-заказы для наглядности
+            const cached = localStorage.getItem(STORAGE_KEY);
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (parsed && Array.isArray(parsed.orders) && parsed.orders.length > 0) {
+                        appState = parsed;
+                    } else {
+                        appState.orders = generateDemoOrders();
+                    }
+                } catch (e) {
+                    appState.orders = generateDemoOrders();
+                }
+            } else {
+                appState.orders = generateDemoOrders();
+            }
+
+            updateSyncStatusUI('Требуется сверка с файлом обмена JSON');
+            renderAll();
+
+            // Сразу после загрузки страницы открываем модальное окно предложения загрузить актуальный файл обмена JSON
+            openSyncModal();
+        };
+    </script>
+</body>
+</html>
