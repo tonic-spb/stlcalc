@@ -1,313 +1,412 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D-Print Календарь Аврора — v4 [101126210000]</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D-Print Календарь Аврора — v6 [101126230000]</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
 
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 
-    <style>
-        :root {
-            --bg-body: #f0f4f8;
-            --bg-panel: #ffffff;
-            --bg-panel-soft: #f8fafc;
-            --bg-hover: #eef2f7;
-            --border: #dbe4ee;
-            --border-strong: #cbd5e1;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
-            --accent-blue: #2563eb;
-            --accent-blue-soft: #dbeafe;
-            --accent-teal: #0d9488;
-            --accent-amber: #d97706;
-            --accent-rose: #e11d48;
-            --radius: 10px;
-            --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-            --shadow-md: 0 4px 12px rgba(0,0,0,.08);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { height: 100%; }
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg-body);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            -webkit-font-smoothing: antialiased;
-        }
+<style>
+:root {
+    --bg-body: #f0f4f8;
+    --bg-panel: #ffffff;
+    --bg-panel-soft: #f8fafc;
+    --bg-hover: #eef2f7;
+    --border: #dbe4ee;
+    --border-strong: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-blue-soft: #dbeafe;
+    --accent-teal: #0d9488;
+    --accent-amber: #d97706;
+    --accent-rose: #e11d48;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg-body);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+}
 
-        /* ===== ШАПКА ===== */
-        .app-header {
-            background: var(--bg-panel);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 16px;
-            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-            position: sticky; top: 0; z-index: 100;
-            box-shadow: var(--shadow);
-            flex-shrink: 0;
-        }
-        .app-logo {
-            width: 40px; height: 40px; border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 18px; flex-shrink: 0; overflow: hidden;
-        }
-        .app-logo img { width: 100%; height: 100%; object-fit: contain; }
-        .app-title-wrap { margin-right: auto; min-width: 0; }
-        .app-title { font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
-        .app-subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+.app-header {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+}
+.app-logos {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-shrink: 0;
+    min-width: 60px;
+}
+.top-logo {
+    height: 38px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+    max-width: 120px;
+}
+.app-title-wrap { margin-right: auto; min-width: 0; }
+.app-title { font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
+.app-subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; }
 
-        .btn {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 7px 12px; border-radius: var(--radius);
-            border: 1px solid var(--border); background: var(--bg-panel);
-            color: var(--text-primary); font-size: 12px; font-weight: 600;
-            cursor: pointer; transition: all .15s; white-space: nowrap; font-family: inherit;
-        }
-        .btn:hover { background: var(--bg-hover); border-color: var(--border-strong); }
-        .btn-primary { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-teal { background: var(--accent-teal); border-color: var(--accent-teal); color: #fff; }
-        .btn-teal:hover { background: #0f766e; }
-        .btn-soft { background: var(--accent-blue-soft); border-color: transparent; color: var(--accent-blue); }
-        .btn-soft:hover { background: #bfdbfe; }
-        .btn-sm { padding: 4px 9px; font-size: 11px; border-radius: 7px; }
+.btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--bg-panel);
+    color: var(--text-primary); font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all .15s; white-space: nowrap; font-family: inherit;
+}
+.btn:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+.btn-primary { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-teal { background: var(--accent-teal); border-color: var(--accent-teal); color: #fff; }
+.btn-teal:hover { background: #0f766e; }
+.btn-soft { background: var(--accent-blue-soft); border-color: transparent; color: var(--accent-blue); }
+.btn-soft:hover { background: #bfdbfe; }
+.btn-sm { padding: 4px 9px; font-size: 11px; border-radius: 7px; }
 
-        /* ===== KPI ===== */
-        .kpi-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 8px; padding: 10px 16px;
-            background: var(--bg-panel); border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-        }
-        .kpi-card {
-            background: var(--bg-panel-soft); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 7px 11px; cursor: pointer;
-            transition: all .15s; display: flex; align-items: center; justify-content: space-between;
-        }
-        .kpi-card:hover { border-color: var(--accent-blue); box-shadow: var(--shadow-md); transform: translateY(-1px); }
-        .kpi-card .kpi-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
-        .kpi-card .kpi-value { font-size: 19px; font-weight: 800; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; line-height: 1.2; }
-        .kpi-card .kpi-icon { font-size: 15px; opacity: .7; }
+.kpi-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px; padding: 10px 16px;
+    background: var(--bg-panel); border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.kpi-card {
+    background: var(--bg-panel-soft); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 7px 11px; cursor: pointer;
+    transition: all .15s; display: flex; align-items: center; justify-content: space-between;
+}
+.kpi-card:hover { border-color: var(--accent-blue); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.kpi-card .kpi-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+.kpi-card .kpi-value { font-size: 19px; font-weight: 800; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; line-height: 1.2; }
+.kpi-card .kpi-icon { font-size: 15px; opacity: .7; }
 
-        /* ===== ТУЛБАР ===== */
-        .toolbar {
-            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
-            padding: 8px 16px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-        }
-        .toolbar-group { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-        .view-switch {
-            display: flex; background: var(--bg-panel-soft);
-            border: 1px solid var(--border); border-radius: var(--radius); padding: 2px;
-        }
-        .view-switch button {
-            padding: 5px 10px; border: none; background: transparent;
-            border-radius: 7px; font-size: 11px; font-weight: 600;
-            color: var(--text-secondary); cursor: pointer; transition: all .15s; font-family: inherit;
-        }
-        .view-switch button.active { background: var(--accent-blue); color: #fff; box-shadow: 0 1px 3px rgba(37,99,235,.3); }
-        .view-switch button:not(.active):hover { background: var(--bg-hover); }
+.toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 8px 16px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.toolbar-group { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.view-switch {
+    display: flex; background: var(--bg-panel-soft);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 2px;
+}
+.view-switch button {
+    padding: 5px 10px; border: none; background: transparent;
+    border-radius: 7px; font-size: 11px; font-weight: 600;
+    color: var(--text-secondary); cursor: pointer; transition: all .15s; font-family: inherit;
+}
+.view-switch button.active { background: var(--accent-blue); color: #fff; box-shadow: 0 1px 3px rgba(37,99,235,.3); }
+.view-switch button:not(.active):hover { background: var(--bg-hover); }
 
-        .period-title {
-            font-size: 13px; font-weight: 800; color: var(--text-primary);
-            padding: 4px 10px; background: var(--bg-panel-soft);
-            border: 1px solid var(--border); border-radius: 7px;
-            white-space: nowrap;
-        }
+.period-title {
+    font-size: 13px; font-weight: 800; color: var(--text-primary);
+    padding: 4px 10px; background: var(--bg-panel-soft);
+    border: 1px solid var(--border); border-radius: 7px;
+    white-space: nowrap;
+}
 
-        .search-box { position: relative; flex: 1; min-width: 160px; max-width: 300px; }
-        .search-box input {
-            width: 100%; padding: 6px 10px 6px 30px;
-            border: 1px solid var(--border); border-radius: var(--radius);
-            font-size: 12px; font-family: inherit;
-            background: var(--bg-panel-soft); color: var(--text-primary);
-        }
-        .search-box input:focus { outline: 2px solid var(--accent-blue-soft); border-color: var(--accent-blue); }
-        .search-box i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 11px; }
-        select.filter-select {
-            padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius);
-            font-size: 11px; font-family: inherit;
-            background: var(--bg-panel-soft); color: var(--text-secondary); max-width: 150px;
-        }
+.search-box { position: relative; flex: 1; min-width: 160px; max-width: 300px; }
+.search-box input {
+    width: 100%; padding: 6px 10px 6px 30px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 12px; font-family: inherit;
+    background: var(--bg-panel-soft); color: var(--text-primary);
+}
+.search-box input:focus { outline: 2px solid var(--accent-blue-soft); border-color: var(--accent-blue); }
+.search-box i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 11px; }
+select.filter-select {
+    padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 11px; font-family: inherit;
+    background: var(--bg-panel-soft); color: var(--text-secondary); max-width: 150px;
+}
 
-        /* ===== ЛЕГЕНДА ===== */
-        .legend-bar {
-            display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
-            padding: 6px 16px; background: var(--bg-panel-soft);
-            border-bottom: 1px solid var(--border); font-size: 10px; flex-shrink: 0;
-        }
-        .legend-chip {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 3px 8px; border-radius: 6px; font-weight: 600;
-            cursor: pointer; border: 1px solid transparent; transition: all .15s; font-size: 10px;
-        }
-        .legend-chip:hover { opacity: .8; }
-        .legend-chip.active-filter { border-color: var(--text-primary); box-shadow: 0 0 0 2px rgba(15,23,42,.15); }
+.legend-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    padding: 6px 16px; background: var(--bg-panel-soft);
+    border-bottom: 1px solid var(--border); font-size: 10px; flex-shrink: 0;
+}
+.legend-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 6px; font-weight: 600;
+    cursor: pointer; border: 1px solid transparent; transition: all .15s; font-size: 10px;
+}
+.legend-chip:hover { opacity: .8; }
+.legend-chip.active-filter { border-color: var(--text-primary); box-shadow: 0 0 0 2px rgba(15,23,42,.15); }
 
-        /* ===== КАЛЕНДАРЬ ===== */
-        #calendar-wrap {
-            flex: 1; min-height: 500px;
-            padding: 10px 14px;
-            display: flex; flex-direction: column;
-            overflow: auto;
-        }
-        #calendar { flex: 1; min-height: 500px; }
+.legend-toggle {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 6px; font-weight: 700;
+    cursor: pointer; border: 1px solid var(--accent-blue);
+    background: var(--accent-blue-soft); color: var(--accent-blue);
+    transition: all .15s; font-size: 10px; font-family: inherit;
+}
+.legend-toggle:hover { background: #bfdbfe; }
+.legend-toggle.request-mode {
+    background: var(--accent-amber); border-color: var(--accent-amber); color: #fff;
+}
 
-        /* FullCalendar светлая тема */
-        .fc {
-            --fc-page-bg-color: var(--bg-panel);
-            --fc-neutral-bg-color: var(--bg-panel-soft);
-            --fc-border-color: var(--border);
-            --fc-today-bg-color: #eff6ff;
-            --fc-event-bg-color: var(--accent-blue);
-            --fc-event-border-color: var(--accent-blue);
-            --fc-button-bg-color: var(--bg-panel);
-            --fc-button-border-color: var(--border);
-            --fc-button-text-color: var(--text-primary);
-            --fc-button-hover-bg-color: var(--bg-hover);
-            --fc-button-hover-border-color: var(--border-strong);
-            --fc-button-active-bg-color: var(--accent-blue);
-            --fc-button-active-border-color: var(--accent-blue);
-            font-size: 11px;
-        }
-        /* Принудительно 3 месяца в ряд */
-        .fc .fc-multimonth {
-            display: grid !important;
-            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            gap: 8px !important;
-            width: 100% !important;
-        }
-        .fc .fc-multimonth-month {
-            min-width: 0 !important;
-            width: 100% !important;
-        }
-        .fc .fc-multimonth-title {
-            font-size: 13px; font-weight: 800; color: var(--text-primary);
-            background: var(--bg-panel-soft); padding: 6px 0;
-            border-bottom: 1px solid var(--border); text-align: center;
-        }
-        .fc .fc-multimonth-daygrid-table {
-            width: 100% !important;
-            table-layout: fixed !important;
-        }
-        .fc .fc-daygrid-day-number { font-size: 10px; font-weight: 700; color: var(--text-secondary); padding: 1px 3px; }
-        .fc .fc-day-today .fc-daygrid-day-number { color: var(--accent-blue); background: var(--accent-blue-soft); border-radius: 4px; }
+#calendar-wrap {
+    flex: 1; min-height: 500px;
+    padding: 10px 14px;
+    display: flex; flex-direction: column;
+    overflow: auto;
+}
+#calendar { flex: 1; min-height: 720px; }
 
-        /* Гарантируем видимость событий */
-        .fc .fc-event {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            cursor: pointer;
-            font-size: 9px;
-            border-radius: 3px;
-            padding: 0 2px;
-            margin: 1px 0;
-            line-height: 1.4;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        .fc .fc-event .fc-event-main { padding: 0 2px; }
-        .fc .fc-event-title { font-weight: 600; }
+.fc {
+    --fc-page-bg-color: var(--bg-panel);
+    --fc-neutral-bg-color: var(--bg-panel-soft);
+    --fc-border-color: var(--border);
+    --fc-today-bg-color: #eff6ff;
+    --fc-event-bg-color: var(--accent-blue);
+    --fc-event-border-color: var(--accent-blue);
+    font-size: 11px;
+}
+.fc .fc-multimonth {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+.fc .fc-multimonth-month {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+.fc .fc-multimonth-title {
+    font-size: 13px; font-weight: 800; color: var(--text-primary);
+    background: var(--bg-panel-soft); padding: 6px 0;
+    border-bottom: 1px solid var(--border); text-align: center;
+}
+.fc .fc-multimonth-daygrid-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+/* Увеличенная минимальная высота дня, чтобы помещать 4+ строки */
+.fc .fc-multimonth .fc-daygrid-day-frame {
+    min-height: 72px;
+}
+.fc .fc-daygrid-day-number { font-size: 10px; font-weight: 700; color: var(--text-secondary); padding: 1px 3px; }
+.fc .fc-day-today .fc-daygrid-day-number { color: var(--accent-blue); background: var(--accent-blue-soft); border-radius: 4px; }
 
-        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(15,23,42,.45);
-            display: none; align-items: flex-start; justify-content: center;
-            z-index: 1000; padding: 30px 12px; overflow-y: auto;
-        }
-        .modal-overlay.open { display: flex; }
-        .modal {
-            background: var(--bg-panel); border-radius: 14px;
-            box-shadow: 0 20px 60px rgba(0,0,0,.15);
-            width: 100%; max-width: 720px; padding: 20px;
-            position: relative; animation: modalIn .18s ease;
-        }
-        @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .modal h2 { font-size: 16px; margin-bottom: 14px; padding-right: 28px; }
-        .modal .close-btn { position: absolute; top: 14px; right: 14px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 4px; }
-        .modal .close-btn:hover { color: var(--text-primary); }
+/* Компактные события — больше строк помещается */
+.fc .fc-event {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1;
+    cursor: pointer;
+    font-size: 9px;
+    line-height: 1.2;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin: 0 0 1px 0;
+    min-height: 13px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transition: opacity 0.2s;
+}
+.fc .fc-event.fc-event-dimmed {
+    opacity: 0.25 !important;
+    filter: grayscale(0.4);
+}
+.fc .fc-event-main { padding: 0 !important; }
+.fc .fc-event-title { font-weight: 600; }
 
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .field label { display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .03em; }
-        .field input, .field select, .field textarea {
-            width: 100%; padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px;
-            font-size: 12px; font-family: inherit; background: var(--bg-panel-soft); color: var(--text-primary);
-        }
-        .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--accent-blue-soft); border-color: var(--accent-blue); }
+/* Более видимая ссылка "+N more" */
+.fc .fc-daygrid-more-link {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--accent-blue) !important;
+    background: var(--accent-blue-soft);
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-top: 1px;
+    cursor: pointer;
+    text-decoration: none;
+}
+.fc .fc-daygrid-more-link:hover {
+    background: var(--accent-blue);
+    color: #fff !important;
+}
+.fc .fc-daygrid-more-link::before { content: "▾ "; font-size: 8px; }
 
-        .stage-row {
-            display: grid; grid-template-columns: 1.2fr .9fr .9fr .9fr auto;
-            gap: 6px; align-items: end; margin-bottom: 6px; padding: 8px;
-            border-radius: 8px; background: var(--bg-panel-soft); border: 1px solid var(--border);
-        }
-        .stage-row .remove-stage { background: none; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 5px 7px; color: var(--accent-rose); font-size: 12px; line-height: 1; }
-        .stage-row .remove-stage:hover { background: #fee2e2; }
+/* Popup при наведении на день с +N more */
+.day-hover-popup {
+    position: fixed;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.18);
+    padding: 10px 12px;
+    z-index: 5000;
+    min-width: 220px;
+    max-width: 340px;
+    max-height: 60vh;
+    overflow-y: auto;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    animation: popupIn .12s ease;
+}
+@keyframes popupIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.day-hover-popup .popup-date {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent-blue);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+}
+.day-hover-popup .popup-event {
+    padding: 4px 6px;
+    margin-bottom: 3px;
+    border-radius: 5px;
+    background: var(--bg-panel-soft);
+    border-left: 3px solid #ccc;
+    font-size: 10px;
+    line-height: 1.3;
+}
+.day-hover-popup .popup-event .time-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    background: var(--bg-hover);
+    padding: 0 4px;
+    border-radius: 3px;
+    margin-right: 4px;
+}
+.day-hover-popup .popup-event .who {
+    color: var(--text-muted);
+    font-size: 9px;
+}
 
-        .drop-zone {
-            border: 2px dashed var(--border-strong); border-radius: var(--radius);
-            padding: 26px 20px; text-align: center; color: var(--text-muted);
-            font-size: 13px; transition: .2s; cursor: pointer; margin-bottom: 12px;
-            background: var(--bg-panel-soft);
-        }
-        .drop-zone.dragover { border-color: var(--accent-blue); background: var(--accent-blue-soft); color: var(--accent-blue); }
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,.45);
+    display: none; align-items: flex-start; justify-content: center;
+    z-index: 1000; padding: 30px 12px; overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+    background: var(--bg-panel); border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.15);
+    width: 100%; max-width: 720px; padding: 20px;
+    position: relative; animation: modalIn .18s ease;
+}
+@keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal h2 { font-size: 16px; margin-bottom: 14px; padding-right: 28px; }
+.modal .close-btn { position: absolute; top: 14px; right: 14px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 4px; }
+.modal .close-btn:hover { color: var(--text-primary); }
 
-        #toast-container { position: fixed; top: 64px; right: 16px; z-index: 2000; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
-        .toast { padding: 9px 14px; border-radius: var(--radius); font-size: 12px; font-weight: 600; box-shadow: var(--shadow-md); max-width: 340px; animation: slideIn .2s ease; pointer-events: auto; }
-        .toast.error { background: #fef2f2; border: 1px solid #fecaca; color: var(--accent-rose); }
-        .toast.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; }
-        .toast.info { background: #eff6ff; border: 1px solid #bfdbfe; color: var(--accent-blue); }
-        @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field label { display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .03em; }
+.field input, .field select, .field textarea {
+    width: 100%; padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 12px; font-family: inherit; background: var(--bg-panel-soft); color: var(--text-primary);
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--accent-blue-soft); border-color: var(--accent-blue); }
 
-        footer { background: var(--bg-panel); border-top: 1px solid var(--border); padding: 12px 18px; font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
-        .accordion { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 8px; background: var(--bg-panel-soft); }
-        .accordion-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--text-primary); user-select: none; }
-        .accordion-header:hover { background: var(--bg-hover); }
-        .accordion-header i.arrow { transition: transform .2s; font-size: 10px; color: var(--text-muted); }
-        .accordion.open .accordion-header i.arrow { transform: rotate(180deg); }
-        .accordion-body { display: none; padding: 0 14px 14px; font-size: 11px; line-height: 1.7; color: var(--text-secondary); }
-        .accordion.open .accordion-body { display: block; }
-        .accordion-body ul { padding-left: 16px; }
-        .accordion-body li { margin-bottom: 3px; }
+.stage-row {
+    display: grid; grid-template-columns: 1.2fr .9fr .9fr .9fr auto;
+    gap: 6px; align-items: end; margin-bottom: 6px; padding: 8px;
+    border-radius: 8px; background: var(--bg-panel-soft); border: 1px solid var(--border);
+}
+.stage-row .remove-stage { background: none; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 5px 7px; color: var(--accent-rose); font-size: 12px; line-height: 1; }
+.stage-row .remove-stage:hover { background: #fee2e2; }
 
-        .dropdown { position: relative; display: inline-block; }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-md); z-index: 200; min-width: 150px; padding: 4px; }
-        .dropdown.open .dropdown-menu { display: block; }
-        .dropdown-menu button { display: block; width: 100%; text-align: left; padding: 6px 10px; border: none; background: none; font-size: 11px; font-family: inherit; color: var(--text-primary); border-radius: 6px; cursor: pointer; font-weight: 500; }
-        .dropdown-menu button:hover { background: var(--bg-hover); }
-        .dropdown-menu button.danger { color: var(--accent-rose); }
+.drop-zone {
+    border: 2px dashed var(--border-strong); border-radius: var(--radius);
+    padding: 26px 20px; text-align: center; color: var(--text-muted);
+    font-size: 13px; transition: .2s; cursor: pointer; margin-bottom: 12px;
+    background: var(--bg-panel-soft);
+}
+.drop-zone.dragover { border-color: var(--accent-blue); background: var(--accent-blue-soft); color: var(--accent-blue); }
 
-        @media (max-width: 900px) {
-            /* На узких экранах разрешаем перенос */
-            .fc .fc-multimonth {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-            }
-        }
-        @media (max-width: 640px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .stage-row { grid-template-columns: 1fr 1fr; }
-            .kpi-bar { grid-template-columns: repeat(2, 1fr); }
-        }
-    </style>
+#toast-container { position: fixed; top: 64px; right: 16px; z-index: 6000; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+.toast { padding: 9px 14px; border-radius: var(--radius); font-size: 12px; font-weight: 600; box-shadow: var(--shadow-md); max-width: 340px; animation: slideIn .2s ease; pointer-events: auto; }
+.toast.error { background: #fef2f2; border: 1px solid #fecaca; color: var(--accent-rose); }
+.toast.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; }
+.toast.info { background: #eff6ff; border: 1px solid #bfdbfe; color: var(--accent-blue); }
+@keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+footer { background: var(--bg-panel); border-top: 1px solid var(--border); padding: 12px 18px; font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+.accordion { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 8px; background: var(--bg-panel-soft); }
+.accordion-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--text-primary); user-select: none; }
+.accordion-header:hover { background: var(--bg-hover); }
+.accordion-header i.arrow { transition: transform .2s; font-size: 10px; color: var(--text-muted); }
+.accordion.open .accordion-header i.arrow { transform: rotate(180deg); }
+.accordion-body { display: none; padding: 0 14px 14px; font-size: 11px; line-height: 1.7; color: var(--text-secondary); }
+.accordion.open .accordion-body { display: block; }
+.accordion-body ul { padding-left: 16px; }
+.accordion-body li { margin-bottom: 3px; }
+
+.dropdown { position: relative; display: inline-block; }
+.dropdown-menu { display: none; position: absolute; right: 0; top: 100%; background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-md); z-index: 200; min-width: 150px; padding: 4px; }
+.dropdown.open .dropdown-menu { display: block; }
+.dropdown-menu button { display: block; width: 100%; text-align: left; padding: 6px 10px; border: none; background: none; font-size: 11px; font-family: inherit; color: var(--text-primary); border-radius: 6px; cursor: pointer; font-weight: 500; }
+.dropdown-menu button:hover { background: var(--bg-hover); }
+.dropdown-menu button.danger { color: var(--accent-rose); }
+
+.start-option {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--bg-panel-soft); cursor: pointer; text-align: left;
+    transition: all .15s; width: 100%; font-family: inherit;
+}
+.start-option:hover { border-color: var(--accent-blue); background: var(--accent-blue-soft); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.start-option .icon { font-size: 22px; color: var(--accent-blue); flex-shrink: 0; margin-top: 2px; }
+.start-option .icon.teal { color: var(--accent-teal); }
+.start-option .icon.amber { color: var(--accent-amber); }
+.start-option .title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+.start-option .desc { font-size: 11px; color: var(--text-muted); }
+
+@media (max-width: 900px) {
+    .fc .fc-multimonth {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    }
+}
+@media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .stage-row { grid-template-columns: 1fr 1fr; }
+    .kpi-bar { grid-template-columns: repeat(2, 1fr); }
+    .top-logo { height: 30px; max-width: 90px; }
+}
+</style>
 </head>
 <body>
 
 <header class="app-header">
-    <div class="app-logo">
-        <img src="https://tonic-spb.github.io/stlcalc/logo_wm" alt="Аврора"
-             onerror="this.style.display='none';this.parentElement.innerHTML='<i class=&quot;fa-solid fa-cubes-stacked&quot;></i>'">
+    <div class="app-logos">
+        <img id="topLogo" class="top-logo" alt="Аврора" title="Аврора (водяной знак)">
+        <img id="topLogoAT" class="top-logo" alt="Аврора Карбон" title="Аврора Карбон Технолоджи">
     </div>
     <div class="app-title-wrap">
         <div class="app-title">3D-Print Календарь Аврора</div>
@@ -368,12 +467,15 @@
         </div>
         <div class="accordion-body">
             <ul>
-                <li><strong>Загрузка:</strong> выберите себя из списка. Загрузите актуальный JSON через «Файл обмена» или перетащите мышкой.</li>
+                <li><strong>Стартовое меню:</strong> после выбора пользователя — чистый календарь / демо-календарь / загрузка JSON.</li>
                 <li><strong>Создание заказа:</strong> «Новый заказ». Автор по умолчанию — вы, исполнитель — Юрий.</li>
-                <li><strong>Длительные этапы:</strong> укажите разные «Дата начала» и «Дата окончания» — событие растянется.</li>
-                <li><strong>Перетаскивание:</strong> события можно переносить и растягивать мышкой прямо в календаре.</li>
-                <li><strong>Фильтры:</strong> KPI-карточки и чипы легенды кликабельны. Поиск работает по всем полям.</li>
-                <li><strong>Сохранение:</strong> после изменений нажмите «Сохранить JSON». Имя файла: ддммггччммсс_Автор.json.</li>
+                <li><strong>Многодневные этапы:</strong> в форме укажите разные «Дата начала» и «Дата окончания». В календаре событие растягивается за <b>левый или правый край</b>.</li>
+                <li><strong>Перетаскивание:</strong> события переносятся мышкой на другую дату.</li>
+                <li><strong>Проверка порядка:</strong> первым этапом заказа всегда должен быть «Запуск печати». Если перенести другой этап на дату раньше запуска — предупреждение и автосдвиг.</li>
+                <li><strong>Фильтры:</strong> клик по чипу активности в легенде подсвечивает этот этап, остальные становятся бледными.</li>
+                <li><strong>Тумблер «Клиент / Заявка»:</strong> переключает названия событий в календаре — показывать клиента или номер заявки.</li>
+                <li><strong>+N more:</strong> если в дне больше 4 этапов, наведите мышь — появится всплывающее окно со всеми этапами дня.</li>
+                <li><strong>Сохранение:</strong> кнопка «Сохранить JSON». Файл содержит заказы, справочники, активности с цветами, настройки вида.</li>
             </ul>
         </div>
     </div>
@@ -385,39 +487,63 @@
         </div>
         <div class="accordion-body">
             <div style="display:flex;flex-wrap:wrap;gap:10px 24px;margin-bottom:10px;font-weight:600;color:var(--text-primary);">
-                <span>Версия: <strong>v4</strong></span>
-                <span>Штамп: <strong>101126210000</strong></span>
-                <span>Формат: <strong>JSON MES-3D v4</strong></span>
+                <span>Версия: <strong>v6</strong></span>
+                <span>Штамп: <strong>101126230000</strong></span>
+                <span>Формат: <strong>JSON MES-3D v6</strong></span>
                 <span>Автор: <strong>Фомин Антон</strong></span>
                 <span>Связь: <a href="mailto:a.fomin@avrora-3d.ru" style="color:var(--accent-blue);">a.fomin@avrora-3d.ru</a></span>
             </div>
             <div style="border-top:1px solid var(--border);padding-top:8px;">
-                <strong style="color:var(--text-primary);">[v4 — 101126210000]</strong>
+                <strong style="color:var(--text-primary);">[v6 — 101126230000]</strong>
                 <ul style="margin-top:4px;">
-                    <li><b>Критично:</b> календарь больше не пустой — добавлена защита от «пустого» состояния (если orders пуст и не выставлен флаг explicit-empty, автоматически загружается демо-план).</li>
-                    <li><b>Критично:</b> 3 месяца теперь жёстко в одну строку — CSS принудительно задаёт <code>grid-template-columns: repeat(3, 1fr)</code> для <code>.fc-multimonth</code>.</li>
-                    <li>События получили принудительные <code>display:block !important</code> и <code>visibility:visible !important</code>, чтобы никакие CSS-конфликты не могли их скрыть.</li>
-                    <li>Убраны конфликтующие опции FullCalendar: <code>expandRows</code>, <code>eventDisplay:'block'</code>, <code>dayMaxEvents</code>.</li>
-                    <li>Инициализация событий переведена на <code>successCallback/failureCallback</code> с try/catch и логированием в консоль — теперь любая ошибка видна.</li>
-                    <li>Добавлен resize-обработчик, при сужении экрана &lt;900px разрешён перенос месяцев.</li>
-                    <li>Демо-данные расширены: 4 заказа, включая один в следующем месяце, чтобы «3 месяца» реально были заполнены.</li>
-                    <li>Кнопка «Пустой календарь» теперь помечает состояние как явно пустое (флаг в localStorage) — повторное открытие не перезатрёт его демо-данными.</li>
+                    <li><b>Исправлено:</b> множественные запуски одного заказа больше не «прячутся» — добавлена приоритезация <code>eventOrder</code>: «Запуск печати» всегда первый в дне, остальные по порядку справочника.</li>
+                    <li><b>Улучшено:</b> компактные события (9px, минимальная высота 13px) + увеличенная высота дня (72px) → минимум 4 строки видно всегда.</li>
+                    <li><b>Улучшено:</b> «+N more» стала заметной (синий бейдж со стрелкой). При наведении на такой день появляется popup со ВСЕМИ этапами этого дня (с датами и исполнителями).</li>
+                    <li><b>Новое:</b> кнопка «Клиент / Заявка» в легенде — переключает название событий в календаре. В режиме «Заявка» кнопка становится оранжевой.</li>
+                    <li><b>Улучшено:</b> при добавлении нового этапа в форму заказа дата по умолчанию = «последняя дата этапа + 1 день», что избегает наложения запусков.</li>
+                    <li><b>Новое:</b> в JSON добавлена настройка <code>titleMode</code> — сохраняется и восстанавливается при импорте.</li>
                 </ul>
-                <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v3 — 101126190000]</strong>
+                <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v5 — 101126220000]</strong>
                 <ul style="margin-top:4px;">
-                    <li>Вид по умолчанию — 3 месяца, заголовок периода, авто-демо при первом визите.</li>
-                </ul>
-                <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v2 — 101126180000]</strong>
-                <ul style="margin-top:4px;">
-                    <li>Светлая тема, справочники с редактированием/удалением, этап «Окрашивание», просмотр месяц/неделя/день, drag-resize, журнал изменений, автор и исполнитель по умолчанию.</li>
+                    <li>Растягивание с обеих сторон, стартовое меню, приглушение несовпадающих этапов, 16 цветов, полный экспорт настроек, логотипы, валидация порядка.</li>
                 </ul>
             </div>
         </div>
     </div>
 </footer>
 
-<!-- ==================== МОДАЛЬНЫЕ ОКНА ==================== -->
+<!-- МОДАЛЬНОЕ ОКНО: СТАРТОВОЕ МЕНЮ -->
+<div class="modal-overlay" id="modal-start">
+    <div class="modal" style="max-width:520px;">
+        <h2><i class="fa-solid fa-folder-open" style="color:var(--accent-blue);margin-right:8px;"></i>С чего начнём?</h2>
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">Выберите стартовый вариант. Данные в текущем кэше будут заменены.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            <button class="start-option" onclick="startWithEmpty()">
+                <i class="fa-regular fa-file icon teal"></i>
+                <div>
+                    <div class="title">Открыть чистый календарь</div>
+                    <div class="desc">Пустой план без заказов. Справочники по умолчанию.</div>
+                </div>
+            </button>
+            <button class="start-option" onclick="startWithDemo()">
+                <i class="fa-solid fa-wand-magic-sparkles icon amber"></i>
+                <div>
+                    <div class="title">Открыть демо-календарь</div>
+                    <div class="desc">Примеры заказов на ближайшие месяцы для ознакомления.</div>
+                </div>
+            </button>
+            <button class="start-option" onclick="startWithJson()">
+                <i class="fa-solid fa-cloud-arrow-down icon"></i>
+                <div>
+                    <div class="title">Загрузить JSON файл обмена</div>
+                    <div class="desc">Актуальные данные от команды из файла обмена.</div>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
 
+<!-- МОДАЛЬНОЕ ОКНО: ВЫБОР ПОЛЬЗОВАТЕЛЯ -->
 <div class="modal-overlay" id="modal-user-select">
     <div class="modal" style="max-width:460px;">
         <button class="close-btn" onclick="closeModal('modal-user-select')">&times;</button>
@@ -435,6 +561,7 @@
     </div>
 </div>
 
+<!-- МОДАЛЬНОЕ ОКНО: ЗАГРУЗКА -->
 <div class="modal-overlay" id="modal-load">
     <div class="modal">
         <button class="close-btn" onclick="closeModal('modal-load')">&times;</button>
@@ -456,6 +583,7 @@
     </div>
 </div>
 
+<!-- МОДАЛЬНОЕ ОКНО: ЗАКАЗ -->
 <div class="modal-overlay" id="modal-order">
     <div class="modal" style="max-width:780px;">
         <button class="close-btn" onclick="closeModal('modal-order')">&times;</button>
@@ -489,6 +617,7 @@
     </div>
 </div>
 
+<!-- МОДАЛЬНОЕ ОКНО: СПРАВОЧНИКИ -->
 <div class="modal-overlay" id="modal-directories">
     <div class="modal" style="max-width:880px;">
         <button class="close-btn" onclick="closeModal('modal-directories')">&times;</button>
@@ -508,13 +637,23 @@
                 <div id="activities-list" style="display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto;margin-bottom:8px;"></div>
                 <div style="display:flex;gap:4px;">
                     <input type="text" id="new-act-name" placeholder="Название" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-size:11px;font-family:inherit;background:var(--bg-panel-soft);">
-                    <select id="new-act-color" style="width:85px;padding:6px;border:1px solid var(--border);border-radius:7px;font-size:11px;font-family:inherit;background:var(--bg-panel-soft);">
+                    <select id="new-act-color" style="width:100px;padding:6px;border:1px solid var(--border);border-radius:7px;font-size:11px;font-family:inherit;background:var(--bg-panel-soft);">
                         <option value="#2563eb">Синий</option>
                         <option value="#0d9488">Бирюза</option>
                         <option value="#d97706">Янтарь</option>
                         <option value="#7c3aed">Фиолет</option>
                         <option value="#e11d48">Красный</option>
                         <option value="#16a34a">Зелёный</option>
+                        <option value="#06b6d4">Голубой</option>
+                        <option value="#ec4899">Розовый</option>
+                        <option value="#8b5cf6">Лаванда</option>
+                        <option value="#f59e0b">Оранжевый</option>
+                        <option value="#10b981">Изумруд</option>
+                        <option value="#6366f1">Индиго</option>
+                        <option value="#a855f7">Пурпур</option>
+                        <option value="#14b8a6">Морская волна</option>
+                        <option value="#ef4444">Алый</option>
+                        <option value="#84cc16">Лайм</option>
                     </select>
                     <button class="btn btn-teal btn-sm" onclick="addActivity()">Добавить</button>
                 </div>
@@ -523,6 +662,7 @@
     </div>
 </div>
 
+<!-- МОДАЛЬНОЕ ОКНО: ДЕТАЛИ KPI -->
 <div class="modal-overlay" id="modal-details">
     <div class="modal">
         <button class="close-btn" onclick="closeModal('modal-details')">&times;</button>
@@ -534,10 +674,13 @@
 <div id="toast-container"></div>
 
 <script>
-const APP_VERSION = 'v4';
-const APP_CODE = '101126210000';
-const STORAGE_KEY = 'mes_3d_avrora_v4_state';
-const EMPTY_FLAG_KEY = 'mes_3d_avrora_v4_explicit_empty';
+/* ============================================================
+   КОНСТАНТЫ
+   ============================================================ */
+const APP_VERSION = 'v6';
+const APP_CODE = '101126230000';
+const STORAGE_KEY = 'mes_3d_avrora_v6_state';
+const EMPTY_FLAG_KEY = 'mes_3d_avrora_v6_explicit_empty';
 const SESSION_USER_KEY = 'mes_3d_avrora_current_user';
 
 let state = {
@@ -548,8 +691,48 @@ let state = {
     currentUser: null,
     calendar: null,
     activeFilter: null,
+    titleMode: 'customer',   // 'customer' | 'request'
 };
 
+/* ============================================================
+   ЛОГОТИПЫ
+   ============================================================ */
+const LOGO_FALLBACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+let LOGO_WM_DATA_URI = LOGO_FALLBACK;
+let LOGO_AT_DATA_URI = LOGO_FALLBACK;
+
+async function extractLogoFromUrl(url) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const htmlText = await res.text();
+        const dummy = document.createElement('div');
+        dummy.innerHTML = htmlText;
+        const cleanText = (dummy.textContent || '').replace(/\s+/g, '');
+        const matchDataUri = cleanText.match(/data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+/);
+        if (matchDataUri) return matchDataUri[0];
+        const matchRaw = cleanText.match(/(iVBORw0KGgo[A-Za-z0-9+/=]{100,})/);
+        if (matchRaw) return 'data:image/png;base64,' + matchRaw[1];
+    } catch (e) {
+        console.warn('Ошибка загрузки логотипа:', url, e);
+    }
+    return null;
+}
+async function loadLogos() {
+    const [wm, at] = await Promise.all([
+        extractLogoFromUrl('https://tonic-spb.github.io/stlcalc/logo_wm'),
+        extractLogoFromUrl('https://tonic-spb.github.io/stlcalc/logo_at'),
+    ]);
+    if (wm) { LOGO_WM_DATA_URI = wm; const i = document.getElementById('topLogo'); if (i) i.src = wm; }
+    else { const i = document.getElementById('topLogo'); if (i) i.style.display = 'none'; }
+    if (at) { LOGO_AT_DATA_URI = at; const i = document.getElementById('topLogoAT'); if (i) i.src = at; }
+    else { const i = document.getElementById('topLogoAT'); if (i) i.style.display = 'none'; }
+    console.log('[LOGOS] WM:', !!wm, '| AT:', !!at);
+}
+
+/* ============================================================
+   СПРАВОЧНИКИ ПО УМОЛЧАНИЮ
+   ============================================================ */
 const DEFAULT_EMPLOYEES = [
     { id: 'anton',  name: 'Антон',  role: 'Менеджер / Инженер',      active: true },
     { id: 'ivan',   name: 'Иван',   role: 'Менеджер / Инженер',      active: true },
@@ -594,7 +777,7 @@ function addDays(isoStr, days) {
 function isValidISODate(s) { return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s); }
 
 /* ============================================================
-   ФЛАГ «ГРЯЗНО»
+   ФЛАГ "ГРЯЗНО"
    ============================================================ */
 function markDirty() {
     state.dirty = true;
@@ -672,6 +855,24 @@ function createNewUser() {
 }
 
 /* ============================================================
+   СТАРТОВОЕ МЕНЮ
+   ============================================================ */
+function showStartMenu() { document.getElementById('modal-start').classList.add('open'); }
+function startWithEmpty() {
+    state.orders = [];
+    try { localStorage.setItem(EMPTY_FLAG_KEY, '1'); } catch (e) {}
+    markDirty(); renderAll(); closeModal('modal-start');
+    showToast('Открыт чистый календарь', 'info');
+}
+function startWithDemo() {
+    state.orders = generateDemoOrders();
+    try { localStorage.removeItem(EMPTY_FLAG_KEY); } catch (e) {}
+    markDirty(); renderAll(); closeModal('modal-start');
+    showToast('Демо-календарь загружен', 'info');
+}
+function startWithJson() { closeModal('modal-start'); openSyncModal(); }
+
+/* ============================================================
    ДЕМО-ДАННЫЕ
    ============================================================ */
 function generateDemoOrders() {
@@ -700,19 +901,23 @@ function generateDemoOrders() {
                 { id: 's12', activityId: 'packing',     date: addDays(t, 7),  endDate: null,           assigneeName: 'Юрий' },
                 { id: 's13', activityId: 'shipping',    date: addDays(t, 8),  endDate: null,           assigneeName: 'Михаил' },
               ]},
+            // Демонстрация параллельных запусков в одном заказе (как в задаче пользователя)
             { id: 'ORD-4', customer: 'Клиент 4', requestNumber: '261115-1', creatorName: 'Михаил', createdAt: t, changeLog: [],
               stages: [
-                { id: 's14', activityId: 'print_start', date: addDays(t, 15), endDate: addDays(t, 17), assigneeName: 'Юрий' },
-                { id: 's15', activityId: 'sandblast',   date: addDays(t, 18), endDate: null,           assigneeName: 'Юрий' },
-                { id: 's16', activityId: 'painting',    date: addDays(t, 19), endDate: addDays(t, 20), assigneeName: 'Юрий' },
-                { id: 's17', activityId: 'packing',     date: addDays(t, 21), endDate: null,           assigneeName: 'Юрий' },
-                { id: 's18', activityId: 'shipping',    date: addDays(t, 22), endDate: null,           assigneeName: 'Михаил' },
+                { id: 's14', activityId: 'print_start', date: addDays(t, 15), endDate: null, assigneeName: 'Юрий' },
+                { id: 's15', activityId: 'sandblast',   date: addDays(t, 16), endDate: null, assigneeName: 'Юрий' },
+                { id: 's16', activityId: 'print_start', date: addDays(t, 16), endDate: null, assigneeName: 'Юрий' },
+                { id: 's17', activityId: 'sandblast',   date: addDays(t, 17), endDate: null, assigneeName: 'Юрий' },
+                { id: 's18', activityId: 'print_start', date: addDays(t, 18), endDate: null, assigneeName: 'Юрий' },
+                { id: 's19', activityId: 'sandblast',   date: addDays(t, 19), endDate: null, assigneeName: 'Юрий' },
+                { id: 's20', activityId: 'packing',     date: addDays(t, 19), endDate: null, assigneeName: 'Юрий' },
+                { id: 's21', activityId: 'shipping',    date: addDays(t, 19), endDate: null, assigneeName: 'Михаил' },
               ]},
             { id: 'ORD-5', customer: 'Клиент 5', requestNumber: '261125-1', creatorName: 'Михаил', createdAt: t, changeLog: [],
               stages: [
-                { id: 's19', activityId: 'print_start', date: addDays(t, 40), endDate: addDays(t, 41), assigneeName: 'Юрий' },
-                { id: 's20', activityId: 'packing',     date: addDays(t, 43), endDate: null,           assigneeName: 'Юрий' },
-                { id: 's21', activityId: 'shipping',    date: addDays(t, 44), endDate: null,           assigneeName: 'Михаил' },
+                { id: 's22', activityId: 'print_start', date: addDays(t, 40), endDate: addDays(t, 41), assigneeName: 'Юрий' },
+                { id: 's23', activityId: 'packing',     date: addDays(t, 43), endDate: null,           assigneeName: 'Юрий' },
+                { id: 's24', activityId: 'shipping',    date: addDays(t, 44), endDate: null,           assigneeName: 'Михаил' },
               ]},
         ];
     } catch (e) {
@@ -728,21 +933,17 @@ function initCalendar() {
     if (typeof FullCalendar === 'undefined') {
         document.getElementById('calendar').innerHTML =
             '<div style="padding:40px;text-align:center;color:#e11d48;font-weight:600;">' +
-            'FullCalendar не загрузился. Проверьте интернет и обновите страницу.' +
-            '</div>';
+            'FullCalendar не загрузился. Проверьте интернет и обновите страницу.</div>';
         return;
     }
 
     const el = document.getElementById('calendar');
-    console.log('[FC INIT] orders:', state.orders.length, 'activities:', state.activities.length, 'employees:', state.employees.length);
+    console.log('[FC INIT] orders:', state.orders.length, 'activities:', state.activities.length);
 
     state.calendar = new FullCalendar.Calendar(el, {
         initialView: 'multiMonthThreeMonth',
         views: {
-            multiMonthThreeMonth: {
-                type: 'multiMonth',
-                duration: { months: 3 },
-            },
+            multiMonthThreeMonth: { type: 'multiMonth', duration: { months: 3 } },
         },
         locale: 'ru',
         firstDay: 1,
@@ -752,14 +953,31 @@ function initCalendar() {
         editable: true,
         eventDurationEditable: true,
         eventStartEditable: true,
+        eventResizableFromStart: true,
         selectable: true,
-        eventDisplay: 'auto',
+        eventDisplay: 'block',
+        // Показываем до 4 строк, при 5+ → «+N more» + hover-popup
+        dayMaxEventRows: 4,
+        moreLinkClick: 'popover',
+
+        // ФИКС #1: сортировка событий — «Запуск печати» первый в дне
+        eventOrder: function (a, b) {
+            const aId = a.extendedProps.activityId;
+            const bId = b.extendedProps.activityId;
+            const getPrio = (id) => {
+                if (id === 'print_start') return 0;
+                const idx = state.activities.findIndex(x => x.id === id);
+                return 10 + (idx >= 0 ? idx : 999);
+            };
+            const diff = getPrio(aId) - getPrio(bId);
+            if (diff !== 0) return diff;
+            // При равном приоритете — по имени клиента/заявки для стабильности
+            return (a.title || '').localeCompare(b.title || '');
+        },
 
         events: function (info, successCallback, failureCallback) {
             try {
-                const events = buildEventsArray();
-                console.log('[FC EVENTS] built:', events.length, events.length > 0 ? events[0] : '');
-                successCallback(events);
+                successCallback(buildEventsArray());
             } catch (err) {
                 console.error('[FC EVENTS] error:', err);
                 failureCallback(err);
@@ -789,18 +1007,167 @@ function initCalendar() {
             if (parts.length) info.el.title = parts.join('\n');
         },
 
+        // После каждой отрисовки событий навешиваем hover на дни с +N more
+        eventsSet: function () {
+            setTimeout(attachHoverExpand, 60);
+        },
+
         eventDrop: handleEventDrop,
         eventResize: handleEventResize,
     });
     state.calendar.render();
+    // Первичная навеска после первого рендера
+    setTimeout(attachHoverExpand, 300);
 }
 
+/* ============================================================
+   HOVER-POPUP ДЛЯ ДНЕЙ С +N MORE
+   ============================================================ */
+let hoverPopup = null;
+let hoverHideTimer = null;
+let hoverShowTimer = null;
+
+function attachHoverExpand() {
+    const days = document.querySelectorAll('.fc-daygrid-day');
+    days.forEach(dayEl => {
+        if (dayEl._hoverAttached) return;
+        const moreLink = dayEl.querySelector('.fc-daygrid-more-link');
+        if (!moreLink) return;
+        dayEl._hoverAttached = true;
+        const dateStr = dayEl.dataset.date;
+        if (!dateStr) return;
+
+        dayEl.addEventListener('mouseenter', () => {
+            clearTimeout(hoverHideTimer);
+            clearTimeout(hoverShowTimer);
+            hoverShowTimer = setTimeout(() => showDayEventsPopover(dayEl, dateStr), 280);
+        });
+        dayEl.addEventListener('mouseleave', () => {
+            clearTimeout(hoverShowTimer);
+            hoverHideTimer = setTimeout(hideDayEventsPopover, 160);
+        });
+    });
+}
+
+function showDayEventsPopover(dayEl, dateStr) {
+    hideDayEventsPopover();
+
+    const allEvents = getAllEventsForDate(dateStr);
+    if (allEvents.length === 0) return;
+
+    const popup = document.createElement('div');
+    popup.className = 'day-hover-popup';
+
+    const dateHuman = formatHumanDate(dateStr);
+    let html = `<div class="popup-date">📅 ${dateHuman} · ${allEvents.length} этап(ов)</div>`;
+    for (const ev of allEvents) {
+        html += `
+            <div class="popup-event" style="border-left-color:${ev.color};">
+                <span class="time-tag">${escapeHtml(ev.activityShort || ev.activityName)}</span>
+                <strong>${escapeHtml(ev.title)}</strong>
+                <div class="who">Исполнитель: ${escapeHtml(ev.assignee)}</div>
+            </div>`;
+    }
+    popup.innerHTML = html;
+    document.body.appendChild(popup);
+
+    // Позиционирование
+    const rect = dayEl.getBoundingClientRect();
+    let left = rect.right + 6;
+    let top = rect.top;
+
+    // Пробное размещение, чтобы не выйти за экран
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+
+    requestAnimationFrame(() => {
+        const pr = popup.getBoundingClientRect();
+        if (pr.right > window.innerWidth - 8) {
+            left = rect.left - pr.width - 6;
+            if (left < 8) left = 8;
+            popup.style.left = left + 'px';
+        }
+        if (pr.bottom > window.innerHeight - 8) {
+            top = Math.max(8, window.innerHeight - pr.height - 8);
+            popup.style.top = top + 'px';
+        }
+    });
+
+    popup.addEventListener('mouseenter', () => clearTimeout(hoverHideTimer));
+    popup.addEventListener('mouseleave', () => {
+        hoverHideTimer = setTimeout(hideDayEventsPopover, 160);
+    });
+
+    hoverPopup = popup;
+}
+
+function hideDayEventsPopover() {
+    clearTimeout(hoverShowTimer);
+    clearTimeout(hoverHideTimer);
+    if (hoverPopup) { hoverPopup.remove(); hoverPopup = null; }
+}
+
+function getAllEventsForDate(dateStr) {
+    const result = [];
+    const actMap = Object.fromEntries(state.activities.map(a => [a.id, a]));
+    for (const order of state.orders) {
+        for (const stage of (order.stages || [])) {
+            if (!isValidISODate(stage.date)) continue;
+            const end = stage.endDate || stage.date;
+            if (dateStr >= stage.date && dateStr <= end) {
+                const act = actMap[stage.activityId] || { name: stage.activityId, color: '#64748b', shortName: stage.activityId };
+                const titleMain = state.titleMode === 'request'
+                    ? (order.requestNumber || '?')
+                    : (order.customer || '?');
+                result.push({
+                    title: titleMain,
+                    color: act.color,
+                    activityName: act.name,
+                    activityShort: act.shortName || act.name,
+                    assignee: stage.assigneeName || '—',
+                });
+            }
+        }
+    }
+    result.sort((a, b) => {
+        // print_start первым
+        const pA = a.activityName === 'Запуск печати' ? 0 : 1;
+        const pB = b.activityName === 'Запуск печати' ? 0 : 1;
+        return pA - pB;
+    });
+    return result;
+}
+
+function formatHumanDate(isoStr) {
+    if (!isoStr) return '';
+    const [y, m, d] = isoStr.split('-');
+    const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+    return `${d} ${months[parseInt(m)-1]} ${y}`;
+}
+
+/* ============================================================
+   ВАЛИДАЦИЯ: первый этап заказа — запуск печати
+   ============================================================ */
+function validateStageAgainstPrintStart(order, stage, proposedDate) {
+    if (stage.activityId === 'print_start') return null;
+    const printStartDates = order.stages
+        .filter(s => s.activityId === 'print_start' && s.date && s.id !== stage.id)
+        .map(s => s.date)
+        .sort();
+    if (printStartDates.length === 0) return null;
+    const earliest = printStartDates[0];
+    if (proposedDate <= earliest) {
+        return { correctedDate: addDays(earliest, 1), earliestPrintStart: earliest };
+    }
+    return null;
+}
+
+/* ============================================================
+   ПОСТРОЕНИЕ СОБЫТИЙ
+   ============================================================ */
 function buildEventsArray() {
     const events = [];
-    if (!Array.isArray(state.orders) || !Array.isArray(state.activities)) {
-        console.warn('[buildEvents] invalid state:', typeof state.orders, typeof state.activities);
-        return events;
-    }
+    if (!Array.isArray(state.orders) || !Array.isArray(state.activities)) return events;
 
     const actMap = {};
     for (const a of state.activities) if (a && a.id) actMap[a.id] = a;
@@ -827,17 +1194,23 @@ function buildEventsArray() {
             if (!stage || !isValidISODate(stage.date)) continue;
             if (filterAss && filterAss !== 'ALL' && stage.assigneeName !== filterAss) continue;
 
-            if (state.activeFilter) {
-                if (state.activeFilter.type === 'activity' && stage.activityId !== state.activeFilter.value) continue;
-                if (state.activeFilter.type === 'kpi' && state.activeFilter.value !== 'orders' && stage.activityId !== state.activeFilter.value) continue;
+            let isDimmed = false;
+            if (state.activeFilter && state.activeFilter.type === 'activity' && stage.activityId !== state.activeFilter.value) {
+                isDimmed = true;
             }
 
             const act = actMap[stage.activityId] || { name: stage.activityId, shortName: stage.activityId, color: '#64748b', icon: 'fa-circle' };
             const hasEnd = isValidISODate(stage.endDate) && stage.endDate > stage.date;
 
+            // ФИКС #3: заголовок зависит от titleMode
+            const titleMain = state.titleMode === 'request'
+                ? (order.requestNumber || '?')
+                : (order.customer || '?');
+            const title = titleMain + ' · ' + (act.shortName || act.name) + (stage.runNumber > 1 ? ' #' + stage.runNumber : '');
+
             const evObj = {
                 id: stage.id || uid(),
-                title: (order.customer || '?') + ' · ' + (act.shortName || act.name),
+                title: title,
                 start: stage.date,
                 allDay: true,
                 backgroundColor: act.color,
@@ -845,6 +1218,7 @@ function buildEventsArray() {
                 textColor: '#ffffff',
                 extendedProps: {
                     orderId: order.id,
+                    activityId: stage.activityId,   // нужно для eventOrder
                     customer: order.customer,
                     requestNumber: order.requestNumber,
                     activityName: act.name,
@@ -853,6 +1227,7 @@ function buildEventsArray() {
                 },
             };
             if (hasEnd) evObj.end = addDays(stage.endDate, 1);
+            if (isDimmed) evObj.classNames = ['fc-event-dimmed'];
             events.push(evObj);
         }
     }
@@ -870,37 +1245,71 @@ function handleEventDrop(info) {
     const stage = order.stages.find(s => s.id === info.event.id);
     if (!stage) return;
 
-    const oldDate = stage.date;
-    const newDate = info.event.startStr.slice(0, 10);
+    let newDate = info.event.startStr.slice(0, 10);
     let newEnd = null;
     if (info.event.end) {
         const ed = new Date(info.event.end); ed.setDate(ed.getDate() - 1);
         newEnd = iso(ed);
         if (newEnd <= newDate) newEnd = null;
     }
+
+    const validation = validateStageAgainstPrintStart(order, stage, newDate);
+    if (validation) {
+        info.revert();
+        showToast('Этап не может быть раньше запуска печати. Дата скорректирована на ' + validation.correctedDate, 'error', 6000);
+        const oldDate = stage.date;
+        stage.date = validation.correctedDate;
+        stage.endDate = null;
+        addLog(order, 'Автокоррекция: этап «' + getActName(stage.activityId) + '» перенесён на ' + validation.correctedDate + ' (не может быть раньше запуска печати ' + validation.earliestPrintStart + '), было ' + oldDate);
+        markDirty(); refetchEvents();
+        return;
+    }
+
+    const oldDate = stage.date;
     stage.date = newDate;
     stage.endDate = newEnd;
-
     addLog(order, 'Перенос этапа «' + getActName(stage.activityId) + '»: ' + oldDate + ' → ' + newDate);
     markDirty(); refetchEvents();
     showToast('Этап перенесён на ' + newDate, 'success');
 }
+
 function handleEventResize(info) {
     const order = state.orders.find(o => o.id === info.event.extendedProps.orderId);
     if (!order) return;
     const stage = order.stages.find(s => s.id === info.event.id);
     if (!stage) return;
+
+    let newStart = info.event.startStr.slice(0, 10);
     let newEnd = null;
     if (info.event.end) {
         const ed = new Date(info.event.end); ed.setDate(ed.getDate() - 1);
         newEnd = iso(ed);
-        if (newEnd <= stage.date) newEnd = null;
+        if (newEnd <= newStart) newEnd = null;
     }
+
+    const validation = validateStageAgainstPrintStart(order, stage, newStart);
+    let corrected = false;
+    if (validation) {
+        corrected = true;
+        showToast('Начало этапа не может быть раньше запуска печати. Скорректировано на ' + validation.correctedDate, 'error', 6000);
+        newStart = validation.correctedDate;
+        if (newEnd && newEnd <= newStart) newEnd = null;
+    }
+
+    const oldDate = stage.date;
+    const oldEnd = stage.endDate;
+    stage.date = newStart;
     stage.endDate = newEnd;
-    addLog(order, 'Продление этапа «' + getActName(stage.activityId) + '» до ' + (newEnd || stage.date));
+
+    if (corrected) {
+        addLog(order, 'Автокоррекция при растяжении: этап «' + getActName(stage.activityId) + '» сдвинут на ' + newStart);
+    } else {
+        addLog(order, 'Растяжение этапа «' + getActName(stage.activityId) + '»: ' + oldDate + (oldEnd ? '→' + oldEnd : '') + ' на ' + newStart + (newEnd ? '→' + newEnd : ''));
+    }
     markDirty(); refetchEvents();
-    showToast('Длительность изменена', 'success');
+    showToast(corrected ? 'Длительность скорректирована' : 'Длительность изменена', corrected ? 'error' : 'success');
 }
+
 function getActName(id) { return (state.activities.find(a => a.id === id) || {}).name || id; }
 function addLog(order, text) {
     if (!order.changeLog) order.changeLog = [];
@@ -923,6 +1332,27 @@ function nextPeriod() { if (state.calendar) state.calendar.next(); }
 function goToday() { if (state.calendar) state.calendar.today(); }
 
 /* ============================================================
+   ТУМБЛЕР «КЛИЕНТ / ЗАЯВКА»
+   ============================================================ */
+function toggleTitleMode() {
+    state.titleMode = state.titleMode === 'customer' ? 'request' : 'customer';
+    updateTitleToggleBtn();
+    refetchEvents();
+    showToast('Показаны: ' + (state.titleMode === 'customer' ? 'клиенты' : 'номера заявок'), 'info', 2000);
+}
+function updateTitleToggleBtn() {
+    const btn = document.getElementById('title-toggle-btn');
+    if (!btn) return;
+    if (state.titleMode === 'request') {
+        btn.classList.add('request-mode');
+        btn.innerHTML = '<i class="fa-solid fa-hashtag"></i> Показано: Заявки';
+    } else {
+        btn.classList.remove('request-mode');
+        btn.innerHTML = '<i class="fa-solid fa-user-tie"></i> Показано: Клиенты';
+    }
+}
+
+/* ============================================================
    KPI
    ============================================================ */
 function renderKPIs() {
@@ -932,7 +1362,6 @@ function renderKPIs() {
     for (const order of state.orders) for (const stage of (order.stages || [])) {
         if (stage && stage.date && counts[stage.activityId] !== undefined) counts[stage.activityId]++;
     }
-
     let html = `
         <div class="kpi-card" onclick="showKPIDetails('orders')" title="Все заказы">
             <div>
@@ -941,7 +1370,6 @@ function renderKPIs() {
             </div>
             <i class="fa-solid fa-file-invoice kpi-icon" style="color:var(--accent-blue);"></i>
         </div>`;
-
     for (const act of state.activities) {
         html += `
             <div class="kpi-card" onclick="showKPIDetails('${act.id}')" title="${escapeHtml(act.name)}">
@@ -958,7 +1386,6 @@ function renderKPIs() {
 function showKPIDetails(type) {
     const title = document.getElementById('modal-details-title');
     const body = document.getElementById('modal-details-body');
-
     if (type === 'orders') {
         title.textContent = 'Все заказы в плане (' + state.orders.length + ')';
         body.innerHTML = state.orders.length === 0
@@ -999,21 +1426,26 @@ function showKPIDetails(type) {
 }
 
 /* ============================================================
-   ЛЕГЕНДА
+   ЛЕГЕНДА + КНОПКА ТУМБЛЕРА
    ============================================================ */
 function renderLegend() {
     const bar = document.getElementById('legend-bar');
-    bar.innerHTML = state.activities.map(a => {
+    // Кнопка-тумблер Клиент/Заявка
+    const toggleBtnHtml = `<button class="legend-toggle" id="title-toggle-btn" onclick="toggleTitleMode()" title="Переключить заголовки событий"></button>`;
+    // Чипы активностей
+    const chips = state.activities.map(a => {
         const isActive = state.activeFilter && state.activeFilter.type === 'activity' && state.activeFilter.value === a.id;
         return `<span class="legend-chip ${isActive ? 'active-filter' : ''}"
                      style="background:${a.color}20;color:${a.color};border-color:${a.color}40;"
                      onclick="toggleActivityFilter('${a.id}')">
                     <i class="fa-solid ${a.icon || 'fa-circle'}" style="font-size:9px;"></i> ${escapeHtml(a.name)}
                 </span>`;
-    }).join('') + `
+    }).join('');
+    bar.innerHTML = toggleBtnHtml + `<span style="width:1px;height:18px;background:var(--border);margin:0 4px;"></span>` + chips + `
         <span class="legend-chip" style="background:var(--bg-hover);color:var(--text-muted);margin-left:auto;" onclick="clearFilter()">
             <i class="fa-solid fa-xmark"></i> Сбросить
         </span>`;
+    updateTitleToggleBtn();
 }
 function toggleActivityFilter(actId) {
     if (state.activeFilter && state.activeFilter.type === 'activity' && state.activeFilter.value === actId) {
@@ -1079,7 +1511,6 @@ function openOrderModal(orderId = null) {
         document.getElementById('order-production').value = order.productionOrder || '';
         document.getElementById('order-creator').value = order.creatorName;
         for (const st of (order.stages || [])) addStageRow(st);
-
         if (order.changeLog && order.changeLog.length > 0) {
             document.getElementById('order-changelog').style.display = 'block';
             document.getElementById('order-changelog-list').innerHTML = order.changeLog.slice(0, 12).map(l =>
@@ -1095,6 +1526,20 @@ function openOrderModal(orderId = null) {
 
 function addStageRow(stage = null) {
     const container = document.getElementById('stages-container');
+
+    // ФИКС: для новой строки — дата = последняя дата этапа + 1 день (избегаем наложения)
+    let defaultDate = today();
+    if (!stage) {
+        const existingRows = container.querySelectorAll('.stage-row');
+        if (existingRows.length > 0) {
+            const lastRow = existingRows[existingRows.length - 1];
+            const lastEnd = lastRow.querySelector('.stage-end')?.value;
+            const lastStart = lastRow.querySelector('.stage-date')?.value;
+            if (lastEnd) defaultDate = addDays(lastEnd, 1);
+            else if (lastStart) defaultDate = addDays(lastStart, 1);
+        }
+    }
+
     const row = document.createElement('div');
     row.className = 'stage-row';
     const actOptions = state.activities.map(a =>
@@ -1106,7 +1551,7 @@ function addStageRow(stage = null) {
     ).join('');
     row.innerHTML = `
         <div class="field"><label>Этап</label><select class="stage-activity" required>${actOptions}</select></div>
-        <div class="field"><label>Начало</label><input type="date" class="stage-date" value="${stage ? stage.date : today()}" required></div>
+        <div class="field"><label>Начало</label><input type="date" class="stage-date" value="${stage ? stage.date : defaultDate}" required></div>
         <div class="field"><label>Окончание</label><input type="date" class="stage-end" value="${stage ? (stage.endDate || '') : ''}"></div>
         <div class="field"><label>Исполнитель</label><select class="stage-assignee" required>${empOptions}</select></div>
         <button type="button" class="remove-stage" onclick="this.closest('.stage-row').remove()">&times;</button>
@@ -1135,6 +1580,23 @@ function handleOrderSubmit(e) {
     });
     if (error) { showToast(error, 'error'); return; }
     if (stages.length === 0) { showToast('Добавьте хотя бы один этап', 'error'); return; }
+
+    // Валидация порядка: не-print_start этапы не могут быть раньше САМОГО РАННЕГО print_start
+    const printStartDates = stages.filter(s => s.activityId === 'print_start').map(s => s.date).sort();
+    if (printStartDates.length > 0) {
+        const earliest = printStartDates[0];
+        let correctedAny = false;
+        for (const st of stages) {
+            if (st.activityId !== 'print_start' && st.date <= earliest) {
+                st.date = addDays(earliest, 1);
+                st.endDate = null;
+                correctedAny = true;
+            }
+        }
+        if (correctedAny) {
+            showToast('Некоторые этапы были сдвинуты — они не могут быть раньше первого запуска печати (' + earliest + ')', 'error', 6000);
+        }
+    }
 
     const orderData = {
         id: id || uid(), customer, requestNumber,
@@ -1261,7 +1723,7 @@ function addActivity() {
     if (state.activities.some(a => a.name.toLowerCase() === name.toLowerCase())) { showToast('Такой этап уже есть', 'error'); return; }
     state.activities.push({ id: uid(), name, shortName: name.slice(0, 14), color, icon: 'fa-circle-dot', category: 'manual' });
     document.getElementById('new-act-name').value = '';
-    markDirty(); renderActivitiesList(); renderLegend(); renderKPIs();
+    markDirty(); renderActivitiesList(); renderLegend(); renderKPIs(); refetchEvents();
     showToast('Этап добавлен', 'success');
 }
 
@@ -1271,19 +1733,27 @@ function addActivity() {
 function openSyncModal() { document.getElementById('modal-load').classList.add('open'); }
 function exportData() {
     return {
-        meta: { app: '3D_PRINT_AVRORA_CALENDAR', version: APP_VERSION, code: APP_CODE,
-                exportedAt: new Date().toISOString(),
-                exportedBy: state.currentUser ? state.currentUser.name : 'Неизвестно' },
+        meta: {
+            app: '3D_PRINT_AVRORA_CALENDAR',
+            version: APP_VERSION, code: APP_CODE,
+            exportedAt: new Date().toISOString(),
+            exportedBy: state.currentUser ? state.currentUser.name : 'Неизвестно',
+        },
         employees: state.employees,
         activities: state.activities,
         orders: state.orders,
+        settings: {
+            currentView: state.calendar ? state.calendar.view.type : 'multiMonthThreeMonth',
+            activeFilter: state.activeFilter,
+            titleMode: state.titleMode,
+        },
     };
 }
 function validateData(data) {
     if (!data || typeof data !== 'object') throw new Error('Не объект JSON');
-    if (!Array.isArray(data.orders)) throw new Error('Нет массива orders');
-    if (!Array.isArray(data.employees)) throw new Error('Нет массива employees');
-    if (!Array.isArray(data.activities)) throw new Error('Нет массива activities');
+    if (!Array.isArray(data.orders)) throw new Error('Отсутствует массив "orders"');
+    if (!Array.isArray(data.employees)) throw new Error('Отсутствует массив "employees"');
+    if (!Array.isArray(data.activities)) throw new Error('Отсутствует массив "activities"');
     for (const o of data.orders) {
         if (!o.id || !o.customer || !o.requestNumber) throw new Error('Заказ без id/customer/requestNumber');
         if (!Array.isArray(o.stages)) throw new Error('Заказ без массива stages');
@@ -1295,11 +1765,27 @@ function applyImportedData(data) {
     state.employees = data.employees;
     state.activities = data.activities;
     state.orders = data.orders;
-    localStorage.removeItem(EMPTY_FLAG_KEY);
+    try { localStorage.removeItem(EMPTY_FLAG_KEY); } catch (e) {}
+    if (data.settings) {
+        if (data.settings.activeFilter && data.settings.activeFilter.value) {
+            if (state.activities.some(a => a.id === data.settings.activeFilter.value)) {
+                state.activeFilter = data.settings.activeFilter;
+            }
+        }
+        if (data.settings.titleMode && (data.settings.titleMode === 'customer' || data.settings.titleMode === 'request')) {
+            state.titleMode = data.settings.titleMode;
+        }
+        if (data.settings.currentView && state.calendar) {
+            const view = data.settings.currentView;
+            setTimeout(() => {
+                try { state.calendar.changeView(view); } catch (e) {}
+            }, 100);
+        }
+    }
     renderAll();
     markClean();
     setTimeout(checkOldOrders, 600);
-    showToast('Загружено ' + state.orders.length + ' заказов', 'success');
+    showToast('Загружено: ' + state.orders.length + ' заказов, ' + state.activities.length + ' этапов, ' + state.employees.length + ' сотрудников', 'success');
     closeModal('modal-load');
 }
 function checkOldOrders() {
@@ -1321,7 +1807,6 @@ function saveExchangeFile() {
              + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0') + String(now.getSeconds()).padStart(2,'0');
     const author = state.currentUser ? state.currentUser.name : 'unknown';
     const fileName = ts + '_' + author + '.json';
-
     if (window.showSaveFilePicker) {
         (async () => {
             try {
@@ -1367,24 +1852,24 @@ async function loadFromUrl() {
 }
 
 /* ============================================================
-   ДЕМО / ПУСТО
+   ДЕМО / ПУСТО (для модалки загрузки)
    ============================================================ */
 function loadDemoData() {
     state.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
     state.activities = JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES));
     state.orders = generateDemoOrders();
-    localStorage.removeItem(EMPTY_FLAG_KEY);
-    markDirty(); renderAll();
-    closeModal('modal-load');
+    try { localStorage.removeItem(EMPTY_FLAG_KEY); } catch (e) {}
+    state.activeFilter = null;
+    markDirty(); renderAll(); closeModal('modal-load');
     showToast('Демо-план загружен', 'info');
 }
 function loadEmptyCalendar() {
     state.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
     state.activities = JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES));
     state.orders = [];
+    state.activeFilter = null;
     try { localStorage.setItem(EMPTY_FLAG_KEY, '1'); } catch (e) {}
-    markDirty(); renderAll();
-    closeModal('modal-load');
+    markDirty(); renderAll(); closeModal('modal-load');
     showToast('Пустой календарь создан', 'info');
 }
 
@@ -1403,20 +1888,23 @@ function renderAll() {
    ============================================================ */
 function toggleAccordion(id) { document.getElementById(id).classList.toggle('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
 document.querySelectorAll('.modal-overlay').forEach(ov => {
-    ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('open'); });
+    ov.addEventListener('click', (e) => {
+        if (e.target === ov && ov.id !== 'modal-start' && ov.id !== 'modal-user-select') {
+            ov.classList.remove('open');
+        }
+    });
 });
 
 /* ============================================================
    ИНИЦИАЛИЗАЦИЯ
    ============================================================ */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    loadLogos();
 
-    // 1. Загрузка данных из кэша (с защитой от ошибок)
-    let firstVisit = false;
     let cachedRaw = null;
     try { cachedRaw = localStorage.getItem(STORAGE_KEY); } catch (e) { console.warn('localStorage read failed:', e); }
-
     if (cachedRaw) {
         try {
             const p = JSON.parse(cachedRaw);
@@ -1428,34 +1916,23 @@ document.addEventListener('DOMContentLoaded', () => {
             state.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
             state.activities = JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES));
             state.orders = [];
-            firstVisit = true;
         }
     } else {
         state.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
         state.activities = JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES));
         state.orders = [];
-        firstVisit = true;
     }
-
-    // 2. Если заказов нет и пользователь НЕ выбирал «пустой календарь» — грузим демо
     let explicitlyEmpty = false;
     try { explicitlyEmpty = localStorage.getItem(EMPTY_FLAG_KEY) === '1'; } catch (e) {}
     if (state.orders.length === 0 && !explicitlyEmpty) {
-        console.log('[INIT] orders empty & not explicitly-empty → загружаю демо');
         state.orders = generateDemoOrders();
-        firstVisit = true;
     }
-
-    // 3. Рендер панелей
     populateFilterSelects();
     renderKPIs();
     renderLegend();
     updateDirtyUI();
-
-    // 4. Инициализация календаря
     initCalendar();
 
-    // 5. Drag-and-drop для загрузки JSON
     const dz = document.getElementById('drop-zone');
     const fi = document.getElementById('file-input');
     if (dz && fi) {
@@ -1465,35 +1942,25 @@ document.addEventListener('DOMContentLoaded', () => {
         ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
         dz.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
     }
-
-    // 6. Выбор пользователя, затем предложение загрузить файл
     promptUser();
     const interval = setInterval(() => {
         if (state.currentUser) {
             clearInterval(interval);
-            if (firstVisit) {
-                setTimeout(() => {
-                    openSyncModal();
-                    showToast('Загружен демо-план. Можете загрузить актуальный JSON или закрыть окно.', 'info', 5000);
-                }, 400);
-            }
+            setTimeout(() => showStartMenu(), 300);
         }
     }, 300);
-
-    // 7. Обработка ошибок
     window.addEventListener('error', (e) => {
         console.error('[GLOBAL ERROR]', e.error || e.message);
     });
 });
 
-/* ============================================================
-   RESIZE — пересчёт при изменении размера окна
-   ============================================================ */
 let resizeTimer;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
         if (state.calendar) state.calendar.render();
+        hideDayEventsPopover();
+        setTimeout(attachHoverExpand, 100);
     }, 200);
 });
 </script>
