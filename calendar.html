@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<title>3D-Print Календарь Аврора — v15 [211126221200]</title>
+<title>3D-Print Календарь Аврора — v16 [221126003200]</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,7 +46,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: v
 .btn-yandex { background: #fff; border-color: var(--yandex-red); color: var(--yandex-red); }
 .btn-yandex:hover { background: #fff5f2; }
 .btn-yandex-up { background: #fff; border-color: var(--yandex-red); color: var(--yandex-red); }
-#btn-yandex-load { font-variant-numeric: tabular-nums; }
+#btn-yandex-load, #btn-yandex-save { font-variant-numeric: tabular-nums; }
 .color-swatch-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin: 10px 0 14px; }
 .color-swatch { width: 100%; aspect-ratio: 1; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .color-swatch:hover { transform: scale(1.1); }
@@ -212,7 +212,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <img id="topLogoAT" class="top-logo" alt="Аврора Карбон" title="Аврора Карбон Технолоджи">
     </div>
     <div class="app-title-wrap">
-        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v15</span></div>
+        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v16</span></div>
         <div class="app-subtitle">Планирование запусков, постобработки и отгрузок</div>
     </div>
 
@@ -223,7 +223,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
     <button class="btn" onclick="openSyncModal()"><i class="fa-solid fa-cloud-arrow-down" style="color:var(--accent-teal);"></i> Файл обмена</button>
     <button class="btn btn-teal" id="btn-save-json" onclick="saveExchangeFile()"><i class="fa-solid fa-floppy-disk"></i> Сохранить JSON</button>
     <button class="btn btn-yandex" id="btn-yandex-load" onclick="loadFromYandexDisk()" title="Нажмите, чтобы скачать актуальную версию с Яндекс.Диска сейчас"><i class="fa-solid fa-cloud-arrow-down"></i> <span id="btn-yandex-load-text">До очередного обновления осталось 10 сек.</span></button>
-    <button class="btn btn-yandex-up editor-only" id="btn-yandex-save" onclick="saveToYandexDisk()"><i class="fa-solid fa-cloud-arrow-up"></i> На Диск</button>
+    <button class="btn btn-yandex-up editor-only" id="btn-yandex-save" onclick="saveToYandexDisk()" title="Нажмите, чтобы выгрузить изменения на Яндекс.Диск сейчас"><i class="fa-solid fa-cloud-arrow-up"></i> <span id="btn-yandex-save-text">На Диск</span></button>
     <button class="btn" onclick="openTokenModal()" title="Настройки Яндекс.Диска"><i class="fa-solid fa-gear" style="color:var(--accent-amber);"></i></button>
 
     <button class="btn" onclick="openDirectoriesModal()"><i class="fa-solid fa-sliders" style="color:var(--accent-amber);"></i> Справочники</button>
@@ -275,7 +275,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
                 <li><strong>Окрашивание:</strong> ограничивается этапами «Передать в окрашивание» и «Забрать из окрашивания». Ответственный — Сергей МАИ.</li>
                 <li><strong>Перенос этапов:</strong> при перетаскивании/растяжении — запрашивается комментарий (обязателен, кроме суперадминистратора).</li>
                 <li><strong>Попап дня:</strong> перетаскивается мышкой, автоскрытие через 10 сек., если мышка не над ним.</li>
-                <li><strong>Автообновление и автосохранение:</strong> в настройках Яндекс.Диска (⚙️) можно выбрать частоту проверки обновлений (каждые 10 сек. или раз в минуту для медленного интернета) и режим автосохранения (выкл., раз в минуту или оперативно сразу после изменений). Кнопка в шапке показывает обратный отсчёт до следующей проверки.</li>
+                <li><strong>Автообновление и автосохранение:</strong> в настройках Яндекс.Диска (⚙️) можно выбрать частоту проверки новых версий (каждые 10 сек. или раз в минуту) и режим автовыгрузки на Диск (каждые 10 сек. с обратным отсчётом, раз в минуту, сразу после изменений или выкл.). Обе кнопки в шапке показывают динамический обратный отсчёт.</li>
                 <li><strong>Цвета этапов:</strong> в «Справочниках → Виды этапов» можно менять цвет любого этапа (через меню ⋯ или кликом по цветному кружку).</li>
                 <li><strong>Синхронизация:</strong> кнопка «На Диск» — <b style="color:#16a34a;">зелёная</b>, если ваша версия совпадает с Диском, <b style="color:#dc2626;">красная</b>, если есть несинхронизированные изменения.</li>
             </ul>
@@ -286,14 +286,20 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <div class="accordion-header" onclick="toggleAccordion('acc-history')"><span><i class="fa-solid fa-code-branch" style="color:var(--accent-teal);margin-right:6px;"></i> История версий и информация</span><i class="fa-solid fa-chevron-down arrow"></i></div>
         <div class="accordion-body">
             <div style="display:flex;flex-wrap:wrap;gap:10px 24px;margin-bottom:10px;font-weight:600;color:var(--text-primary);">
-                <span>Версия: <strong>v15</strong></span>
-                <span>Штамп: <strong>211126221200</strong></span>
-                <span>Формат: <strong>JSON MES-3D v15</strong></span>
+                <span>Версия: <strong>v16</strong></span>
+                <span>Штамп: <strong>221126003200</strong></span>
+                <span>Формат: <strong>JSON MES-3D v16</strong></span>
                 <span>Автор: <strong>Фомин Антон</strong></span>
                 <span>Связь: <a href="mailto:a.fomin@avrora-3d.ru" style="color:var(--accent-blue);">a.fomin@avrora-3d.ru</a></span>
             </div>
             <div style="border-top:1px solid var(--border);padding-top:8px;">
-                <strong style="color:var(--text-primary);">[v15 — 211126221200]</strong>
+                <strong style="color:var(--text-primary);">[v16 — 221126003200]</strong>
+                <ul style="margin-top:4px;margin-bottom:8px;">
+                    <li><b>Новое:</b> в настройках автосохранения на Яндекс.Диск добавлен режим выгрузки <b>каждые 10 секунд</b> (по умолчанию при наличии токена) с обратным отсчётом.</li>
+                    <li><b>Новое:</b> кнопка «На Диск» стала динамической — при наличии несохранённых изменений показывает обратный отсчёт «До выгрузки осталось 10…9…8… сек.», во время отправки — «Отправка на Диск...», при обрыве связи — «Нет связи · повтор через … сек.» и уведомление «Проверьте интернет соединение».</li>
+                    <li><b>Улучшено:</b> повторная попытка автовыгрузки при сбое соединения теперь также выполняется по таймеру с обратным отсчётом.</li>
+                </ul>
+                <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v15 — 211126221200]</strong>
                 <ul style="margin-top:4px;margin-bottom:8px;">
                     <li><b>Новое:</b> в «Справочниках → Виды этапов» добавлена возможность изменения цвета любого этапа (палитра готовых цветов + произвольный цвет).</li>
                     <li><b>Улучшено:</b> в журнале действий и выгружаемом LOG-файле при редактировании заказа теперь фиксируется конкретика — какие этапы добавлены, удалены, у каких изменились сроки, исполнители, комментарии или реквизиты заказа.</li>
@@ -489,9 +495,10 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
             <div class="yd-step-hint">Выберите режим автоматической выгрузки ваших изменений на Яндекс.Диск.</div>
             <div class="field" style="margin-bottom:10px;">
                 <select id="yandex-autoupload-mode">
-                    <option value="off">Выключено (выгрузка только вручную)</option>
+                    <option value="10sec">Каждые 10 секунд (с обратным отсчётом)</option>
                     <option value="minute">Раз в минуту (для медленного интернета)</option>
                     <option value="instant">Оперативное обновление (сразу после изменений)</option>
+                    <option value="off">Выключено (выгрузка только вручную)</option>
                 </select>
             </div>
             <div class="yd-step-title">Частота проверки новых версий с Диска</div>
@@ -606,8 +613,8 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
 /* ============================================================
    КОНСТАНТЫ
    ============================================================ */
-const APP_VERSION = 'v15';
-const APP_CODE = '211126221200';
+const APP_VERSION = 'v16';
+const APP_CODE = '221126003200';
 const STORAGE_KEY = 'mes_3d_avrora_v6_state';
 const EMPTY_FLAG_KEY = 'mes_3d_avrora_v6_explicit_empty';
 const SESSION_USER_KEY = 'mes_3d_avrora_current_user';
@@ -621,7 +628,7 @@ const YANDEX_AUTOUPLOAD      = 'mes_3d_yandex_autoupload';
 const YANDEX_CHECK_INTERVAL_KEY = 'mes_3d_yandex_check_interval';
 const DEFAULT_YANDEX_PATH    = 'disk:/proizvodstvo/proizvodstvo.json';
 const DEFAULT_YANDEX_PROXY   = '';
-const YANDEX_AUTO_INTERVAL_MS = 60 * 1000;
+const DEFAULT_AUTOUPLOAD_MODE = '10sec';
 const DEFAULT_REMOTE_CHECK_SEC = 10;
 const REMOTE_COUNTDOWN_SECONDS = 10;
 
@@ -842,9 +849,14 @@ function saveToLocalStorage() {
     } catch (e) { console.warn('localStorage write failed:', e); }
 }
 function markDirty() {
+    const wasDirty = !!state.dirty;
     state.dirty = true;
     state.changeSeq = (state.changeSeq || 0) + 1;
     state.yandexClean = false;
+    if (!wasDirty) {
+        const sec = getAutoUploadIntervalSec();
+        if (sec > 0) _autoUploadSecondsLeft = sec;
+    }
     saveToLocalStorage();
     updateDirtyUI();
     scheduleInstantUpload();
@@ -874,6 +886,7 @@ function updateDirtyUI() {
             yBtn.style.background = '#dc2626'; yBtn.style.borderColor = '#dc2626'; yBtn.style.color = '#fff';
         }
     }
+    if (typeof updateAutoUploadButtonText === 'function') updateAutoUploadButtonText(_yandexSaveInFlight);
 }
 window.addEventListener('beforeunload', (e) => { if (state.dirty) { e.preventDefault(); e.returnValue = 'Есть несохранённые изменения!'; } });
 
@@ -909,10 +922,21 @@ function getYandexProxyUrl() {
     return (localStorage.getItem(YANDEX_PROXY_KEY) || DEFAULT_YANDEX_PROXY || '').trim();
 }
 function getAutoUploadMode() {
-    const raw = (localStorage.getItem(YANDEX_AUTOUPLOAD) || '').trim();
-    if (raw === 'instant') return 'instant';
-    if (raw === '1' || raw === 'minute') return 'minute';
-    return 'off';
+    const raw = localStorage.getItem(YANDEX_AUTOUPLOAD);
+    if (raw === null || raw === '') return DEFAULT_AUTOUPLOAD_MODE;
+    const val = raw.trim();
+    if (val === 'off' || val === '0') return 'off';
+    if (val === 'instant') return 'instant';
+    if (val === '1' || val === 'minute') return 'minute';
+    if (val === '10sec') return '10sec';
+    return DEFAULT_AUTOUPLOAD_MODE;
+}
+function getAutoUploadIntervalSec() {
+    const mode = getAutoUploadMode();
+    if (mode === '10sec') return 10;
+    if (mode === 'minute') return 60;
+    if (mode === 'instant') return 10;
+    return 0;
 }
 function getRemoteCheckIntervalSec() {
     const raw = parseInt(localStorage.getItem(YANDEX_CHECK_INTERVAL_KEY) || '', 10);
@@ -928,6 +952,78 @@ function showConnectionErrorToast() {
 let _instantUploadTimer = null;
 let _yandexSaveInFlight = false;
 let _yandexSaveQueued = false;
+let _autoUploadTickTimer = null;
+let _autoUploadSecondsLeft = 10;
+let _autoUploadHasError = false;
+
+function updateAutoUploadButtonText(uploading = false) {
+    const span = document.getElementById('btn-yandex-save-text');
+    if (!span) return;
+    if (uploading || _yandexSaveInFlight) {
+        span.textContent = 'Отправка на Диск...';
+        return;
+    }
+    const mode = getAutoUploadMode();
+    const hasToken = !!localStorage.getItem(YANDEX_TOKEN_KEY);
+    if (!hasToken || mode === 'off') {
+        span.textContent = 'На Диск';
+        return;
+    }
+    if (state.dirty) {
+        if (_autoUploadHasError) {
+            span.textContent = 'Нет связи · повтор через ' + _autoUploadSecondsLeft + ' сек.';
+        } else if (mode === 'instant') {
+            span.textContent = 'Отправка на Диск...';
+        } else {
+            span.textContent = 'До выгрузки осталось ' + _autoUploadSecondsLeft + ' сек.';
+        }
+    } else {
+        if (mode === 'instant') {
+            span.textContent = state.yandexClean ? 'На Диск · актуально (авто)' : 'На Диск (авто)';
+        } else {
+            const sec = getAutoUploadIntervalSec();
+            span.textContent = state.yandexClean ? ('На Диск · актуально (авто ' + sec + ' сек.)') : ('На Диск (авто ' + sec + ' сек.)');
+        }
+    }
+}
+
+function restartAutoUploadTimer() {
+    if (_autoUploadTickTimer) {
+        clearInterval(_autoUploadTickTimer);
+        _autoUploadTickTimer = null;
+    }
+    const sec = getAutoUploadIntervalSec();
+    _autoUploadSecondsLeft = sec > 0 ? sec : 10;
+    _autoUploadHasError = false;
+    updateAutoUploadButtonText(false);
+    if (sec <= 0) return;
+    _autoUploadTickTimer = setInterval(() => {
+        const mode = getAutoUploadMode();
+        if (mode === 'off') {
+            updateAutoUploadButtonText(false);
+            return;
+        }
+        if (_yandexSaveInFlight) return;
+        const hasToken = !!localStorage.getItem(YANDEX_TOKEN_KEY);
+        if (!hasToken || !_isEditor() || !state.dirty) {
+            _autoUploadSecondsLeft = getAutoUploadIntervalSec() || 10;
+            updateAutoUploadButtonText(false);
+            return;
+        }
+        if (mode === 'instant' && !_autoUploadHasError) {
+            updateAutoUploadButtonText(false);
+            return;
+        }
+        _autoUploadSecondsLeft--;
+        if (_autoUploadSecondsLeft <= 0) {
+            _autoUploadSecondsLeft = getAutoUploadIntervalSec() || 10;
+            saveToYandexDisk(true);
+        } else {
+            updateAutoUploadButtonText(false);
+        }
+    }, 1000);
+}
+
 function scheduleInstantUpload() {
     if (getAutoUploadMode() !== 'instant') return;
     if (!localStorage.getItem(YANDEX_TOKEN_KEY) || !_isEditor()) return;
@@ -980,7 +1076,7 @@ function saveYandexSettings() {
     const token = extractYandexToken(document.getElementById('yandex-token-input').value || '');
     const rawPath = (document.getElementById('yandex-path-input').value || '').trim();
     const proxyUrl = (document.getElementById('yandex-proxy-input')?.value || '').trim();
-    const autoMode = document.getElementById('yandex-autoupload-mode')?.value || 'off';
+    const autoMode = document.getElementById('yandex-autoupload-mode')?.value || DEFAULT_AUTOUPLOAD_MODE;
     const checkSec = document.getElementById('yandex-check-interval')?.value === '60' ? '60' : '10';
     let path = normalizeYandexPath(rawPath);
     if (rawPath && path !== rawPath) showToast('Путь не подходит — используется ' + path, 'info', 5000);
@@ -992,6 +1088,7 @@ function saveYandexSettings() {
     localStorage.setItem(YANDEX_CHECK_INTERVAL_KEY, checkSec);
     closeModal('modal-token');
     restartRemoteCheckTimer();
+    restartAutoUploadTimer();
     if (autoMode === 'instant' && state.dirty) scheduleInstantUpload();
     showToast('Настройки сохранены', 'success', 4000);
     addAuditLog('yandex_settings', 'Изменены настройки Яндекс.Диска');
@@ -1001,6 +1098,7 @@ function clearYandexToken() {
     localStorage.removeItem(YANDEX_TOKEN_KEY); localStorage.removeItem(YANDEX_CLIENT_ID_KEY); localStorage.removeItem(YANDEX_PATH_KEY); localStorage.removeItem(YANDEX_PROXY_KEY); localStorage.removeItem(YANDEX_AUTOUPLOAD); localStorage.removeItem(YANDEX_CHECK_INTERVAL_KEY);
     closeModal('modal-token');
     restartRemoteCheckTimer();
+    restartAutoUploadTimer();
     showToast('Настройки удалены', 'info');
     addAuditLog('yandex_settings', 'Удалены настройки Яндекс.Диска');
 }
@@ -1163,6 +1261,7 @@ async function saveToYandexDisk(silent = false) {
     const diskPath = normalizeYandexPath(localStorage.getItem(YANDEX_PATH_KEY));
     if (!silent) showToast('Подготовка к сохранению...', 'info');
     _yandexSaveInFlight = true;
+    updateAutoUploadButtonText(true);
     const seqAtStart = state.changeSeq || 0;
     try {
         if (typeof navigator !== 'undefined' && navigator.onLine === false) {
@@ -1184,6 +1283,8 @@ async function saveToYandexDisk(silent = false) {
         if (!silent) showToast('Загрузка на Яндекс.Диск...', 'info');
         const put = await fetch(upMeta.href, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: json });
         if (!put.ok) throw new Error('HTTP ' + put.status);
+        _autoUploadHasError = false;
+        _autoUploadSecondsLeft = getAutoUploadIntervalSec() || 10;
         if ((state.changeSeq || 0) === seqAtStart) {
             markYandexClean();
         } else {
@@ -1197,6 +1298,8 @@ async function saveToYandexDisk(silent = false) {
         if (!silent) showToast('Файл сохранён на Диск', 'success', 4500);
     } catch (e) {
         console.error('[Yandex save]', e);
+        _autoUploadHasError = true;
+        _autoUploadSecondsLeft = getAutoUploadIntervalSec() || 10;
         if (silent) {
             showConnectionErrorToast();
         } else if (e.message === 'OFFLINE' || /Failed to fetch|NetworkError|Load failed/i.test(e.message || '')) {
@@ -1206,6 +1309,7 @@ async function saveToYandexDisk(silent = false) {
         }
     } finally {
         _yandexSaveInFlight = false;
+        updateAutoUploadButtonText(false);
         if (_yandexSaveQueued && state.dirty) {
             _yandexSaveQueued = false;
             setTimeout(() => saveToYandexDisk(true), 400);
@@ -2929,15 +3033,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentUser) { clearInterval(interval); setTimeout(() => showStartMenu(), 300); }
     }, 300);
 
-    // Автосохранение на Диск (раз в минуту или повторная попытка при оперативном режиме)
-    setInterval(() => {
-        try {
-            const mode = getAutoUploadMode();
-            if (state.dirty && (mode === 'minute' || mode === 'instant') && localStorage.getItem(YANDEX_TOKEN_KEY) && _isEditor()) {
-                saveToYandexDisk(true);
-            }
-        } catch (e) {}
-    }, YANDEX_AUTO_INTERVAL_MS);
+    // Динамический таймер автовыгрузки на Диск (10 сек., 1 мин. или повтор при сбое)
+    restartAutoUploadTimer();
 
     // Динамический таймер проверки обновлений с Диска (10 сек. или 1 мин.)
     restartRemoteCheckTimer();
