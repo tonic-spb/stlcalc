@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D-Print Календарь Аврора — v13 [101126230000]</title>
+<title>3D-Print Календарь Аврора — v14 [101126230000]</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -102,7 +102,6 @@ select.filter-select { padding: 6px 8px; border: 1px solid var(--border); border
 .fc .fc-daygrid-more-link:hover { background: var(--accent-blue); color: #fff !important; }
 .fc .fc-daygrid-more-link::before { content: "▾ "; font-size: 8px; }
 
-/* Hover-попап — перетаскиваемый + автоскрытие */
 .day-hover-popup { position: fixed; background: var(--bg-panel); border: 1px solid var(--border-strong); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.18); padding: 10px 12px; z-index: 5000; min-width: 220px; max-width: 340px; max-height: 60vh; overflow-y: auto; font-family: 'Inter', sans-serif; font-size: 11px; animation: popupIn .12s ease; cursor: move; user-select: none; }
 @keyframes popupIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 .day-hover-popup .popup-date { font-size: 11px; font-weight: 800; color: var(--accent-blue); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 6px; cursor: move; }
@@ -186,11 +185,12 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
 .audit-entry .desc { color: var(--text-secondary); line-height: 1.35; }
 .audit-entry .icon-badge { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 4px; font-size: 9px; margin-right: 4px; background: var(--accent-blue-soft); color: var(--accent-blue); }
 
-/* Remote update banner */
-#remote-update-banner { display: none; position: fixed; top: 72px; left: 50%; transform: translateX(-50%); background: #d97706; color: #fff; padding: 14px 22px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.25); z-index: 7000; font-size: 13px; font-weight: 600; max-width: 560px; text-align: center; }
+#remote-update-banner { display: none; position: fixed; top: 72px; left: 50%; transform: translateX(-50%); background: #d97706; color: #fff; padding: 14px 22px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.3); z-index: 7000; font-size: 13px; font-weight: 600; max-width: 720px; min-width: 420px; text-align: center; }
 #remote-update-banner.visible { display: block; }
 #remote-update-banner .countdown { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 800; margin: 0 4px; }
-#remote-update-banner .actions { margin-top: 10px; display: flex; gap: 8px; justify-content: center; }
+#remote-update-banner .actions { margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+#remote-update-banner .actions button { padding: 6px 14px; font-size: 11px; border-radius: 6px; font-weight: 700; cursor: pointer; border: 1px solid; font-family: inherit; }
+#remote-update-diff { font-size: 11px; margin-top: 8px; background: rgba(255,255,255,.15); border-radius: 6px; padding: 8px 10px; text-align: left; line-height: 1.55; max-height: 200px; overflow-y: auto; }
 
 @keyframes saluteParticle { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0.1); opacity: 0; } }
 
@@ -206,7 +206,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <img id="topLogoAT" class="top-logo" alt="Аврора Карбон" title="Аврора Карбон Технолоджи">
     </div>
     <div class="app-title-wrap">
-        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v13</span></div>
+        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v14</span></div>
         <div class="app-subtitle">Планирование запусков, постобработки и отгрузок</div>
     </div>
 
@@ -263,13 +263,14 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
                 <li><strong>Вход по паролю:</strong> пароль по умолчанию — <code>123</code>.</li>
                 <li><strong>Смена пароля:</strong> кнопка «Пароль» рядом с именем пользователя.</li>
                 <li><strong>Группировка заказа:</strong> наведите мышь на любой этап — все этапы того же заказа подсветятся контуром.</li>
-                <li><strong>Уровни доступа:</strong> «только просмотр» (Антон, Иван); «просмотр, изменение и создание» (Юрий, Михаил, Вадим, Сергей МАИ).</li>
+                <li><strong>Уровни доступа:</strong> «только просмотр» (Антон, Иван, Сергей МАИ); «просмотр, изменение и создание» (Юрий, Михаил, Вадим).</li>
                 <li><strong>Профилактика принтера:</strong> отдельная кнопка в шапке — для этого вида не требуется клиент и номер заявки.</li>
                 <li><strong>Порядок этапов:</strong> все этапы между <b>первым</b> «Запуском» и <b>последней</b> «Отгрузкой». Отгрузка не может быть раньше запуска.</li>
                 <li><strong>Окрашивание:</strong> ограничивается этапами «Передать в окрашивание» и «Забрать из окрашивания». Ответственный — Сергей МАИ.</li>
                 <li><strong>Перенос этапов:</strong> при перетаскивании/растяжении — запрашивается комментарий (обязателен, кроме суперадминистратора).</li>
-                <li><strong>Попап дня:</strong> перетаскивается мышкой, автоскрытие через 3 сек., если мышка не над ним.</li>
-                <li><strong>Автообновление:</strong> каждую минуту проверяется актуальность данных на Диске. При изменениях другого пользователя — уведомление и обратный отсчёт.</li>
+                <li><strong>Попап дня:</strong> перетаскивается мышкой, автоскрытие через 10 сек., если мышка не над ним.</li>
+                <li><strong>Автообновление:</strong> каждую минуту проверяется актуальность данных на Диске. При изменениях другого пользователя — уведомление с обратным отсчётом (10 сек.), паузой и списком изменений.</li>
+                <li><strong>Синхронизация:</strong> кнопка «На Диск» — <b style="color:#16a34a;">зелёная</b>, если ваша версия совпадает с Диском, <b style="color:#dc2626;">красная</b>, если есть несинхронизированные изменения.</li>
             </ul>
         </div>
     </div>
@@ -278,33 +279,36 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <div class="accordion-header" onclick="toggleAccordion('acc-history')"><span><i class="fa-solid fa-code-branch" style="color:var(--accent-teal);margin-right:6px;"></i> История версий и информация</span><i class="fa-solid fa-chevron-down arrow"></i></div>
         <div class="accordion-body">
             <div style="display:flex;flex-wrap:wrap;gap:10px 24px;margin-bottom:10px;font-weight:600;color:var(--text-primary);">
-                <span>Версия: <strong>v13</strong></span>
+                <span>Версия: <strong>v14</strong></span>
                 <span>Штамп: <strong>101126230000</strong></span>
-                <span>Формат: <strong>JSON MES-3D v13</strong></span>
+                <span>Формат: <strong>JSON MES-3D v14</strong></span>
                 <span>Автор: <strong>Фомин Антон</strong></span>
                 <span>Связь: <a href="mailto:a.fomin@avrora-3d.ru" style="color:var(--accent-blue);">a.fomin@avrora-3d.ru</a></span>
             </div>
             <div style="border-top:1px solid var(--border);padding-top:8px;">
-                <strong style="color:var(--text-primary);">[v13 — 101126230000]</strong>
+                <strong style="color:var(--text-primary);">[v14 — 101126230000]</strong>
                 <ul style="margin-top:4px;">
-                    <li><b>Исправлено:</b> возвращено растягивание этапов влево (drag-handle от начала события).</li>
-                    <li><b>Исправлено:</b> всплывающее окно дня теперь перетаскивается мышкой и автоскрывается через 3 секунды, если мышка не над ним. Mousedown на любой другой элемент скрывает попап мгновенно.</li>
-                    <li><b>Новое:</b> этап «Профилактика принтера» (фиолетовый) — не требует клиента и номера заявки. Кнопка «Профилактика» в шапке для быстрого создания.</li>
-                    <li><b>Новое:</b> этапы производства в форме заказа можно перетаскивать вверх/вниз за ручку ⋮⋮. После перетаскивания предлагается скорректировать даты по соседним этапам.</li>
-                    <li><b>Новое:</b> этапы в форме заказа тонируются цветом из справочника.</li>
-                    <li><b>Новое:</b> в форме заказа добавлено поле «Комментарий к заказу» (дата прихода заявки, контакт клиента, номер спецификации и т.п.).</li>
-                    <li><b>Новое:</b> после загрузки с Яндекс.Диска отображается баннер с датой и временем последнего изменения файла.</li>
-                    <li><b>Новое:</b> кнопка «На Диск» — зелёная, если изменений нет с последней синхронизации, красная, если есть несохранённые изменения.</li>
-                    <li><b>Новое:</b> каждую минуту проверяется актуальность базы. При изменениях другого пользователя — уведомление с 5-секундным обратным отсчётом и возможностью отменить.</li>
+                    <li><b>Исправлено:</b> дубликаты этапов (Профилактика, Передать/Забрать из окрашивания). Добавлена дедупликация по id и по имени для служебных этапов.</li>
+                    <li><b>Исправлено:</b> кнопка «На Диск» остаётся зелёной после сохранения. Служебные сообщения (синхронизация, экспорт) больше не помечают файл как изменённый.</li>
+                    <li><b>Изменено:</b> таймер скрытия попапа при наведении на день — с 3 до 10 секунд.</li>
+                    <li><b>Новое:</b> таймер авто-обновления — 10 секунд (было 5). Кнопка «Пауза» останавливает отсчёт.</li>
+                    <li><b>Новое:</b> при обнаружении изменений от другого пользователя показывается список изменений (добавленные/изменённые/удалённые заказы, изменения этапов).</li>
+                    <li><b>Новое:</b> возможность «Загрузить мою версию» — отправить свою версию на Диск вместо принятия чужой (другой пользователь получит уведомление).</li>
+                    <li><b>Изменено:</b> у «Сергей МАИ» уровень доступа «только просмотр».</li>
+                    <li><b>Безопасность:</b> скрытый суперпользователь не сериализуется в JSON и не сохраняется в localStorage — при каждом открытии страницы он скрыт.</li>
+                </ul>
+                <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v13 — 101126230000]</strong>
+                <ul style="margin-top:4px;">
+                    <li>Исправлено растягивание этапов влево; попап перетаскивается; этап «Профилактика принтера»; drag-reorder этапов; цветовая подсветка; поле «Комментарий к заказу»; дата обновления файла; зелёная/красная кнопка «На Диск»; автопроверка базы.</li>
                 </ul>
                 <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v12 — 101126230000]</strong>
                 <ul style="margin-top:4px;">
-                    <li>Логика порядка этапов между первым запуском и последней отгрузкой; восстановление удалённых заказов; растянутое окно «Справочники»; «этапы» вместо «активностей»; этапы «Передать в окрашивание» / «Забрать из окрашивания»; Сергей МАИ; действия Владыки не попадают в LOG; анимация «салют».</li>
+                    <li>Логика порядка этапов; восстановление удалённых; «этапы»; границы окрашивания; Сергей МАИ; скрытие действий суперадмина; анимация «салют».</li>
                 </ul>
                 <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v11 — 101126230000]</strong>
-                <ul style="margin-top:4px;"><li>Журнал действий, комментарии этапов, восстановление порядка, удаление заказа, приветственное окно, скрытие суперпользователя после перезагрузки.</li></ul>
-                <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v10 — 101126230000]</strong>
-                <ul style="margin-top:4px;"><li>Визуальная группировка этапов; уровни доступа; пароли с хэшированием и солью в JSON.</li></ul>
+                <ul style="margin-top:4px;">
+                    <li>Журнал действий, комментарии этапов, восстановление порядка, удаление заказа, приветственное окно.</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -324,9 +328,12 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
 <!-- Remote update banner -->
 <div id="remote-update-banner">
     <div id="remote-update-text"></div>
+    <div id="remote-update-diff"></div>
     <div class="actions">
-        <button class="btn btn-sm" onclick="cancelRemoteUpdate()" style="background:#fff;color:#d97706;border-color:#fff;">Отменить и оставить свою версию</button>
-        <button class="btn btn-sm" onclick="applyPendingRemoteNow()" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.5);">Загрузить сейчас</button>
+        <button id="remote-pause-btn" onclick="pauseRemoteCountdown()" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.5);">⏸ Пауза</button>
+        <button onclick="applyPendingRemoteNow()" style="background:#fff;color:#d97706;border-color:#fff;">✓ Принять</button>
+        <button onclick="rejectRemoteAndUpload()" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.5);">📤 Загрузить мою</button>
+        <button onclick="cancelRemoteUpdate()" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.3);">✗ Закрыть</button>
     </div>
 </div>
 
@@ -388,7 +395,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
     </div>
 </div>
 
-<!-- КОММЕНТАРИЙ ИЗМЕНЕНИЯ -->
+<!-- КОММЕНТАРИЙ -->
 <div class="modal-overlay" id="modal-comment">
     <div class="modal" style="max-width:480px;">
         <button class="close-btn" onclick="cancelComment()">&times;</button>
@@ -544,7 +551,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
 /* ============================================================
    КОНСТАНТЫ
    ============================================================ */
-const APP_VERSION = 'v13';
+const APP_VERSION = 'v14';
 const APP_CODE = '101126230000';
 const STORAGE_KEY = 'mes_3d_avrora_v6_state';
 const EMPTY_FLAG_KEY = 'mes_3d_avrora_v6_explicit_empty';
@@ -558,6 +565,7 @@ const YANDEX_AUTOUPLOAD      = 'mes_3d_yandex_autoupload';
 const DEFAULT_YANDEX_PATH    = 'disk:/proizvodstvo/proizvodstvo.json';
 const YANDEX_AUTO_INTERVAL_MS = 60 * 1000;
 const REMOTE_CHECK_INTERVAL_MS = 60 * 1000;
+const REMOTE_COUNTDOWN_SECONDS = 10;
 
 const ACCESS_VIEW  = 'view';
 const ACCESS_EDIT  = 'edit';
@@ -614,7 +622,9 @@ function _ensureAdminExists() {
     if (admin) return admin;
     const salt = _randomSalt();
     admin = { id: _SA_ID, name: _SA_NAME, role: 'Суперадминистратор', active: true, accessLevel: ACCESS_ADMIN, salt, passwordHash: _hashPassword(_SA_PASS, salt) };
-    state.employees.push(admin); markDirty();
+    state.employees.push(admin);
+    // НЕ помечаем dirty - суперпользователь не считается "изменением календаря"
+    saveToLocalStorage();
     return admin;
 }
 function _fireSalute() {
@@ -655,7 +665,7 @@ function ensurePasswords() {
     let changed = false;
     for (const emp of state.employees) {
         if (!emp.accessLevel) {
-            if (emp.id === 'anton' || emp.id === 'ivan') emp.accessLevel = ACCESS_VIEW;
+            if (emp.id === 'anton' || emp.id === 'ivan' || emp.id === 'sergey_mai') emp.accessLevel = ACCESS_VIEW;
             else if (emp.id === _SA_ID) emp.accessLevel = ACCESS_ADMIN;
             else emp.accessLevel = ACCESS_EDIT;
             changed = true;
@@ -666,7 +676,7 @@ function ensurePasswords() {
             emp.salt = salt; emp.passwordHash = _hashPassword(pwd, salt); changed = true;
         }
     }
-    if (changed) markDirty();
+    if (changed) saveToLocalStorage();
 }
 
 /* ============================================================
@@ -698,7 +708,7 @@ const DEFAULT_EMPLOYEES = [
     { id: 'yuri',   name: 'Юрий',   role: 'Мастер участка',            active: true, accessLevel: ACCESS_EDIT },
     { id: 'mihail', name: 'Михаил', role: 'Руководитель производства', active: true, accessLevel: ACCESS_EDIT },
     { id: 'vadim',  name: 'Вадим',  role: 'Мастер участка',            active: true, accessLevel: ACCESS_EDIT },
-    { id: 'sergey_mai', name: 'Сергей МАИ', role: 'Окрашивание',       active: true, accessLevel: ACCESS_EDIT },
+    { id: 'sergey_mai', name: 'Сергей МАИ', role: 'Окрашивание',       active: true, accessLevel: ACCESS_VIEW },
 ];
 const DEFAULT_ACTIVITIES = [
     { id: 'print_start',     name: 'Запуск печати',           shortName: 'Печать',      color: '#2563eb', icon: 'fa-print',               category: 'equipment' },
@@ -742,8 +752,12 @@ function formatDateHuman(isoStr) {
    ============================================================ */
 function saveToLocalStorage() {
     try {
+        const employeesToSave = state.employees.filter(e => e.id !== _SA_ID);
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
-            employees: state.employees, activities: state.activities, orders: state.orders, auditLog: state.auditLog,
+            employees: employeesToSave,
+            activities: state.activities,
+            orders: state.orders,
+            auditLog: state.auditLog,
             _yandexClean: state.yandexClean,
             _lastRemoteModified: state.lastRemoteModified,
         }));
@@ -791,7 +805,8 @@ function addAuditLog(action, description, details) {
     const entry = { id: uid(), timestamp: new Date().toISOString(), user: state.currentUser ? state.currentUser.name : 'Система', action, description, details: details || null };
     state.auditLog.unshift(entry);
     if (state.auditLog.length > 10000) state.auditLog = state.auditLog.slice(0, 10000);
-    markDirty();
+    // НЕ вызываем markDirty - служебные записи не считаются изменениями календаря
+    saveToLocalStorage();
 }
 function addLog(order, text) {
     if (_isSecretAdmin(state.currentUser)) return;
@@ -824,7 +839,7 @@ function openYandexAuthWindow() {
     localStorage.setItem(YANDEX_CLIENT_ID_KEY, clientId);
     const url = 'https://oauth.yandex.ru/authorize?response_type=token&client_id=' + encodeURIComponent(clientId);
     const w = window.open(url, '_blank', 'width=800,height=720');
-    if (!w) { showToast('Браузер заблокировал всплывающее окно. Разрешите pop-up.', 'error', 7000); return; }
+    if (!w) { showToast('Разрешите pop-up.', 'error', 7000); return; }
     showToast('Войдите в окне, подтвердите доступ и скопируйте всю адресную строку.', 'info', 9000);
 }
 async function checkYandexConnection() {
@@ -916,8 +931,8 @@ async function saveToYandexDisk(silent = false) {
             const err = await um.json().catch(() => ({}));
             const msg = err.message || err.description || ('HTTP ' + um.status);
             if (um.status === 409) throw new Error('Путь не найден: ' + diskPath);
-            if (um.status === 401 || um.status === 403) throw new Error('Токен недействителен или нет прав на запись');
-            if (um.status === 507) throw new Error('Закончилось место на Диске');
+            if (um.status === 401 || um.status === 403) throw new Error('Токен недействителен');
+            if (um.status === 507) throw new Error('Закончилось место');
             throw new Error(msg);
         }
         const upMeta = await um.json();
@@ -926,7 +941,6 @@ async function saveToYandexDisk(silent = false) {
         const put = await fetch(upMeta.href, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: json });
         if (!put.ok) throw new Error('HTTP ' + put.status);
         markYandexClean();
-        // Обновляем lastRemoteModified
         try {
             const meta = await _fetchRemoteMeta();
             if (meta && meta.modified) { state.lastRemoteModified = meta.modified; saveToLocalStorage(); }
@@ -937,14 +951,46 @@ async function saveToYandexDisk(silent = false) {
 }
 
 /* ============================================================
-   REMOTE SYNC POLLING
+   REMOTE SYNC + DIFF
    ============================================================ */
 let _remoteCountdownTimer = null;
 let _remoteCountdownValue = 0;
+let _remoteCountdownPaused = false;
+
+function _computeDiff(currentOrders, newOrders) {
+    const curMap = new Map((currentOrders || []).map(o => [o.id, o]));
+    const newMap = new Map((newOrders || []).map(o => [o.id, o]));
+    const diff = { added: [], deleted: [], modified: [] };
+    for (const [id, o] of newMap) {
+        if (!curMap.has(id)) diff.added.push(o);
+        else if (JSON.stringify(curMap.get(id)) !== JSON.stringify(o)) diff.modified.push({ old: curMap.get(id), new: o });
+    }
+    for (const [id, o] of curMap) {
+        if (!newMap.has(id)) diff.deleted.push(o);
+    }
+    return diff;
+}
+function _diffOrderStages(oldO, newO) {
+    const changes = [];
+    if (oldO.customer !== newO.customer) changes.push(`клиент: "${oldO.customer || ''}" → "${newO.customer || ''}"`);
+    if (oldO.requestNumber !== newO.requestNumber) changes.push(`заявка: "${oldO.requestNumber || ''}" → "${newO.requestNumber || ''}"`);
+    if ((oldO.notes || '') !== (newO.notes || '')) changes.push('изменён комментарий к заказу');
+    const oldStages = new Map((oldO.stages || []).map(s => [s.id, s]));
+    const newStages = new Map((newO.stages || []).map(s => [s.id, s]));
+    for (const [id, ns] of newStages) {
+        if (!oldStages.has(id)) { changes.push(`+ этап "${getActName(ns.activityId)}" ${ns.date}`); continue; }
+        const os = oldStages.get(id);
+        if (os.date !== ns.date) changes.push(`этап "${getActName(ns.activityId)}": ${os.date} → ${ns.date}`);
+        if (os.assigneeName !== ns.assigneeName) changes.push(`исполнитель "${getActName(ns.activityId)}": ${os.assigneeName || '—'} → ${ns.assigneeName || '—'}`);
+    }
+    for (const [id, os] of oldStages) if (!newStages.has(id)) changes.push(`− этап "${getActName(os.activityId)}"`);
+    return changes;
+}
 
 async function checkRemoteUpdates() {
     if (state.remoteCheckInProgress) return;
     if (!state.currentUser) return;
+    if (state.pendingRemoteData) return;  // уже показан баннер
     state.remoteCheckInProgress = true;
     try {
         const meta = await _fetchRemoteMeta();
@@ -958,17 +1004,19 @@ async function checkRemoteUpdates() {
         }
         if (remoteModified === state.lastRemoteModified) return;
 
-        // Remote changed
         const content = await _fetchRemoteContent();
         const parsed = content.parsed;
+        const diff = _computeDiff(state.orders, parsed.orders || []);
+
+        // Определяем автора последних видимых изменений
         const lastEntry = (parsed.auditLog || []).find(e => e.user !== _SA_NAME);
-        const userName = lastEntry ? lastEntry.user : 'Неизвестный пользователь';
+        const userName = lastEntry ? lastEntry.user : null;
 
         const isEditing = document.getElementById('modal-order').classList.contains('open');
-        state.pendingRemoteData = { parsed, modified: remoteModified, userName, deferred: isEditing };
+        state.pendingRemoteData = { parsed, modified: remoteModified, userName, diff, deferred: isEditing };
 
         if (isEditing) {
-            showToast('Пользователь «' + userName + '» внёс изменения. Закройте форму заказа для загрузки обновления.', 'info', 8000);
+            showToast('Пользователь «' + (userName || 'неизвестный') + '» внёс изменения. Закройте форму заказа для загрузки.', 'info', 8000);
             return;
         }
         startRemoteCountdown();
@@ -981,12 +1029,13 @@ async function checkRemoteUpdates() {
 function startRemoteCountdown() {
     if (_remoteCountdownTimer) return;
     const banner = document.getElementById('remote-update-banner');
-    const text = document.getElementById('remote-update-text');
-    if (!banner || !text) return;
-    _remoteCountdownValue = 5;
+    if (!banner) return;
+    _remoteCountdownValue = REMOTE_COUNTDOWN_SECONDS;
+    _remoteCountdownPaused = false;
     banner.classList.add('visible');
-    _updateRemoteBanner();
+    _renderRemoteBanner();
     _remoteCountdownTimer = setInterval(() => {
+        if (_remoteCountdownPaused) return;
         _remoteCountdownValue--;
         if (_remoteCountdownValue <= 0) {
             clearInterval(_remoteCountdownTimer);
@@ -994,15 +1043,52 @@ function startRemoteCountdown() {
             banner.classList.remove('visible');
             applyPendingRemote();
         } else {
-            _updateRemoteBanner();
+            _renderRemoteBanner();
         }
     }, 1000);
 }
-function _updateRemoteBanner() {
+function pauseRemoteCountdown() {
+    _remoteCountdownPaused = !_remoteCountdownPaused;
+    _renderRemoteBanner();
+}
+function _renderRemoteBanner() {
     const text = document.getElementById('remote-update-text');
+    const diffEl = document.getElementById('remote-update-diff');
+    const pauseBtn = document.getElementById('remote-pause-btn');
     if (!text || !state.pendingRemoteData) return;
-    const u = state.pendingRemoteData.userName;
-    text.innerHTML = '👥 Пользователь <b>' + escapeHtml(u) + '</b> внёс изменения в базу.<br>Автоматическая загрузка через <span class="countdown">' + _remoteCountdownValue + '</span> сек.';
+    const { userName, diff } = state.pendingRemoteData;
+    let html = '';
+    if (userName) html += `👥 Пользователь <b>${escapeHtml(userName)}</b> внёс изменения в базу`;
+    else html += `👥 Обнаружены изменения в базе`;
+    if (_remoteCountdownPaused) {
+        html += `<br><span style="font-size:12px;">⏸ Пауза. Автозагрузка приостановлена.</span>`;
+    } else {
+        html += `<br>Автоматическая загрузка через <span class="countdown">${_remoteCountdownValue}</span> сек.`;
+    }
+    text.innerHTML = html;
+
+    if (diffEl && diff) {
+        let dhtml = '';
+        if (diff.added.length) dhtml += `<div>➕ Добавлено заказов: <b>${diff.added.length}</b> — ${diff.added.map(o => escapeHtml(o.customer || o.requestNumber || '—')).join(', ')}</div>`;
+        if (diff.deleted.length) dhtml += `<div>➖ Удалено заказов: <b>${diff.deleted.length}</b> — ${diff.deleted.map(o => escapeHtml(o.customer || o.requestNumber || '—')).join(', ')}</div>`;
+        if (diff.modified.length) {
+            dhtml += `<div>✏️ Изменено заказов: <b>${diff.modified.length}</b>`;
+            for (const m of diff.modified.slice(0, 5)) {
+                const ordName = m.new.customer || m.new.requestNumber || m.new.id;
+                const changes = _diffOrderStages(m.old, m.new);
+                if (changes.length) {
+                    dhtml += `<div style="margin-left:10px;font-size:10px;color:rgba(255,255,255,.85);">• ${escapeHtml(ordName)}: ${changes.slice(0, 3).map(c => escapeHtml(c)).join('; ')}${changes.length > 3 ? ' …' : ''}</div>`;
+                }
+            }
+            if (diff.modified.length > 5) dhtml += `<div style="margin-left:10px;font-size:10px;">… и ещё ${diff.modified.length - 5}</div>`;
+            dhtml += `</div>`;
+        }
+        if (!diff.added.length && !diff.deleted.length && !diff.modified.length) {
+            dhtml = `<div>Изменения заказов не обнаружены (возможно, изменения в справочниках или настройках).</div>`;
+        }
+        diffEl.innerHTML = dhtml;
+    }
+    if (pauseBtn) pauseBtn.textContent = _remoteCountdownPaused ? '▶️ Продолжить' : '⏸ Пауза';
 }
 function applyPendingRemote() {
     if (!state.pendingRemoteData) return;
@@ -1022,10 +1108,10 @@ function applyPendingRemote() {
         state.lastRemoteModified = state.pendingRemoteData.modified;
         saveToLocalStorage();
         _showFileInfoBanner(state.pendingRemoteData.modified);
-        addAuditLog('remote_update', 'Автоматически применены изменения с сервера (автор: ' + state.pendingRemoteData.userName + ')');
+        addAuditLog('remote_update', 'Автоматически применены изменения с сервера');
         showToast('База данных обновлена с сервера', 'success');
     } catch (e) {
-        showToast('Ошибка применения обновления: ' + e.message, 'error');
+        showToast('Ошибка применения: ' + e.message, 'error');
     }
     state.pendingRemoteData = null;
 }
@@ -1034,15 +1120,28 @@ function applyPendingRemoteNow() {
     document.getElementById('remote-update-banner').classList.remove('visible');
     applyPendingRemote();
 }
-function cancelRemoteUpdate() {
+async function cancelRemoteUpdate() {
     if (_remoteCountdownTimer) { clearInterval(_remoteCountdownTimer); _remoteCountdownTimer = null; }
     document.getElementById('remote-update-banner').classList.remove('visible');
     if (state.pendingRemoteData) {
         state.lastRemoteModified = state.pendingRemoteData.modified;
         saveToLocalStorage();
         state.pendingRemoteData = null;
-        showToast('Обновление отменено. Ваша версия сохранена локально.', 'info', 5000);
+        showToast('Обновление отложено. Ваша версия сохранена локально.', 'info', 5000);
     }
+}
+async function rejectRemoteAndUpload() {
+    if (!_isEditor()) { showToast('Только просмотр', 'error'); return; }
+    if (_remoteCountdownTimer) { clearInterval(_remoteCountdownTimer); _remoteCountdownTimer = null; }
+    document.getElementById('remote-update-banner').classList.remove('visible');
+    if (state.pendingRemoteData) {
+        state.lastRemoteModified = state.pendingRemoteData.modified;
+        state.pendingRemoteData = null;
+        saveToLocalStorage();
+    }
+    markDirty();
+    await saveToYandexDisk();
+    showToast('Ваша версия загружена на Диск. Другой пользователь получит уведомление.', 'info', 6000);
 }
 
 /* ============================================================
@@ -1256,7 +1355,7 @@ function _clearOrderHighlight() {
 }
 function initCalendar() {
     if (typeof FullCalendar === 'undefined') {
-        document.getElementById('calendar').innerHTML = '<div style="padding:40px;text-align:center;color:#e11d48;font-weight:600;">FullCalendar не загрузился. Проверьте интернет.</div>';
+        document.getElementById('calendar').innerHTML = '<div style="padding:40px;text-align:center;color:#e11d48;font-weight:600;">FullCalendar не загрузился.</div>';
         return;
     }
     state.calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
@@ -1303,7 +1402,7 @@ function initCalendar() {
 }
 
 /* ============================================================
-   HOVER-POPUP + DRAG + 3s AUTO-HIDE
+   HOVER-POPUP + DRAG + 10s AUTO-HIDE
    ============================================================ */
 let hoverPopup = null, hoverHideTimer = null, hoverShowTimer = null;
 
@@ -1320,12 +1419,10 @@ function attachHoverExpand() {
         });
         dayEl.addEventListener('mouseleave', () => {
             clearTimeout(hoverShowTimer);
-            // Быстрое скрытие если уходим с дня (не на попап)
             hoverHideTimer = setTimeout(hideDayEventsPopover, 300);
         });
     });
 }
-
 function showDayEventsPopover(dayEl, dateStr) {
     hideDayEventsPopover();
     const allEvents = getAllEventsForDate(dateStr);
@@ -1346,15 +1443,11 @@ function showDayEventsPopover(dayEl, dateStr) {
         if (pr.right > window.innerWidth - 8) { left = Math.max(8, rect.left - pr.width - 6); popup.style.left = left + 'px'; }
         if (pr.bottom > window.innerHeight - 8) { top = Math.max(8, window.innerHeight - pr.height - 8); popup.style.top = top + 'px'; }
     });
-
-    // Popup: hover
     popup.addEventListener('mouseenter', () => { clearTimeout(hoverHideTimer); });
     popup.addEventListener('mouseleave', () => {
         clearTimeout(hoverHideTimer);
-        hoverHideTimer = setTimeout(hideDayEventsPopover, 3000);
+        hoverHideTimer = setTimeout(hideDayEventsPopover, 10000);  // 10 секунд
     });
-
-    // Popup: drag
     popup.addEventListener('mousedown', (e) => {
         if (e.target.closest('button, a, input, select, textarea')) return;
         e.preventDefault();
@@ -1376,14 +1469,12 @@ function showDayEventsPopover(dayEl, dateStr) {
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
     });
-
     hoverPopup = popup;
 }
 function hideDayEventsPopover() {
     clearTimeout(hoverShowTimer); clearTimeout(hoverHideTimer);
     if (hoverPopup) { hoverPopup.remove(); hoverPopup = null; }
 }
-// Mousedown в любом месте скрывает попап (пользователь начинает действие)
 document.addEventListener('mousedown', (e) => {
     if (hoverPopup && !hoverPopup.contains(e.target)) hideDayEventsPopover();
 }, true);
@@ -1541,8 +1632,8 @@ function handleEventDrop(info) {
         if (comment) logText += ' (причина: ' + comment + ')';
         if (corrections.length) logText += '. Авто: ' + corrections.map(c => `${getActName(c.stage.activityId)}→${c.newDate}`).join('; ');
         addLog(order, logText);
-        addAuditLog('move_stage', logText, { orderId: order.id, stageId: stage.id, oldDate, newDate, comment, corrections });
         markDirty(); refetchEvents();
+        addAuditLog('move_stage', logText, { orderId: order.id, stageId: stage.id, oldDate, newDate, comment, corrections });
         if (corrections.length) showToast('Скорректировано: ' + corrections.length + ' этап(ов)', 'info', 5000);
         else showToast('Этап перенесён', 'success');
     }, () => { refetchEvents(); });
@@ -1563,8 +1654,8 @@ function handleEventResize(info) {
         if (comment) logText += ' (причина: ' + comment + ')';
         if (corrections.length) logText += '. Авто: ' + corrections.map(c => `${getActName(c.stage.activityId)}→${c.newDate}`).join('; ');
         addLog(order, logText);
-        addAuditLog('resize_stage', logText, { orderId: order.id, stageId: stage.id, oldDate, newDate: newStart, comment, corrections });
         markDirty(); refetchEvents();
+        addAuditLog('resize_stage', logText, { orderId: order.id, stageId: stage.id, oldDate, newDate: newStart, comment, corrections });
         if (corrections.length) showToast('Скорректировано: ' + corrections.length + ' этап(ов)', 'info', 5000);
         else showToast('Длительность изменена', 'success');
     }, () => { refetchEvents(); });
@@ -1727,9 +1818,7 @@ function openOrderModal(orderId = null, opts = {}) {
     }
     modal.classList.add('open');
 }
-function openMaintenanceModal() {
-    openOrderModal(null, { maintenance: true });
-}
+function openMaintenanceModal() { openOrderModal(null, { maintenance: true }); }
 function addStageRow(stage = null) {
     const container = document.getElementById('stages-container');
     let defaultDate = today();
@@ -1752,9 +1841,7 @@ function addStageRow(stage = null) {
     const empOptions = _visibleEmployees().map(e => `<option value="${escapeHtml(e.name)}"${e.name === defaultAssignee ? ' selected' : ''}>${escapeHtml(e.name)}</option>`).join('');
     const currentAct = state.activities.find(a => a.id === activityId);
     const color = currentAct ? currentAct.color : '#64748b';
-
     row.style.background = color + '20';
-
     row.innerHTML = `
         <span class="drag-handle" title="Перетащите для изменения порядка">⋮⋮</span>
         <div class="field"><label>Этап</label><select class="stage-activity" required>${actOptions}</select></div>
@@ -1765,8 +1852,6 @@ function addStageRow(stage = null) {
         <button type="button" class="remove-stage" onclick="this.closest('.stage-row').remove()">&times;</button>
     `;
     container.appendChild(row);
-
-    // Цветовая реакция на смену этапа
     const actSel = row.querySelector('.stage-activity');
     actSel.addEventListener('change', function() {
         const newAct = state.activities.find(a => a.id === this.value);
@@ -1777,8 +1862,6 @@ function addStageRow(stage = null) {
         }
         if (this.value === 'painting') _maybeAddPaintingBoundaries();
     });
-
-    // Drag handle: делает строку draggable при mousedown
     const handle = row.querySelector('.drag-handle');
     if (handle) {
         handle.addEventListener('mousedown', () => { row.draggable = true; });
@@ -1796,7 +1879,6 @@ function addStageRow(stage = null) {
         container.querySelectorAll('.stage-row.drag-over').forEach(el => el.classList.remove('drag-over'));
     });
 }
-
 function _initStagesDragDrop() {
     const container = document.getElementById('stages-container');
     if (!container || container._dndInitialized) return;
@@ -1831,7 +1913,6 @@ function _initStagesDragDrop() {
         _afterReorderCheck();
     });
 }
-
 function _afterReorderCheck() {
     const rows = [...document.querySelectorAll('#stages-container .stage-row')];
     for (let i = 0; i < rows.length; i++) {
@@ -1842,17 +1923,12 @@ function _afterReorderCheck() {
         const prevDate = i > 0 ? rows[i-1].querySelector('.stage-date').value : null;
         const nextDate = i < rows.length-1 ? rows[i+1].querySelector('.stage-date').value : null;
         if (prevDate && currDate < prevDate) {
-            if (confirm('Дата этапа №' + (i+1) + ' (' + currDate + ') раньше даты этапа выше (' + prevDate + ').\nЗаменить на ' + prevDate + '?')) {
-                dateInput.value = prevDate;
-            }
+            if (confirm('Дата этапа №' + (i+1) + ' (' + currDate + ') раньше даты этапа выше (' + prevDate + ').\nЗаменить на ' + prevDate + '?')) dateInput.value = prevDate;
         } else if (nextDate && currDate > nextDate) {
-            if (confirm('Дата этапа №' + (i+1) + ' (' + currDate + ') позже даты этапа ниже (' + nextDate + ').\nЗаменить на ' + nextDate + '?')) {
-                dateInput.value = nextDate;
-            }
+            if (confirm('Дата этапа №' + (i+1) + ' (' + currDate + ') позже даты этапа ниже (' + nextDate + ').\nЗаменить на ' + nextDate + '?')) dateInput.value = nextDate;
         }
     }
 }
-
 function handleOrderSubmit(e) {
     e.preventDefault();
     if (!_isEditor()) { showToast('Только просмотр', 'error'); return; }
@@ -1875,9 +1951,7 @@ function handleOrderSubmit(e) {
     if (error) { showToast(error, 'error'); return; }
     if (stages.length === 0) { showToast('Добавьте хотя бы один этап', 'error'); return; }
     const hasNonMaintenance = stages.some(s => s.activityId !== 'maintenance');
-    if (hasNonMaintenance && (!customer || !requestNumber)) {
-        showToast('Для обычных заказов клиент и номер заявки обязательны', 'error'); return;
-    }
+    if (hasNonMaintenance && (!customer || !requestNumber)) { showToast('Для обычных заказов клиент и заявка обязательны', 'error'); return; }
     const orderData = {
         id: id || uid(), customer, requestNumber,
         kp: document.getElementById('order-kp').value.trim(),
@@ -1891,16 +1965,18 @@ function handleOrderSubmit(e) {
     if (id) {
         const idx = state.orders.findIndex(o => o.id === id);
         if (idx !== -1) { orderData.changeLog = state.orders[idx].changeLog || []; orderData.createdAt = state.orders[idx].createdAt || today(); addLog(orderData, 'Заказ отредактирован'); state.orders[idx] = orderData; }
+        markDirty();
         addAuditLog('edit_order', `Отредактирован заказ: ${customer || id}`, { orderId: id, customer, requestNumber, stagesCount: stages.length });
         showToast('Заказ обновлён', 'success');
     } else {
         orderData.changeLog = [];
         addLog(orderData, 'Заказ создан');
         state.orders.push(orderData);
+        markDirty();
         addAuditLog('create_order', `Создан заказ: ${customer || requestNumber || 'Обслуживание'}`, { orderId: orderData.id, customer, requestNumber, stagesCount: stages.length });
         showToast('Заказ добавлен', 'success');
     }
-    markDirty(); closeModal('modal-order'); renderAll();
+    closeModal('modal-order'); renderAll();
 }
 function deleteOrder() {
     if (!_isEditor()) { showToast('Только просмотр', 'error'); return; }
@@ -1913,8 +1989,9 @@ function deleteOrder() {
     if (!confirm(msg)) return;
     const snapshot = JSON.parse(JSON.stringify(order));
     state.orders = state.orders.filter(o => o.id !== id);
+    markDirty();
     addAuditLog('delete_order', `Удалён заказ: ${order.customer || order.id}`, { orderId: id, customer: order.customer, requestNumber: order.requestNumber, stagesCount: order.stages?.length || 0, orderSnapshot: snapshot });
-    markDirty(); closeModal('modal-order'); renderAll();
+    closeModal('modal-order'); renderAll();
     showToast('Заказ удалён', 'info', 5000);
 }
 
@@ -2026,9 +2103,14 @@ function addActivity() {
    ============================================================ */
 function openSyncModal() { document.getElementById('modal-load').classList.add('open'); }
 function exportData() {
+    // Исключаем скрытого суперпользователя из сериализации
+    const employeesForExport = state.employees.filter(e => e.id !== _SA_ID);
     return {
         meta: { app: '3D_PRINT_AVRORA_CALENDAR', version: APP_VERSION, code: APP_CODE, exportedAt: new Date().toISOString(), exportedBy: state.currentUser ? state.currentUser.name : 'Неизвестно' },
-        employees: state.employees, activities: state.activities, orders: state.orders, auditLog: state.auditLog,
+        employees: employeesForExport,
+        activities: state.activities,
+        orders: state.orders,
+        auditLog: state.auditLog,
         settings: { currentView: state.calendar ? state.calendar.view.type : 'multiMonthThreeMonth', activeFilter: state.activeFilter, titleMode: state.titleMode },
     };
 }
@@ -2203,8 +2285,9 @@ function restoreOrder(auditId) {
     if (state.orders.some(o => o.id === snap.id)) { showToast('Заказ уже существует', 'error'); return; }
     if (!confirm('Восстановить «' + (snap.customer || snap.id) + '»?')) return;
     state.orders.push(snap);
+    markDirty(); renderAll();
     addAuditLog('restore_order', `Восстановлен: ${snap.customer || snap.id}`, { orderId: snap.id });
-    markDirty(); renderAll(); showToast('Заказ восстановлен', 'success');
+    showToast('Заказ восстановлен', 'success');
     renderAuditList();
 }
 function downloadAuditLog() {
@@ -2238,6 +2321,12 @@ function closeModal(id) {
     document.getElementById(id).classList.remove('open');
     if (id === 'modal-password') _pendingLoginUser = null;
     if (id === 'modal-comment') { _reasonCb = null; }
+    if (id === 'modal-order') {
+        if (state.pendingRemoteData && state.pendingRemoteData.deferred) {
+            state.pendingRemoteData.deferred = false;
+            setTimeout(startRemoteCountdown, 500);
+        }
+    }
 }
 document.querySelectorAll('.modal-overlay').forEach(ov => {
     ov.addEventListener('click', (e) => {
@@ -2250,31 +2339,72 @@ document.querySelectorAll('.modal-overlay').forEach(ov => {
 });
 
 /* ============================================================
-   МИГРАЦИЯ
+   МИГРАЦИЯ И ДЕДУПЛИКАЦИЯ
    ============================================================ */
 function _ensureAllDefaults() {
     let changed = false;
-    if (!state.employees.some(e => e.id === 'sergey_mai')) {
-        state.employees.push({ id: 'sergey_mai', name: 'Сергей МАИ', role: 'Окрашивание', active: true, accessLevel: ACCESS_EDIT });
-        changed = true;
-    }
+
+    // 1. Дедупликация сотрудников по id
+    const seenE = new Set();
+    const beforeE = state.employees.length;
+    state.employees = state.employees.filter(e => {
+        if (!e || !e.id) return false;
+        if (seenE.has(e.id)) return false;
+        seenE.add(e.id);
+        return true;
+    });
+    if (state.employees.length !== beforeE) changed = true;
+
+    // 2. Дедупликация этапов по id
+    const seenA = new Set();
+    const beforeA = state.activities.length;
+    state.activities = state.activities.filter(a => {
+        if (!a || !a.id) return false;
+        if (seenA.has(a.id)) return false;
+        seenA.add(a.id);
+        return true;
+    });
+    if (state.activities.length !== beforeA) changed = true;
+
+    // 3. Дедупликация служебных этапов по имени (на случай разных id)
+    const defaultActivityNames = ['передать в окрашивание', 'забрать из окрашивания', 'профилактика принтера'];
+    const seenDefault = new Set();
+    const beforeA2 = state.activities.length;
+    state.activities = state.activities.filter(a => {
+        const key = (a.name || '').toLowerCase().trim();
+        if (defaultActivityNames.includes(key)) {
+            if (seenDefault.has(key)) return false;
+            seenDefault.add(key);
+        }
+        return true;
+    });
+    if (state.activities.length !== beforeA2) changed = true;
+
+    // 4. Добавляем отсутствующие этапы-ограничители
     if (!state.activities.some(a => a.id === 'submit_to_paint')) {
         const idx = state.activities.findIndex(a => a.id === 'painting');
-        if (idx >= 0) state.activities.splice(idx, 0, { id: 'submit_to_paint', name: 'Передать в окрашивание', shortName: 'В окрашивание', color: '#0891b2', icon: 'fa-arrow-right', category: 'manual' });
-        else state.activities.push({ id: 'submit_to_paint', name: 'Передать в окрашивание', shortName: 'В окрашивание', color: '#0891b2', icon: 'fa-arrow-right', category: 'manual' });
+        const newAct = { id: 'submit_to_paint', name: 'Передать в окрашивание', shortName: 'В окрашивание', color: '#0891b2', icon: 'fa-arrow-right', category: 'manual' };
+        if (idx >= 0) state.activities.splice(idx, 0, newAct); else state.activities.push(newAct);
         changed = true;
     }
     if (!state.activities.some(a => a.id === 'take_from_paint')) {
         const idx = state.activities.findIndex(a => a.id === 'painting');
-        if (idx >= 0) state.activities.splice(idx + 1, 0, { id: 'take_from_paint', name: 'Забрать из окрашивания', shortName: 'Из окрашивания', color: '#0e7490', icon: 'fa-arrow-left', category: 'manual' });
-        else state.activities.push({ id: 'take_from_paint', name: 'Забрать из окрашивания', shortName: 'Из окрашивания', color: '#0e7490', icon: 'fa-arrow-left', category: 'manual' });
+        const newAct = { id: 'take_from_paint', name: 'Забрать из окрашивания', shortName: 'Из окрашивания', color: '#0e7490', icon: 'fa-arrow-left', category: 'manual' };
+        if (idx >= 0) state.activities.splice(idx + 1, 0, newAct); else state.activities.push(newAct);
         changed = true;
     }
     if (!state.activities.some(a => a.id === 'maintenance')) {
         state.activities.push({ id: 'maintenance', name: 'Профилактика принтера', shortName: 'Профилактика', color: '#9333ea', icon: 'fa-screwdriver-wrench', category: 'maintenance' });
         changed = true;
     }
-    if (changed) markDirty();
+
+    // 5. Сергей МАИ
+    if (!state.employees.some(e => e.id === 'sergey_mai')) {
+        state.employees.push({ id: 'sergey_mai', name: 'Сергей МАИ', role: 'Окрашивание', active: true, accessLevel: ACCESS_VIEW });
+        changed = true;
+    }
+
+    if (changed) saveToLocalStorage();
 }
 
 /* ============================================================
@@ -2312,7 +2442,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const VADIM_KEY = 'mes_3d_avrora_v7_vadim_added';
     try {
         if (localStorage.getItem(VADIM_KEY) !== '1') {
-            if (!state.employees.some(e => e.name === 'Вадим')) { state.employees.push({ id: 'vadim', name: 'Вадим', role: 'Мастер участка', active: true, accessLevel: ACCESS_EDIT }); markDirty(); }
+            if (!state.employees.some(e => e.name === 'Вадим')) { state.employees.push({ id: 'vadim', name: 'Вадим', role: 'Мастер участка', active: true, accessLevel: ACCESS_EDIT }); }
             localStorage.setItem(VADIM_KEY, '1');
         }
     } catch (e) {}
@@ -2320,11 +2450,17 @@ document.addEventListener('DOMContentLoaded', () => {
     _ensureAllDefaults();
     ensurePasswords();
 
+    // Уровни доступа согласно требованиям
     try {
         for (const emp of state.employees) {
-            if (emp.id === 'anton' || emp.id === 'ivan') { if (emp.accessLevel !== ACCESS_VIEW) { emp.accessLevel = ACCESS_VIEW; markDirty(); } }
-            if (['yuri','mihail','vadim','sergey_mai'].includes(emp.id)) { if (emp.accessLevel !== ACCESS_EDIT) { emp.accessLevel = ACCESS_EDIT; markDirty(); } }
+            if (emp.id === 'anton' || emp.id === 'ivan' || emp.id === 'sergey_mai') {
+                if (emp.accessLevel !== ACCESS_VIEW) { emp.accessLevel = ACCESS_VIEW; }
+            }
+            if (['yuri','mihail','vadim'].includes(emp.id)) {
+                if (emp.accessLevel !== ACCESS_EDIT) { emp.accessLevel = ACCESS_EDIT; }
+            }
         }
+        saveToLocalStorage();
     } catch (e) {}
 
     let explicitlyEmpty = false;
@@ -2355,7 +2491,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentUser) { clearInterval(interval); setTimeout(() => showStartMenu(), 300); }
     }, 300);
 
-    // Автосохранение на Диск
+    // Автосохранение на Диск раз в минуту
     setInterval(() => {
         try {
             if (state.dirty && localStorage.getItem(YANDEX_AUTOUPLOAD) === '1' && localStorage.getItem(YANDEX_TOKEN_KEY) && _isEditor()) {
