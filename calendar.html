@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<title>3D-Print Календарь Аврора — v14 [101126230000]</title>
+<title>3D-Print Календарь Аврора — v15 [211126221200]</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,6 +46,11 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: v
 .btn-yandex { background: #fff; border-color: var(--yandex-red); color: var(--yandex-red); }
 .btn-yandex:hover { background: #fff5f2; }
 .btn-yandex-up { background: #fff; border-color: var(--yandex-red); color: var(--yandex-red); }
+#btn-yandex-load { font-variant-numeric: tabular-nums; }
+.color-swatch-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin: 10px 0 14px; }
+.color-swatch { width: 100%; aspect-ratio: 1; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.color-swatch:hover { transform: scale(1.1); }
+.color-swatch.selected { border-color: var(--text-primary); box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--text-primary); transform: scale(1.08); }
 .btn-danger { background: #fff; border-color: var(--accent-rose); color: var(--accent-rose); }
 .btn-danger:hover { background: #fef2f2; }
 
@@ -207,7 +212,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <img id="topLogoAT" class="top-logo" alt="Аврора Карбон" title="Аврора Карбон Технолоджи">
     </div>
     <div class="app-title-wrap">
-        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v14</span></div>
+        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v15</span></div>
         <div class="app-subtitle">Планирование запусков, постобработки и отгрузок</div>
     </div>
 
@@ -217,7 +222,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
 
     <button class="btn" onclick="openSyncModal()"><i class="fa-solid fa-cloud-arrow-down" style="color:var(--accent-teal);"></i> Файл обмена</button>
     <button class="btn btn-teal" id="btn-save-json" onclick="saveExchangeFile()"><i class="fa-solid fa-floppy-disk"></i> Сохранить JSON</button>
-    <button class="btn btn-yandex editor-only" id="btn-yandex-load" onclick="loadFromYandexDisk()"><i class="fa-solid fa-cloud-arrow-down"></i> Скачать с Диска</button>
+    <button class="btn btn-yandex" id="btn-yandex-load" onclick="loadFromYandexDisk()" title="Нажмите, чтобы скачать актуальную версию с Яндекс.Диска сейчас"><i class="fa-solid fa-cloud-arrow-down"></i> <span id="btn-yandex-load-text">До очередного обновления осталось 10 сек.</span></button>
     <button class="btn btn-yandex-up editor-only" id="btn-yandex-save" onclick="saveToYandexDisk()"><i class="fa-solid fa-cloud-arrow-up"></i> На Диск</button>
     <button class="btn" onclick="openTokenModal()" title="Настройки Яндекс.Диска"><i class="fa-solid fa-gear" style="color:var(--accent-amber);"></i></button>
 
@@ -270,7 +275,8 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
                 <li><strong>Окрашивание:</strong> ограничивается этапами «Передать в окрашивание» и «Забрать из окрашивания». Ответственный — Сергей МАИ.</li>
                 <li><strong>Перенос этапов:</strong> при перетаскивании/растяжении — запрашивается комментарий (обязателен, кроме суперадминистратора).</li>
                 <li><strong>Попап дня:</strong> перетаскивается мышкой, автоскрытие через 10 сек., если мышка не над ним.</li>
-                <li><strong>Автообновление:</strong> каждую минуту проверяется актуальность данных на Диске. При изменениях другого пользователя — уведомление с обратным отсчётом (10 сек.), паузой и списком изменений.</li>
+                <li><strong>Автообновление и автосохранение:</strong> в настройках Яндекс.Диска (⚙️) можно выбрать частоту проверки обновлений (каждые 10 сек. или раз в минуту для медленного интернета) и режим автосохранения (выкл., раз в минуту или оперативно сразу после изменений). Кнопка в шапке показывает обратный отсчёт до следующей проверки.</li>
+                <li><strong>Цвета этапов:</strong> в «Справочниках → Виды этапов» можно менять цвет любого этапа (через меню ⋯ или кликом по цветному кружку).</li>
                 <li><strong>Синхронизация:</strong> кнопка «На Диск» — <b style="color:#16a34a;">зелёная</b>, если ваша версия совпадает с Диском, <b style="color:#dc2626;">красная</b>, если есть несинхронизированные изменения.</li>
             </ul>
         </div>
@@ -280,14 +286,23 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <div class="accordion-header" onclick="toggleAccordion('acc-history')"><span><i class="fa-solid fa-code-branch" style="color:var(--accent-teal);margin-right:6px;"></i> История версий и информация</span><i class="fa-solid fa-chevron-down arrow"></i></div>
         <div class="accordion-body">
             <div style="display:flex;flex-wrap:wrap;gap:10px 24px;margin-bottom:10px;font-weight:600;color:var(--text-primary);">
-                <span>Версия: <strong>v14</strong></span>
-                <span>Штамп: <strong>101126230000</strong></span>
-                <span>Формат: <strong>JSON MES-3D v14</strong></span>
+                <span>Версия: <strong>v15</strong></span>
+                <span>Штамп: <strong>211126221200</strong></span>
+                <span>Формат: <strong>JSON MES-3D v15</strong></span>
                 <span>Автор: <strong>Фомин Антон</strong></span>
                 <span>Связь: <a href="mailto:a.fomin@avrora-3d.ru" style="color:var(--accent-blue);">a.fomin@avrora-3d.ru</a></span>
             </div>
             <div style="border-top:1px solid var(--border);padding-top:8px;">
-                <strong style="color:var(--text-primary);">[v14 — 101126230000]</strong>
+                <strong style="color:var(--text-primary);">[v15 — 211126221200]</strong>
+                <ul style="margin-top:4px;margin-bottom:8px;">
+                    <li><b>Новое:</b> в «Справочниках → Виды этапов» добавлена возможность изменения цвета любого этапа (палитра готовых цветов + произвольный цвет).</li>
+                    <li><b>Улучшено:</b> в журнале действий и выгружаемом LOG-файле при редактировании заказа теперь фиксируется конкретика — какие этапы добавлены, удалены, у каких изменились сроки, исполнители, комментарии или реквизиты заказа.</li>
+                    <li><b>Новое:</b> в настройках Яндекс.Диска добавлен выбор режима автосохранения — «Раз в минуту (медленный интернет)», «Оперативное обновление (сразу после изменений)» или «Выключено».</li>
+                    <li><b>Новое:</b> добавлена настройка частоты проверки новых версий от команды — каждые 10 секунд или раз в минуту (для медленного интернета).</li>
+                    <li><b>Новое:</b> кнопка «Скачать с Диска» заменена на динамическую с таймером обратного отсчёта «До очередного обновления осталось … сек.»; при ошибке автообновления или автосохранения выводится уведомление «Проверьте интернет соединение».</li>
+                    <li><b>Исправлено:</b> улучшена совместимость загрузки с Яндекс.Диска при публикации на GitHub Pages (отключена передача Referer, добавлен резервный запрос по токену и опциональный прокси в настройках).</li>
+                </ul>
+                <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v14 — 101126230000]</strong>
                 <ul style="margin-top:4px;">
                     <li><b>Исправлено:</b> дубликаты этапов (Профилактика, Передать/Забрать из окрашивания). Добавлена дедупликация по id и по имени для служебных этапов.</li>
                     <li><b>Исправлено:</b> кнопка «На Диск» остаётся зелёной после сохранения. Служебные сообщения (синхронизация, экспорт) больше не помечают файл как изменённый.</li>
@@ -470,8 +485,23 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
             <div class="yd-step-title">Прокси для скачивания (опционально, для GitHub Pages)</div>
             <div class="yd-step-hint">Оставьте пустым, если скачивание работает напрямую. Если браузер на GitHub блокирует скачивание (CORS), вставьте сюда URL вашей функции Yandex Cloud Functions.</div>
             <div class="field" style="margin-bottom:10px;"><input type="url" id="yandex-proxy-input" placeholder="https://functions.yandexcloud.net/..."></div>
-            <div class="yd-step-title">Автосохранение</div>
-            <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-panel-soft);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;"><input type="checkbox" id="yandex-autoupload-chk" style="width:auto;"><label for="yandex-autoupload-chk" style="font-size:12px;cursor:pointer;margin:0;">Автоматически отправлять раз в минуту при наличии изменений</label></div>
+            <div class="yd-step-title">Автосохранение на Диск</div>
+            <div class="yd-step-hint">Выберите режим автоматической выгрузки ваших изменений на Яндекс.Диск.</div>
+            <div class="field" style="margin-bottom:10px;">
+                <select id="yandex-autoupload-mode">
+                    <option value="off">Выключено (выгрузка только вручную)</option>
+                    <option value="minute">Раз в минуту (для медленного интернета)</option>
+                    <option value="instant">Оперативное обновление (сразу после изменений)</option>
+                </select>
+            </div>
+            <div class="yd-step-title">Частота проверки новых версий с Диска</div>
+            <div class="yd-step-hint">Как часто проверять изменения, внесённые другими участниками команды.</div>
+            <div class="field" style="margin-bottom:6px;">
+                <select id="yandex-check-interval">
+                    <option value="10">Каждые 10 секунд (оперативно)</option>
+                    <option value="60">Раз в минуту (для медленного интернета)</option>
+                </select>
+            </div>
         </div>
         <div style="display:flex;gap:6px;justify-content:flex-end;border-top:1px solid var(--border);padding-top:12px;margin-top:16px;"><button class="btn" onclick="clearYandexToken()">Удалить</button><button class="btn btn-primary" onclick="saveYandexSettings()">Сохранить</button></div>
     </div>
@@ -540,6 +570,27 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
     </div>
 </div>
 
+
+<!-- ЦВЕТ ЭТАПА -->
+<div class="modal-overlay" id="modal-activity-color">
+    <div class="modal" style="max-width:420px;">
+        <button class="close-btn" onclick="closeModal('modal-activity-color')">&times;</button>
+        <h2><i class="fa-solid fa-palette" style="color:var(--accent-blue);margin-right:8px;"></i>Цвет этапа</h2>
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Этап: <strong id="act-color-name"></strong></p>
+        <input type="hidden" id="act-color-id">
+        <div class="color-swatch-grid" id="act-color-swatches"></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg-panel-soft);border:1px solid var(--border);border-radius:8px;">
+            <label for="act-color-custom" style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin:0;">Свой цвет:</label>
+            <input type="color" id="act-color-custom" value="#2563eb" oninput="onCustomActivityColorInput(this.value)" style="width:44px;height:28px;border:1px solid var(--border);border-radius:6px;padding:2px;background:#fff;cursor:pointer;">
+            <span id="act-color-hex" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--text-primary);">#2563eb</span>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
+            <button type="button" class="btn" onclick="closeModal('modal-activity-color')">Отмена</button>
+            <button type="button" class="btn btn-primary" onclick="saveActivityColor()">Сохранить цвет</button>
+        </div>
+    </div>
+</div>
+
 <!-- ДЕТАЛИ KPI -->
 <div class="modal-overlay" id="modal-details">
     <div class="modal">
@@ -555,8 +606,8 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
 /* ============================================================
    КОНСТАНТЫ
    ============================================================ */
-const APP_VERSION = 'v14';
-const APP_CODE = '101126230000';
+const APP_VERSION = 'v15';
+const APP_CODE = '211126221200';
 const STORAGE_KEY = 'mes_3d_avrora_v6_state';
 const EMPTY_FLAG_KEY = 'mes_3d_avrora_v6_explicit_empty';
 const SESSION_USER_KEY = 'mes_3d_avrora_current_user';
@@ -567,11 +618,31 @@ const YANDEX_CLIENT_ID_KEY   = 'mes_3d_yandex_client_id';
 const YANDEX_PATH_KEY        = 'mes_3d_yandex_path';
 const YANDEX_PROXY_KEY       = 'mes_3d_yandex_proxy';
 const YANDEX_AUTOUPLOAD      = 'mes_3d_yandex_autoupload';
+const YANDEX_CHECK_INTERVAL_KEY = 'mes_3d_yandex_check_interval';
 const DEFAULT_YANDEX_PATH    = 'disk:/proizvodstvo/proizvodstvo.json';
 const DEFAULT_YANDEX_PROXY   = '';
 const YANDEX_AUTO_INTERVAL_MS = 60 * 1000;
-const REMOTE_CHECK_INTERVAL_MS = 60 * 1000;
+const DEFAULT_REMOTE_CHECK_SEC = 10;
 const REMOTE_COUNTDOWN_SECONDS = 10;
+
+const ACTIVITY_COLOR_PRESETS = [
+    { hex: '#2563eb', name: 'Синий' },
+    { hex: '#0d9488', name: 'Бирюза' },
+    { hex: '#d97706', name: 'Янтарь' },
+    { hex: '#7c3aed', name: 'Фиолет' },
+    { hex: '#e11d48', name: 'Красный' },
+    { hex: '#16a34a', name: 'Зелёный' },
+    { hex: '#06b6d4', name: 'Голубой' },
+    { hex: '#ec4899', name: 'Розовый' },
+    { hex: '#8b5cf6', name: 'Лаванда' },
+    { hex: '#f59e0b', name: 'Оранжевый' },
+    { hex: '#10b981', name: 'Изумруд' },
+    { hex: '#6366f1', name: 'Индиго' },
+    { hex: '#a855f7', name: 'Пурпур' },
+    { hex: '#14b8a6', name: 'Морская волна' },
+    { hex: '#ef4444', name: 'Алый' },
+    { hex: '#84cc16', name: 'Лайм' },
+];
 
 const ACCESS_VIEW  = 'view';
 const ACCESS_EDIT  = 'edit';
@@ -590,6 +661,7 @@ let _uClickStart = 0;
 
 let state = {
     employees: [], activities: [], orders: [], auditLog: [], dirty: false,
+    changeSeq: 0,
     yandexClean: false,
     lastRemoteModified: null,
     pendingRemoteData: null,
@@ -771,9 +843,11 @@ function saveToLocalStorage() {
 }
 function markDirty() {
     state.dirty = true;
+    state.changeSeq = (state.changeSeq || 0) + 1;
     state.yandexClean = false;
     saveToLocalStorage();
     updateDirtyUI();
+    scheduleInstantUpload();
 }
 function markClean() {
     state.dirty = false;
@@ -834,13 +908,47 @@ function extractYandexToken(input) { if (!input) return ''; input = input.trim()
 function getYandexProxyUrl() {
     return (localStorage.getItem(YANDEX_PROXY_KEY) || DEFAULT_YANDEX_PROXY || '').trim();
 }
+function getAutoUploadMode() {
+    const raw = (localStorage.getItem(YANDEX_AUTOUPLOAD) || '').trim();
+    if (raw === 'instant') return 'instant';
+    if (raw === '1' || raw === 'minute') return 'minute';
+    return 'off';
+}
+function getRemoteCheckIntervalSec() {
+    const raw = parseInt(localStorage.getItem(YANDEX_CHECK_INTERVAL_KEY) || '', 10);
+    return raw === 60 ? 60 : DEFAULT_REMOTE_CHECK_SEC;
+}
+let _lastConnToastAt = 0;
+function showConnectionErrorToast() {
+    const now = Date.now();
+    if (now - _lastConnToastAt < 8000) return;
+    _lastConnToastAt = now;
+    showToast('Проверьте интернет соединение', 'error', 5000);
+}
+let _instantUploadTimer = null;
+let _yandexSaveInFlight = false;
+let _yandexSaveQueued = false;
+function scheduleInstantUpload() {
+    if (getAutoUploadMode() !== 'instant') return;
+    if (!localStorage.getItem(YANDEX_TOKEN_KEY) || !_isEditor()) return;
+    if (_instantUploadTimer) clearTimeout(_instantUploadTimer);
+    _instantUploadTimer = setTimeout(() => {
+        _instantUploadTimer = null;
+        if (state.dirty && getAutoUploadMode() === 'instant' && localStorage.getItem(YANDEX_TOKEN_KEY) && _isEditor()) {
+            saveToYandexDisk(true);
+        }
+    }, 1000);
+}
 function openTokenModal() {
     document.getElementById('yandex-client-id').value = localStorage.getItem(YANDEX_CLIENT_ID_KEY) || '';
     document.getElementById('yandex-token-input').value = localStorage.getItem(YANDEX_TOKEN_KEY) || '';
     document.getElementById('yandex-path-input').value = normalizeYandexPath(localStorage.getItem(YANDEX_PATH_KEY));
     const proxyEl = document.getElementById('yandex-proxy-input');
     if (proxyEl) proxyEl.value = getYandexProxyUrl();
-    document.getElementById('yandex-autoupload-chk').checked = localStorage.getItem(YANDEX_AUTOUPLOAD) === '1';
+    const autoSel = document.getElementById('yandex-autoupload-mode');
+    if (autoSel) autoSel.value = getAutoUploadMode();
+    const checkSel = document.getElementById('yandex-check-interval');
+    if (checkSel) checkSel.value = String(getRemoteCheckIntervalSec());
     document.getElementById('yandex-check-result').innerHTML = '';
     document.getElementById('modal-token').classList.add('open');
 }
@@ -872,22 +980,28 @@ function saveYandexSettings() {
     const token = extractYandexToken(document.getElementById('yandex-token-input').value || '');
     const rawPath = (document.getElementById('yandex-path-input').value || '').trim();
     const proxyUrl = (document.getElementById('yandex-proxy-input')?.value || '').trim();
-    const auto = document.getElementById('yandex-autoupload-chk').checked;
+    const autoMode = document.getElementById('yandex-autoupload-mode')?.value || 'off';
+    const checkSec = document.getElementById('yandex-check-interval')?.value === '60' ? '60' : '10';
     let path = normalizeYandexPath(rawPath);
     if (rawPath && path !== rawPath) showToast('Путь не подходит — используется ' + path, 'info', 5000);
     if (clientId) localStorage.setItem(YANDEX_CLIENT_ID_KEY, clientId); else localStorage.removeItem(YANDEX_CLIENT_ID_KEY);
     if (token) localStorage.setItem(YANDEX_TOKEN_KEY, token); else localStorage.removeItem(YANDEX_TOKEN_KEY);
     if (proxyUrl) localStorage.setItem(YANDEX_PROXY_KEY, proxyUrl); else localStorage.removeItem(YANDEX_PROXY_KEY);
     localStorage.setItem(YANDEX_PATH_KEY, path);
-    localStorage.setItem(YANDEX_AUTOUPLOAD, auto ? '1' : '0');
+    localStorage.setItem(YANDEX_AUTOUPLOAD, autoMode);
+    localStorage.setItem(YANDEX_CHECK_INTERVAL_KEY, checkSec);
     closeModal('modal-token');
+    restartRemoteCheckTimer();
+    if (autoMode === 'instant' && state.dirty) scheduleInstantUpload();
     showToast('Настройки сохранены', 'success', 4000);
     addAuditLog('yandex_settings', 'Изменены настройки Яндекс.Диска');
 }
 function clearYandexToken() {
     if (!confirm('Удалить сохранённые настройки Яндекс.Диска?')) return;
-    localStorage.removeItem(YANDEX_TOKEN_KEY); localStorage.removeItem(YANDEX_CLIENT_ID_KEY); localStorage.removeItem(YANDEX_PATH_KEY); localStorage.removeItem(YANDEX_PROXY_KEY); localStorage.removeItem(YANDEX_AUTOUPLOAD);
-    closeModal('modal-token'); showToast('Настройки удалены', 'info');
+    localStorage.removeItem(YANDEX_TOKEN_KEY); localStorage.removeItem(YANDEX_CLIENT_ID_KEY); localStorage.removeItem(YANDEX_PATH_KEY); localStorage.removeItem(YANDEX_PROXY_KEY); localStorage.removeItem(YANDEX_AUTOUPLOAD); localStorage.removeItem(YANDEX_CHECK_INTERVAL_KEY);
+    closeModal('modal-token');
+    restartRemoteCheckTimer();
+    showToast('Настройки удалены', 'info');
     addAuditLog('yandex_settings', 'Удалены настройки Яндекс.Диска');
 }
 function _showFileInfoBanner(modifiedIso) {
@@ -1002,28 +1116,58 @@ async function _fetchRemoteContent() {
     throw firstError || new Error('Не удалось скачать файл с Яндекс.Диска');
 }
 async function loadFromYandexDisk() {
-    if (!_isEditor()) { showToast('Только просмотр — нет прав', 'error'); return; }
     if (state.dirty) { if (!confirm('Есть несохранённые изменения. Заменить их данными с Диска?')) return; }
     showToast('Получение данных с Яндекс.Диска...', 'info');
+    updateRemoteCheckButtonText(true);
     try {
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            throw new Error('OFFLINE');
+        }
         const meta = await _fetchRemoteMeta();
         const modified = meta && meta.modified ? meta.modified : new Date().toISOString();
         const content = await _fetchRemoteContent();
+        const currentUserName = state.currentUser?.name;
         applyImportedData(content.parsed, true);
+        if (currentUserName) {
+            const u = state.employees.find(e => e.name === currentUserName);
+            if (u) state.currentUser = u;
+        }
         state.lastRemoteModified = modified;
         saveToLocalStorage();
         _showFileInfoBanner(modified);
+        _remoteCheckHasError = false;
+        _remoteCheckSecondsLeft = getRemoteCheckIntervalSec();
+        updateRemoteCheckButtonText(false);
         addAuditLog('yandex_load', 'Загружены данные с Яндекс.Диска');
         showToast('Данные загружены с Яндекс.Диска', 'success');
-    } catch (e) { console.error('[Yandex load]', e); showToast('Ошибка: ' + e.message, 'error', 6500); }
+    } catch (e) {
+        console.error('[Yandex load]', e);
+        _remoteCheckHasError = true;
+        _remoteCheckSecondsLeft = getRemoteCheckIntervalSec();
+        updateRemoteCheckButtonText(false);
+        if (e.message === 'OFFLINE' || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+            showToast('Проверьте интернет соединение', 'error', 5500);
+        } else {
+            showToast('Ошибка: ' + e.message, 'error', 6500);
+        }
+    }
 }
 async function saveToYandexDisk(silent = false) {
     if (!_isEditor()) { if (!silent) showToast('Только просмотр', 'error'); return; }
     const token = localStorage.getItem(YANDEX_TOKEN_KEY);
     if (!token) { if (!silent) { showToast('Не задан OAuth-токен', 'error', 6000); openTokenModal(); } return; }
+    if (_yandexSaveInFlight) {
+        _yandexSaveQueued = true;
+        return;
+    }
     const diskPath = normalizeYandexPath(localStorage.getItem(YANDEX_PATH_KEY));
     if (!silent) showToast('Подготовка к сохранению...', 'info');
+    _yandexSaveInFlight = true;
+    const seqAtStart = state.changeSeq || 0;
     try {
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            throw new Error('OFFLINE');
+        }
         const json = JSON.stringify(exportData(), null, 2);
         const upMetaUrl = 'https://cloud-api.yandex.net/v1/disk/resources/upload?path=' + encodeURIComponent(diskPath) + '&overwrite=true';
         const um = await fetch(upMetaUrl, { headers: { 'Authorization': 'OAuth ' + token, 'Accept': 'application/json' } });
@@ -1040,14 +1184,33 @@ async function saveToYandexDisk(silent = false) {
         if (!silent) showToast('Загрузка на Яндекс.Диск...', 'info');
         const put = await fetch(upMeta.href, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: json });
         if (!put.ok) throw new Error('HTTP ' + put.status);
-        markYandexClean();
+        if ((state.changeSeq || 0) === seqAtStart) {
+            markYandexClean();
+        } else {
+            _yandexSaveQueued = true;
+        }
         try {
             const meta = await _fetchRemoteMeta();
             if (meta && meta.modified) { state.lastRemoteModified = meta.modified; saveToLocalStorage(); }
         } catch (e) {}
         addAuditLog('yandex_save', 'Данные сохранены на Яндекс.Диск: ' + diskPath);
         if (!silent) showToast('Файл сохранён на Диск', 'success', 4500);
-    } catch (e) { console.error('[Yandex save]', e); if (!silent) showToast('Ошибка: ' + e.message, 'error', 7000); else showToast('Автосохранение не удалось: ' + e.message, 'error', 5000); }
+    } catch (e) {
+        console.error('[Yandex save]', e);
+        if (silent) {
+            showConnectionErrorToast();
+        } else if (e.message === 'OFFLINE' || /Failed to fetch|NetworkError|Load failed/i.test(e.message || '')) {
+            showToast('Проверьте интернет соединение', 'error', 6000);
+        } else {
+            showToast('Ошибка: ' + e.message, 'error', 7000);
+        }
+    } finally {
+        _yandexSaveInFlight = false;
+        if (_yandexSaveQueued && state.dirty) {
+            _yandexSaveQueued = false;
+            setTimeout(() => saveToYandexDisk(true), 400);
+        }
+    }
 }
 
 /* ============================================================
@@ -1070,21 +1233,113 @@ function _computeDiff(currentOrders, newOrders) {
     }
     return diff;
 }
-function _diffOrderStages(oldO, newO) {
+function _formatStageRange(date, endDate) {
+    if (!date) return '—';
+    return (endDate && endDate !== date) ? `${date} → ${endDate}` : date;
+}
+function _describeOrderChanges(oldO, newO) {
     const changes = [];
-    if (oldO.customer !== newO.customer) changes.push(`клиент: "${oldO.customer || ''}" → "${newO.customer || ''}"`);
-    if (oldO.requestNumber !== newO.requestNumber) changes.push(`заявка: "${oldO.requestNumber || ''}" → "${newO.requestNumber || ''}"`);
-    if ((oldO.notes || '') !== (newO.notes || '')) changes.push('изменён комментарий к заказу');
-    const oldStages = new Map((oldO.stages || []).map(s => [s.id, s]));
-    const newStages = new Map((newO.stages || []).map(s => [s.id, s]));
-    for (const [id, ns] of newStages) {
-        if (!oldStages.has(id)) { changes.push(`+ этап "${getActName(ns.activityId)}" ${ns.date}`); continue; }
-        const os = oldStages.get(id);
-        if (os.date !== ns.date) changes.push(`этап "${getActName(ns.activityId)}": ${os.date} → ${ns.date}`);
-        if (os.assigneeName !== ns.assigneeName) changes.push(`исполнитель "${getActName(ns.activityId)}": ${os.assigneeName || '—'} → ${ns.assigneeName || '—'}`);
+    const oldCust = (oldO.customer || '').trim(), newCust = (newO.customer || '').trim();
+    const oldReq = (oldO.requestNumber || '').trim(), newReq = (newO.requestNumber || '').trim();
+    const oldKp = (oldO.kp || '').trim(), newKp = (newO.kp || '').trim();
+    const oldInv = (oldO.invoice || '').trim(), newInv = (newO.invoice || '').trim();
+    const oldProd = (oldO.productionOrder || '').trim(), newProd = (newO.productionOrder || '').trim();
+    const oldNotes = (oldO.notes || '').trim(), newNotes = (newO.notes || '').trim();
+    const oldCreator = (oldO.creatorName || '').trim(), newCreator = (newO.creatorName || '').trim();
+
+    if (oldCust !== newCust) changes.push(`клиент: «${oldCust || '—'}» → «${newCust || '—'}»`);
+    if (oldReq !== newReq) changes.push(`заявка: «${oldReq || '—'}» → «${newReq || '—'}»`);
+    if (oldKp !== newKp) changes.push(`КП: «${oldKp || '—'}» → «${newKp || '—'}»`);
+    if (oldInv !== newInv) changes.push(`счёт: «${oldInv || '—'}» → «${newInv || '—'}»`);
+    if (oldProd !== newProd) changes.push(`заказ в пр-во: «${oldProd || '—'}» → «${newProd || '—'}»`);
+    if (oldCreator !== newCreator) changes.push(`автор: ${oldCreator || '—'} → ${newCreator || '—'}`);
+    if (oldNotes !== newNotes) {
+        const clip = s => s.length > 60 ? s.slice(0, 57) + '…' : s;
+        changes.push(`комментарий к заказу: «${clip(oldNotes) || '—'}» → «${clip(newNotes) || '—'}»`);
     }
-    for (const [id, os] of oldStages) if (!newStages.has(id)) changes.push(`− этап "${getActName(os.activityId)}"`);
+
+    const oldList = Array.isArray(oldO.stages) ? oldO.stages : [];
+    const newList = Array.isArray(newO.stages) ? newO.stages : [];
+    const oldStages = new Map(oldList.map(s => [s.id, s]));
+    const newStages = new Map(newList.map(s => [s.id, s]));
+
+    for (const ns of newList) {
+        if (!oldStages.has(ns.id)) {
+            changes.push(`добавлен этап «${getActName(ns.activityId)}» (${_formatStageRange(ns.date, ns.endDate)}, исп.: ${ns.assigneeName || '—'})`);
+            continue;
+        }
+        const os = oldStages.get(ns.id);
+        const actLabel = getActName(ns.activityId);
+        if (os.activityId !== ns.activityId) {
+            changes.push(`изменён вид этапа: «${getActName(os.activityId)}» → «${actLabel}»`);
+        }
+        const oldRange = _formatStageRange(os.date, os.endDate || null);
+        const newRange = _formatStageRange(ns.date, ns.endDate || null);
+        if (os.date !== ns.date || (os.endDate || null) !== (ns.endDate || null)) {
+            changes.push(`изменён срок этапа «${actLabel}»: ${oldRange} → ${newRange}`);
+        }
+        if ((os.assigneeName || '') !== (ns.assigneeName || '')) {
+            changes.push(`изменён исполнитель этапа «${actLabel}»: ${os.assigneeName || '—'} → ${ns.assigneeName || '—'}`);
+        }
+        if ((os.comment || '').trim() !== (ns.comment || '').trim()) {
+            changes.push(`изменён комментарий этапа «${actLabel}»: «${(os.comment || '').trim() || '—'}» → «${(ns.comment || '').trim() || '—'}»`);
+        }
+    }
+    for (const os of oldList) {
+        if (!newStages.has(os.id)) {
+            changes.push(`удалён этап «${getActName(os.activityId)}» (был ${_formatStageRange(os.date, os.endDate)})`);
+        }
+    }
+    const oldCommonIds = oldList.filter(s => newStages.has(s.id)).map(s => s.id).join(',');
+    const newCommonIds = newList.filter(s => oldStages.has(s.id)).map(s => s.id).join(',');
+    if (oldCommonIds !== newCommonIds) {
+        changes.push('изменён порядок этапов');
+    }
     return changes;
+}
+function _diffOrderStages(oldO, newO) {
+    return _describeOrderChanges(oldO, newO);
+}
+
+let _remoteCheckTickTimer = null;
+let _remoteCheckSecondsLeft = DEFAULT_REMOTE_CHECK_SEC;
+let _remoteCheckHasError = false;
+
+function updateRemoteCheckButtonText(checking = false) {
+    const span = document.getElementById('btn-yandex-load-text');
+    if (!span) return;
+    if (checking) {
+        span.textContent = 'Проверка обновлений...';
+        return;
+    }
+    if (_remoteCheckHasError) {
+        span.textContent = 'Нет связи · повтор через ' + _remoteCheckSecondsLeft + ' сек.';
+    } else {
+        span.textContent = 'До очередного обновления осталось ' + _remoteCheckSecondsLeft + ' сек.';
+    }
+}
+
+function restartRemoteCheckTimer() {
+    if (_remoteCheckTickTimer) {
+        clearInterval(_remoteCheckTickTimer);
+        _remoteCheckTickTimer = null;
+    }
+    _remoteCheckSecondsLeft = getRemoteCheckIntervalSec();
+    updateRemoteCheckButtonText(false);
+    _remoteCheckTickTimer = setInterval(() => {
+        if (state.remoteCheckInProgress) return;
+        _remoteCheckSecondsLeft--;
+        if (_remoteCheckSecondsLeft <= 0) {
+            _remoteCheckSecondsLeft = getRemoteCheckIntervalSec();
+            if (state.currentUser && !state.pendingRemoteData) {
+                checkRemoteUpdates();
+            } else {
+                updateRemoteCheckButtonText(false);
+            }
+        } else {
+            updateRemoteCheckButtonText(false);
+        }
+    }, 1000);
 }
 
 async function checkRemoteUpdates() {
@@ -1092,9 +1347,16 @@ async function checkRemoteUpdates() {
     if (!state.currentUser) return;
     if (state.pendingRemoteData) return;  // уже показан баннер
     state.remoteCheckInProgress = true;
+    updateRemoteCheckButtonText(true);
     try {
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            throw new Error('OFFLINE');
+        }
         const meta = await _fetchRemoteMeta();
-        if (!meta) return;
+        if (!meta) {
+            throw new Error('NO_META');
+        }
+        _remoteCheckHasError = false;
         const remoteModified = meta.modified || '';
         if (!remoteModified) return;
         if (state.lastRemoteModified === null) {
@@ -1122,8 +1384,12 @@ async function checkRemoteUpdates() {
         startRemoteCountdown();
     } catch (e) {
         console.warn('[Remote check]', e);
+        _remoteCheckHasError = true;
+        showConnectionErrorToast();
     } finally {
         state.remoteCheckInProgress = false;
+        _remoteCheckSecondsLeft = getRemoteCheckIntervalSec();
+        updateRemoteCheckButtonText(false);
     }
 }
 function startRemoteCountdown() {
@@ -1935,6 +2201,7 @@ function addStageRow(stage = null) {
     const row = document.createElement('div');
     row.className = 'stage-row';
     row.draggable = false;
+    row.dataset.stageId = (stage && stage.id) ? stage.id : uid();
     const actOptions = state.activities.map(a => `<option value="${a.id}"${stage && stage.activityId === a.id ? ' selected' : ''}>${escapeHtml(a.name)}</option>`).join('');
     const activityId = stage ? stage.activityId : 'print_start';
     const defaultAssignee = (stage && stage.assigneeName) || _getDefaultAssignee(activityId);
@@ -2039,6 +2306,7 @@ function handleOrderSubmit(e) {
     const stages = [];
     let error = null;
     document.querySelectorAll('#stages-container .stage-row').forEach(row => {
+        const stageId = row.dataset.stageId || uid();
         const activityId = row.querySelector('.stage-activity').value;
         const date = row.querySelector('.stage-date').value;
         const endDate = row.querySelector('.stage-end').value || null;
@@ -2046,7 +2314,7 @@ function handleOrderSubmit(e) {
         const comment = row.querySelector('.stage-comment').value.trim();
         if (!date) { error = 'Укажите дату начала'; return; }
         if (endDate && endDate < date) { error = 'Дата окончания раньше начала'; return; }
-        stages.push({ id: uid(), activityId, date, endDate, assigneeName, comment });
+        stages.push({ id: stageId, activityId, date, endDate, assigneeName, comment });
     });
     if (error) { showToast(error, 'error'); return; }
     if (stages.length === 0) { showToast('Добавьте хотя бы один этап', 'error'); return; }
@@ -2064,16 +2332,34 @@ function handleOrderSubmit(e) {
     if (corrections.length > 0) showToast('Этапы скорректированы: ' + corrections.map(c => `${getActName(c.stage.activityId)}→${c.newDate}`).join(', '), 'info', 6000);
     if (id) {
         const idx = state.orders.findIndex(o => o.id === id);
-        if (idx !== -1) { orderData.changeLog = state.orders[idx].changeLog || []; orderData.createdAt = state.orders[idx].createdAt || today(); addLog(orderData, 'Заказ отредактирован'); state.orders[idx] = orderData; }
+        let changeDetails = [];
+        if (idx !== -1) {
+            const oldOrder = state.orders[idx];
+            changeDetails = _describeOrderChanges(oldOrder, orderData);
+            if (corrections.length > 0) {
+                changeDetails.push('автокоррекция сроков: ' + corrections.map(c => `${getActName(c.stage.activityId)} → ${c.newDate}`).join(', '));
+            }
+            orderData.changeLog = oldOrder.changeLog || [];
+            orderData.createdAt = oldOrder.createdAt || today();
+            const logSummary = changeDetails.length ? changeDetails.join('; ') : 'без изменений параметров';
+            addLog(orderData, 'Заказ отредактирован: ' + logSummary);
+            state.orders[idx] = orderData;
+        }
+        const orderLabel = (customer || id) + (requestNumber ? ' (заявка ' + requestNumber + ')' : '');
+        const auditText = changeDetails.length
+            ? `Отредактирован заказ «${orderLabel}»: ${changeDetails.join('; ')}`
+            : `Отредактирован заказ «${orderLabel}» (без изменений параметров)`;
+        addAuditLog('edit_order', auditText, { orderId: id, customer, requestNumber, stagesCount: stages.length, changes: changeDetails });
         markDirty();
-        addAuditLog('edit_order', `Отредактирован заказ: ${customer || id}`, { orderId: id, customer, requestNumber, stagesCount: stages.length });
         showToast('Заказ обновлён', 'success');
     } else {
         orderData.changeLog = [];
-        addLog(orderData, 'Заказ создан');
+        const stageSummary = stages.map(s => `${getActName(s.activityId)} (${_formatStageRange(s.date, s.endDate)})`).join(', ');
+        addLog(orderData, 'Заказ создан: ' + stageSummary);
         state.orders.push(orderData);
+        const orderLabel = (customer || requestNumber || 'Профилактика') + (customer && requestNumber ? ' (заявка ' + requestNumber + ')' : '');
+        addAuditLog('create_order', `Создан заказ «${orderLabel}»: этапы — ${stageSummary}`, { orderId: orderData.id, customer, requestNumber, stagesCount: stages.length });
         markDirty();
-        addAuditLog('create_order', `Создан заказ: ${customer || requestNumber || 'Обслуживание'}`, { orderId: orderData.id, customer, requestNumber, stagesCount: stages.length });
         showToast('Заказ добавлен', 'success');
     }
     closeModal('modal-order'); renderAll();
@@ -2167,9 +2453,61 @@ function renderActivitiesList() {
     const isE = _isEditor();
     list.innerHTML = state.activities.map(a => `
         <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-size:12px;">
-            <div style="display:flex;align-items:center;gap:6px;min-width:0;"><span style="width:10px;height:10px;border-radius:50%;background:${a.color};display:inline-block;flex-shrink:0;"></span><strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(a.name)}</strong></div>
-            ${isE ? `<div class="dropdown"><button class="btn btn-sm" onclick="toggleDropdown(this)" style="padding:2px 6px;">⋯</button><div class="dropdown-menu"><button onclick="editActivity('${a.id}')">✏️ Переименовать</button><button class="danger" onclick="deleteActivity('${a.id}')">🗑 Удалить</button></div></div>` : ''}
+            <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+                <span ${isE ? `onclick="openActivityColorModal('${a.id}')" title="Нажмите, чтобы изменить цвет"` : ''} style="width:14px;height:14px;border-radius:50%;background:${a.color};display:inline-block;flex-shrink:0;border:1px solid rgba(15,23,42,.2);${isE ? 'cursor:pointer;' : ''}"></span>
+                <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(a.name)}</strong>
+            </div>
+            ${isE ? `<div class="dropdown"><button class="btn btn-sm" onclick="toggleDropdown(this)" style="padding:2px 6px;">⋯</button><div class="dropdown-menu"><button onclick="openActivityColorModal('${a.id}')">🎨 Изменить цвет</button><button onclick="editActivity('${a.id}')">✏️ Переименовать</button><button class="danger" onclick="deleteActivity('${a.id}')">🗑 Удалить</button></div></div>` : ''}
         </div>`).join('');
+}
+function openActivityColorModal(id) {
+    if (!_isEditor()) { showToast('Только просмотр', 'error'); return; }
+    const act = state.activities.find(a => a.id === id);
+    if (!act) return;
+    document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+    document.getElementById('act-color-id').value = act.id;
+    document.getElementById('act-color-name').textContent = act.name;
+    const currentColor = /^#[0-9a-fA-F]{6}$/.test(act.color || '') ? act.color.toLowerCase() : '#2563eb';
+    document.getElementById('act-color-custom').value = currentColor;
+    document.getElementById('act-color-hex').textContent = currentColor;
+    _renderActivityColorSwatches(currentColor);
+    document.getElementById('modal-activity-color').classList.add('open');
+}
+function _renderActivityColorSwatches(selectedHex) {
+    const grid = document.getElementById('act-color-swatches');
+    if (!grid) return;
+    const sel = (selectedHex || '').toLowerCase();
+    grid.innerHTML = ACTIVITY_COLOR_PRESETS.map(c => `
+        <button type="button" class="color-swatch ${c.hex.toLowerCase() === sel ? 'selected' : ''}"
+            style="background:${c.hex};" title="${escapeHtml(c.name)} (${c.hex})"
+            onclick="selectPresetActivityColor('${c.hex}')"></button>
+    `).join('');
+}
+function selectPresetActivityColor(hex) {
+    document.getElementById('act-color-custom').value = hex;
+    document.getElementById('act-color-hex').textContent = hex.toLowerCase();
+    _renderActivityColorSwatches(hex);
+}
+function onCustomActivityColorInput(hex) {
+    document.getElementById('act-color-hex').textContent = (hex || '').toLowerCase();
+    _renderActivityColorSwatches(hex);
+}
+function saveActivityColor() {
+    if (!_isEditor()) { showToast('Только просмотр', 'error'); return; }
+    const id = document.getElementById('act-color-id').value;
+    const newColor = (document.getElementById('act-color-custom').value || '').trim().toLowerCase();
+    const act = state.activities.find(a => a.id === id);
+    if (!act || !/^#[0-9a-fA-F]{6}$/.test(newColor)) return;
+    const oldColor = act.color || '';
+    act.color = newColor;
+    addAuditLog('edit_activity_color', `Изменён цвет этапа «${act.name}»: ${oldColor} → ${newColor}`, { id: act.id, name: act.name, oldColor, newColor });
+    markDirty();
+    renderActivitiesList();
+    renderLegend();
+    renderKPIs();
+    refetchEvents();
+    closeModal('modal-activity-color');
+    showToast('Цвет этапа «' + act.name + '» изменён', 'success');
 }
 function editActivity(id) {
     if (!_isEditor()) return;
@@ -2591,18 +2929,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentUser) { clearInterval(interval); setTimeout(() => showStartMenu(), 300); }
     }, 300);
 
-    // Автосохранение на Диск раз в минуту
+    // Автосохранение на Диск (раз в минуту или повторная попытка при оперативном режиме)
     setInterval(() => {
         try {
-            if (state.dirty && localStorage.getItem(YANDEX_AUTOUPLOAD) === '1' && localStorage.getItem(YANDEX_TOKEN_KEY) && _isEditor()) {
+            const mode = getAutoUploadMode();
+            if (state.dirty && (mode === 'minute' || mode === 'instant') && localStorage.getItem(YANDEX_TOKEN_KEY) && _isEditor()) {
                 saveToYandexDisk(true);
             }
         } catch (e) {}
     }, YANDEX_AUTO_INTERVAL_MS);
 
-    // Проверка remote updates каждую минуту
-    setTimeout(checkRemoteUpdates, 5000);
-    setInterval(checkRemoteUpdates, REMOTE_CHECK_INTERVAL_MS);
+    // Динамический таймер проверки обновлений с Диска (10 сек. или 1 мин.)
+    restartRemoteCheckTimer();
 
     window.addEventListener('error', (e) => { console.error('[GLOBAL ERROR]', e.error || e.message); });
 });
