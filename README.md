@@ -174,6 +174,8 @@ canvas.preview.dragging{cursor:grabbing}
         <a href="https://tonic-spb.github.io/stlcalc/passport.html" class="top-nav-btn" target="_blank" rel="noopener noreferrer">Генератор паспортов</a>
         <a href="https://tonic-spb.github.io/stlcalc/otchet_po_komandirovke_kollega.html" class="top-nav-btn" target="_blank" rel="noopener noreferrer">Отчет по командировке</a>
         <a href="https://tonic-spb.github.io/stlcalc/zayavka_na_komandirovku_kollega.html" class="top-nav-btn" target="_blank" rel="noopener noreferrer">СЗ на командировку</a>
+        <a href="https://stlcalc.tb.ru/page5" class="top-nav-btn" target="_blank" rel="noopener noreferrer">Базовый расчет стоимости</a>
+        <a href="https://tonic-spb.github.io/stlcalc/calendar.html" class="top-nav-btn" target="_blank" rel="noopener noreferrer">Производственный Календарь</a>
     </div>
 </div>
 
