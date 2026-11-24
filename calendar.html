@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<title>3D-Print Календарь Аврора — v16 [221126003200]</title>
+<title>3D-Print Календарь Аврора — v17 [241126175500]</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -129,11 +129,50 @@ select.filter-select { padding: 6px 8px; border: 1px solid var(--border); border
 .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--accent-blue-soft); border-color: var(--accent-blue); }
 .field input:disabled, .field select:disabled, .field textarea:disabled { background: #f1f5f9; color: var(--text-muted); cursor: not-allowed; }
 
-.stage-row { display: grid; grid-template-columns: auto 1.1fr .85fr .85fr .85fr 1fr auto; gap: 5px; align-items: end; margin-bottom: 6px; padding: 8px; border-radius: 8px; background: var(--bg-panel-soft); border: 1px solid var(--border); transition: background .15s, box-shadow .15s; }
+.stage-row { display: grid; grid-template-columns: auto 1.15fr .85fr .85fr .85fr 1fr auto; gap: 5px; align-items: end; margin-bottom: 6px; padding: 8px; border-radius: 8px; background: var(--bg-panel-soft); border: 1px solid var(--border); transition: background .15s, box-shadow .15s, border-color .15s; }
 .stage-row.dragging { opacity: 0.4; }
 .stage-row.drag-over { box-shadow: 0 -3px 0 0 var(--accent-blue); }
+.stage-row.stage-completed { background: #e2e8f0 !important; border-color: #94a3b8 !important; }
+.stage-row.stage-completed .field input, .stage-row.stage-completed .field select { background: #f1f5f9; color: #475569; }
+.stage-row .stage-actions { display: flex; align-items: center; gap: 4px; }
+.stage-row .complete-stage { background: #fff; border: 1px solid #16a34a; border-radius: 6px; cursor: pointer; padding: 5px 7px; color: #16a34a; font-size: 12px; line-height: 1; transition: all .15s; }
+.stage-row .complete-stage:hover { background: #dcfce7; }
+.stage-row .complete-stage.is-done { background: #16a34a; border-color: #15803d; color: #fff; box-shadow: 0 1px 4px rgba(22,163,74,.35); }
+.stage-row .complete-stage.is-done:hover { background: #15803d; }
 .stage-row .remove-stage { background: none; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 5px 7px; color: var(--accent-rose); font-size: 12px; line-height: 1; }
 .stage-row .remove-stage:hover { background: #fee2e2; }
+.stage-status-badge { display: inline-block; margin-left: 4px; padding: 1px 5px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; vertical-align: middle; }
+.stage-status-badge.planned { background: #dbeafe; color: #1d4ed8; }
+.stage-status-badge.completed { background: #cbd5e1; color: #334155; }
+
+.fc .fc-event.fc-event-completed { opacity: 0.85; border-color: #475569 !important; }
+.fc .fc-event.fc-event-completed .fc-event-title { text-decoration: line-through; }
+
+@keyframes newOrderBlink {
+    0%, 100% { background-color: #ef4444 !important; border-color: #991b1b !important; box-shadow: 0 0 0 2px rgba(239,68,68,.75), 0 0 14px rgba(239,68,68,.95); filter: brightness(1.05); }
+    50% { background-color: #ff1e1e !important; border-color: #fef08a !important; box-shadow: 0 0 0 3px rgba(254,240,138,.9), 0 0 22px rgba(255,30,30,1); filter: brightness(1.25); }
+}
+@keyframes newOrderCardBlink {
+    0%, 100% { background: #fef2f2; border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,.35), 0 0 12px rgba(239,68,68,.45); }
+    50% { background: #fee2e2; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.7), 0 0 20px rgba(239,68,68,.85); }
+}
+@keyframes newOrderIconBlink {
+    0%, 100% { opacity: 1; transform: scale(1); color: #dc2626; }
+    50% { opacity: 0.35; transform: scale(1.28); color: #ff0000; }
+}
+.fc .fc-event.fc-event-new-order-blink { animation: newOrderBlink 0.9s infinite ease-in-out !important; z-index: 15 !important; font-weight: 800; }
+.kpi-card.kpi-new-order-blink { animation: newOrderCardBlink 0.9s infinite ease-in-out; }
+.kpi-card.kpi-new-order-blink .kpi-icon { animation: newOrderIconBlink 0.9s infinite ease-in-out; opacity: 1 !important; }
+.legend-chip.legend-new-order-blink { animation: newOrderCardBlink 0.9s infinite ease-in-out; font-weight: 800; }
+
+#modal-urgent-alert { align-items: center; justify-content: center; z-index: 8000; background: rgba(15,23,42,.65); }
+#modal-urgent-alert .modal { max-width: 520px; border: 3px solid #dc2626; background: #fff5f5; box-shadow: 0 24px 64px rgba(220,38,38,.35); text-align: center; padding: 26px 24px; }
+#modal-urgent-alert .urgent-icon { font-size: 46px; color: #dc2626; margin-bottom: 12px; animation: newOrderIconBlink 0.9s infinite ease-in-out; }
+#modal-urgent-alert .urgent-title { font-size: 20px; font-weight: 900; color: #b91c1c; margin-bottom: 12px; line-height: 1.3; letter-spacing: -.01em; }
+#modal-urgent-alert .urgent-details { font-size: 13px; color: #7f1d1d; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; line-height: 1.5; text-align: left; }
+#modal-urgent-alert .urgent-ok-btn { min-width: 160px; padding: 10px 22px; font-size: 14px; font-weight: 800; border-radius: 10px; border: none; background: #dc2626; color: #fff; cursor: pointer; transition: all .15s; font-family: inherit; font-variant-numeric: tabular-nums; }
+#modal-urgent-alert .urgent-ok-btn:hover:not(:disabled) { background: #b91c1c; }
+#modal-urgent-alert .urgent-ok-btn:disabled { background: #fca5a5; color: #7f1d1d; cursor: not-allowed; }
 .stage-row .drag-handle { cursor: grab; color: var(--text-muted); font-size: 16px; user-select: none; padding: 4px 2px; align-self: center; }
 .stage-row .drag-handle:active { cursor: grabbing; }
 
@@ -212,7 +251,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <img id="topLogoAT" class="top-logo" alt="Аврора Карбон" title="Аврора Карбон Технолоджи">
     </div>
     <div class="app-title-wrap">
-        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v16</span></div>
+        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v17</span></div>
         <div class="app-subtitle">Планирование запусков, постобработки и отгрузок</div>
     </div>
 
@@ -277,6 +316,8 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
                 <li><strong>Попап дня:</strong> перетаскивается мышкой, автоскрытие через 10 сек., если мышка не над ним.</li>
                 <li><strong>Автообновление и автосохранение:</strong> в настройках Яндекс.Диска (⚙️) можно выбрать частоту проверки новых версий (каждые 10 сек. или раз в минуту) и режим автовыгрузки на Диск (каждые 10 сек. с обратным отсчётом, раз в минуту, сразу после изменений или выкл.). Обе кнопки в шапке показывают динамический обратный отсчёт.</li>
                 <li><strong>Цвета этапов:</strong> в «Справочниках → Виды этапов» можно менять цвет любого этапа (через меню ⋯ или кликом по цветному кружку).</li>
+                <li><strong>Статусы этапов:</strong> у каждого этапа в форме заказа есть зелёная галочка «Выполнено» — завершённые этапы окрашиваются в серый цвет со статусом «Выполнен». При завершении «Упаковка товара» появляется напоминание об оформлении документов на списание.</li>
+                <li><strong>Этап «НОВЫЙ ЗАКАЗ»:</strong> активные этапы «НОВЫЙ ЗАКАЗ» мигают ярким красным цветом в календаре и на панели KPI; при появлении нового заказа после обновления выводится уведомление по центру экрана.</li>
                 <li><strong>Синхронизация:</strong> кнопка «На Диск» — <b style="color:#16a34a;">зелёная</b>, если ваша версия совпадает с Диском, <b style="color:#dc2626;">красная</b>, если есть несинхронизированные изменения.</li>
             </ul>
         </div>
@@ -286,14 +327,22 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <div class="accordion-header" onclick="toggleAccordion('acc-history')"><span><i class="fa-solid fa-code-branch" style="color:var(--accent-teal);margin-right:6px;"></i> История версий и информация</span><i class="fa-solid fa-chevron-down arrow"></i></div>
         <div class="accordion-body">
             <div style="display:flex;flex-wrap:wrap;gap:10px 24px;margin-bottom:10px;font-weight:600;color:var(--text-primary);">
-                <span>Версия: <strong>v16</strong></span>
-                <span>Штамп: <strong>221126003200</strong></span>
-                <span>Формат: <strong>JSON MES-3D v16</strong></span>
+                <span>Версия: <strong>v17</strong></span>
+                <span>Штамп: <strong>241126175500</strong></span>
+                <span>Формат: <strong>JSON MES-3D v17</strong></span>
                 <span>Автор: <strong>Фомин Антон</strong></span>
                 <span>Связь: <a href="mailto:a.fomin@avrora-3d.ru" style="color:var(--accent-blue);">a.fomin@avrora-3d.ru</a></span>
             </div>
             <div style="border-top:1px solid var(--border);padding-top:8px;">
-                <strong style="color:var(--text-primary);">[v16 — 221126003200]</strong>
+                <strong style="color:var(--text-primary);">[v17 — 241126175500]</strong>
+                <ul style="margin-top:4px;margin-bottom:8px;">
+                    <li><b>Новое:</b> в форму заказа под полями «КП» и «Счёт» добавлены поля «Тип печати» (по умолчанию <code>SLS</code>), «Название принтера» (по умолчанию <code>P360 TPM3D</code>) и «Название материала» (по умолчанию <code>PA12 GF30</code>).</li>
+                    <li><b>Новое:</b> у каждого этапа добавлены статусы «Запланирован» и «Выполнен» с кнопкой зелёной галочки рядом с удалением; выполненные этапы окрашиваются в серый цвет в форме и в календаре, а смена статуса фиксируется в журнале.</li>
+                    <li><b>Новое:</b> при завершении этапа «Упаковка товара» выводится яркое красное напоминание «НЕ ЗАБУДЬ ОФОРМИТЬ ДОКУМЕНТЫ НА СПИСАНИЕ!!!» с 2-секундным таймером на кнопке «ОК».</li>
+                    <li><b>Новое:</b> добавлен этап «НОВЫЙ ЗАКАЗ» с иконкой восклицательного знака и ярким красным миганием; при появлении этого этапа после обновления выводится центральное уведомление для пользователя с 2-секундной задержкой закрытия.</li>
+                    <li><b>Новое:</b> добавлен этап «ДОСТАВКА ДО ОФИСА» с иконкой машинки.</li>
+                </ul>
+                <strong style="color:var(--text-primary);display:block;margin-top:8px;">[v16 — 221126003200]</strong>
                 <ul style="margin-top:4px;margin-bottom:8px;">
                     <li><b>Новое:</b> в настройках автосохранения на Яндекс.Диск добавлен режим выгрузки <b>каждые 10 секунд</b> (по умолчанию при наличии токена) с обратным отсчётом.</li>
                     <li><b>Новое:</b> кнопка «На Диск» стала динамической — при наличии несохранённых изменений показывает обратный отсчёт «До выгрузки осталось 10…9…8… сек.», во время отправки — «Отправка на Диск...», при обрыве связи — «Нет связи · повтор через … сек.» и уведомление «Проверьте интернет соединение».</li>
@@ -526,6 +575,9 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
                 <div class="field"><label>Номер заявки в печать</label><input type="text" id="order-request" placeholder="261110-1"></div>
                 <div class="field"><label>КП</label><input type="text" id="order-kp" placeholder="КП-123"></div>
                 <div class="field"><label>Счёт</label><input type="text" id="order-invoice" placeholder="СЧ-456"></div>
+                <div class="field"><label>Тип печати</label><input type="text" id="order-print-type" value="SLS" placeholder="SLS"></div>
+                <div class="field"><label>Название принтера</label><input type="text" id="order-printer-name" value="P360 TPM3D" placeholder="P360 TPM3D"></div>
+                <div class="field"><label>Название материала</label><input type="text" id="order-material-name" value="PA12 GF30" placeholder="PA12 GF30"></div>
                 <div class="field"><label>Заказ в производство</label><input type="text" id="order-production" placeholder="ПР-789"></div>
                 <div class="field"><label>Кто вносит заказ *</label><select id="order-creator" required></select></div>
             </div>
@@ -607,14 +659,30 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
     </div>
 </div>
 
+<!-- ВАЖНОЕ НАПОМИНАНИЕ / НОВЫЙ ЗАКАЗ -->
+<div class="modal-overlay" id="modal-urgent-alert">
+    <div class="modal">
+        <div class="urgent-icon"><i class="fa-solid fa-triangle-exclamation" id="urgent-alert-icon"></i></div>
+        <div class="urgent-title" id="urgent-alert-title"></div>
+        <div class="urgent-details" id="urgent-alert-details" style="display:none;"></div>
+        <button type="button" class="urgent-ok-btn" id="urgent-alert-ok-btn" onclick="closeUrgentAlert()" disabled>ОК (2)</button>
+    </div>
+</div>
+
 <div id="toast-container"></div>
 
 <script>
 /* ============================================================
    КОНСТАНТЫ
    ============================================================ */
-const APP_VERSION = 'v16';
-const APP_CODE = '221126003200';
+const APP_VERSION = 'v17';
+const APP_CODE = '241126175500';
+const DEFAULT_PRINT_TYPE = 'SLS';
+const DEFAULT_PRINTER_NAME = 'P360 TPM3D';
+const DEFAULT_MATERIAL_NAME = 'PA12 GF30';
+const STAGE_STATUS_PLANNED = 'planned';
+const STAGE_STATUS_COMPLETED = 'completed';
+const COMPLETED_STAGE_COLOR = '#64748b';
 const STORAGE_KEY = 'mes_3d_avrora_v6_state';
 const EMPTY_FLAG_KEY = 'mes_3d_avrora_v6_explicit_empty';
 const SESSION_USER_KEY = 'mes_3d_avrora_current_user';
@@ -796,15 +864,17 @@ const DEFAULT_EMPLOYEES = [
     { id: 'sergey_mai', name: 'Сергей МАИ', role: 'Окрашивание',       active: true, accessLevel: ACCESS_VIEW },
 ];
 const DEFAULT_ACTIVITIES = [
-    { id: 'print_start',     name: 'Запуск печати',           shortName: 'Печать',      color: '#2563eb', icon: 'fa-print',               category: 'equipment' },
-    { id: 'unpack',          name: 'Распаковка принтера',      shortName: 'Распаковка',  color: '#0d9488', icon: 'fa-box-open',            category: 'manual' },
-    { id: 'sandblast',       name: 'Пескоструйная обработка',  shortName: 'Пескоструй',  color: '#d97706', icon: 'fa-spray-can-sparkles',  category: 'manual' },
-    { id: 'submit_to_paint', name: 'Передать в окрашивание',   shortName: 'В окрашивание', color: '#0891b2', icon: 'fa-arrow-right',         category: 'manual' },
-    { id: 'painting',        name: 'Окрашивание',              shortName: 'Окрашивание', color: '#7c3aed', icon: 'fa-paint-roller',        category: 'manual' },
-    { id: 'take_from_paint', name: 'Забрать из окрашивания',   shortName: 'Из окрашивания', color: '#0e7490', icon: 'fa-arrow-left',          category: 'manual' },
-    { id: 'packing',         name: 'Упаковка товара',          shortName: 'Упаковка',    color: '#16a34a', icon: 'fa-boxes-packing',       category: 'manual' },
-    { id: 'shipping',        name: 'Отгрузка товара',          shortName: 'Отгрузка',    color: '#e11d48', icon: 'fa-truck-fast',          category: 'deadline' },
-    { id: 'maintenance',     name: 'Профилактика принтера',    shortName: 'Профилактика', color: '#9333ea', icon: 'fa-screwdriver-wrench', category: 'maintenance' },
+    { id: 'new_order',          name: 'НОВЫЙ ЗАКАЗ',              shortName: 'НОВЫЙ ЗАКАЗ',     color: '#ef4444', icon: 'fa-circle-exclamation',  category: 'alert' },
+    { id: 'print_start',        name: 'Запуск печати',            shortName: 'Печать',          color: '#2563eb', icon: 'fa-print',               category: 'equipment' },
+    { id: 'unpack',             name: 'Распаковка принтера',      shortName: 'Распаковка',      color: '#0d9488', icon: 'fa-box-open',            category: 'manual' },
+    { id: 'sandblast',          name: 'Пескоструйная обработка',  shortName: 'Пескоструй',      color: '#d97706', icon: 'fa-spray-can-sparkles',  category: 'manual' },
+    { id: 'submit_to_paint',    name: 'Передать в окрашивание',   shortName: 'В окрашивание',   color: '#0891b2', icon: 'fa-arrow-right',         category: 'manual' },
+    { id: 'painting',           name: 'Окрашивание',              shortName: 'Окрашивание',     color: '#7c3aed', icon: 'fa-paint-roller',        category: 'manual' },
+    { id: 'take_from_paint',    name: 'Забрать из окрашивания',   shortName: 'Из окрашивания',  color: '#0e7490', icon: 'fa-arrow-left',          category: 'manual' },
+    { id: 'packing',            name: 'Упаковка товара',          shortName: 'Упаковка',        color: '#16a34a', icon: 'fa-boxes-packing',       category: 'manual' },
+    { id: 'delivery_to_office', name: 'ДОСТАВКА ДО ОФИСА',        shortName: 'Доставка в офис', color: '#ec4899', icon: 'fa-car',                 category: 'manual' },
+    { id: 'shipping',           name: 'Отгрузка товара',          shortName: 'Отгрузка',        color: '#e11d48', icon: 'fa-truck-fast',          category: 'deadline' },
+    { id: 'maintenance',        name: 'Профилактика принтера',    shortName: 'Профилактика',    color: '#9333ea', icon: 'fa-screwdriver-wrench',  category: 'maintenance' },
 ];
 
 /* ============================================================
@@ -831,6 +901,148 @@ function formatDateHuman(isoStr) {
     const d = new Date(isoStr); if (isNaN(d.getTime())) return isoStr;
     return String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 }
+
+/* ============================================================
+   ВАЖНЫЕ ЦЕНТРАЛЬНЫЕ УВЕДОМЛЕНИЯ (С ТАЙМЕРОМ 2 СЕК.)
+   ============================================================ */
+let _urgentAlertQueue = [];
+let _urgentAlertTimer = null;
+let _urgentAlertActive = false;
+
+function showUrgentAlert({ title, detailsHtml = '', okLabel = 'ОК', seconds = 2, iconClass = 'fa-triangle-exclamation' }) {
+    _urgentAlertQueue.push({ title, detailsHtml, okLabel, seconds, iconClass });
+    if (!_urgentAlertActive) _displayNextUrgentAlert();
+}
+function _displayNextUrgentAlert() {
+    if (_urgentAlertQueue.length === 0) {
+        _urgentAlertActive = false;
+        return;
+    }
+    _urgentAlertActive = true;
+    const item = _urgentAlertQueue.shift();
+    const overlay = document.getElementById('modal-urgent-alert');
+    const titleEl = document.getElementById('urgent-alert-title');
+    const detailsEl = document.getElementById('urgent-alert-details');
+    const iconEl = document.getElementById('urgent-alert-icon');
+    const btn = document.getElementById('urgent-alert-ok-btn');
+    if (!overlay || !titleEl || !btn) { _urgentAlertActive = false; return; }
+
+    if (iconEl) iconEl.className = 'fa-solid ' + (item.iconClass || 'fa-triangle-exclamation');
+    titleEl.textContent = item.title || '';
+    if (detailsEl) {
+        if (item.detailsHtml) {
+            detailsEl.innerHTML = item.detailsHtml;
+            detailsEl.style.display = 'block';
+        } else {
+            detailsEl.innerHTML = '';
+            detailsEl.style.display = 'none';
+        }
+    }
+
+    if (_urgentAlertTimer) { clearInterval(_urgentAlertTimer); _urgentAlertTimer = null; }
+    let left = Math.max(1, parseInt(item.seconds, 10) || 2);
+    const label = item.okLabel || 'ОК';
+    btn.disabled = true;
+    btn.textContent = `${label} (${left})`;
+    overlay.classList.add('open');
+
+    _urgentAlertTimer = setInterval(() => {
+        left--;
+        if (left <= 0) {
+            clearInterval(_urgentAlertTimer);
+            _urgentAlertTimer = null;
+            btn.disabled = false;
+            btn.textContent = label;
+        } else {
+            btn.textContent = `${label} (${left})`;
+        }
+    }, 1000);
+}
+function closeUrgentAlert() {
+    const btn = document.getElementById('urgent-alert-ok-btn');
+    if (btn && btn.disabled) return;
+    if (_urgentAlertTimer) { clearInterval(_urgentAlertTimer); _urgentAlertTimer = null; }
+    const overlay = document.getElementById('modal-urgent-alert');
+    if (overlay) overlay.classList.remove('open');
+    _urgentAlertActive = false;
+    if (_urgentAlertQueue.length > 0) {
+        setTimeout(_displayNextUrgentAlert, 150);
+    }
+}
+function showPackingWriteoffAlert() {
+    showUrgentAlert({
+        title: 'НЕ ЗАБУДЬ ОФОРМИТЬ ДОКУМЕНТЫ НА СПИСАНИЕ!!!',
+        detailsHtml: 'Этап <b>«Упаковка товара»</b> отмечен как выполненный. Пожалуйста, оформите необходимые документы на списание.',
+        okLabel: 'ОК',
+        seconds: 2,
+        iconClass: 'fa-triangle-exclamation',
+    });
+}
+function showNewOrdersRegisteredAlert(newOrdersList) {
+    if (!Array.isArray(newOrdersList) || newOrdersList.length === 0) return;
+    const userName = state.currentUser ? state.currentUser.name : 'Пользователь';
+    const itemsHtml = newOrdersList.map(o => {
+        const cust = escapeHtml(o.customer || 'Без клиента');
+        const req = o.requestNumber ? ' · заявка <b>' + escapeHtml(o.requestNumber) + '</b>' : '';
+        const newSt = (o.stages || []).find(s => isNewOrderActivity(s.activityId) && !isStageCompleted(s));
+        const dt = newSt && newSt.date ? ' · ' + escapeHtml(newSt.date) : '';
+        return `<div style="margin-bottom:3px;">• <b>${cust}</b>${req}${dt}</div>`;
+    }).join('');
+    showUrgentAlert({
+        title: `Пользователь ${userName}, обратите внимание, в системе зарегистрирован новый заказ!`,
+        detailsHtml: itemsHtml,
+        okLabel: 'ОК',
+        seconds: 2,
+        iconClass: 'fa-circle-exclamation',
+    });
+}
+function isStageCompleted(stage) {
+    return !!stage && stage.status === STAGE_STATUS_COMPLETED;
+}
+function getStageStatusLabel(stage) {
+    return isStageCompleted(stage) ? 'Выполнен' : 'Запланирован';
+}
+function isNewOrderActivity(activityId) {
+    if (!activityId) return false;
+    if (activityId === 'new_order') return true;
+    const act = state.activities.find(a => a.id === activityId);
+    return !!(act && (act.name || '').trim().toLowerCase() === 'новый заказ');
+}
+function isPackingActivity(activityId) {
+    if (!activityId) return false;
+    if (activityId === 'packing') return true;
+    const act = state.activities.find(a => a.id === activityId);
+    return !!(act && (act.name || '').trim().toLowerCase().includes('упаковка'));
+}
+function hasActiveNewOrderStages() {
+    for (const o of (state.orders || [])) {
+        for (const s of (o.stages || [])) {
+            if (isNewOrderActivity(s.activityId) && !isStageCompleted(s)) return true;
+        }
+    }
+    return false;
+}
+function _findNewlyAddedNewOrders(prevOrders, nextOrders) {
+    const prevOrderHasActive = new Set();
+    const prevStageKeys = new Set();
+    for (const o of (prevOrders || [])) {
+        for (const s of (o.stages || [])) {
+            if (isNewOrderActivity(s.activityId) && !isStageCompleted(s)) {
+                prevOrderHasActive.add(o.id);
+                if (s.id) prevStageKeys.add(o.id + '::' + s.id);
+            }
+        }
+    }
+    const found = [];
+    for (const o of (nextOrders || [])) {
+        const activeNewStages = (o.stages || []).filter(s => isNewOrderActivity(s.activityId) && !isStageCompleted(s));
+        if (activeNewStages.length === 0) continue;
+        const isBrandNew = !prevOrderHasActive.has(o.id) || activeNewStages.some(s => s.id && !prevStageKeys.has(o.id + '::' + s.id));
+        if (isBrandNew) found.push(o);
+    }
+    return found;
+}
+
 
 /* ============================================================
    ПЕРСИСТЕНЦИЯ
@@ -1347,6 +1559,9 @@ function _describeOrderChanges(oldO, newO) {
     const oldReq = (oldO.requestNumber || '').trim(), newReq = (newO.requestNumber || '').trim();
     const oldKp = (oldO.kp || '').trim(), newKp = (newO.kp || '').trim();
     const oldInv = (oldO.invoice || '').trim(), newInv = (newO.invoice || '').trim();
+    const oldPrintType = (oldO.printType || '').trim(), newPrintType = (newO.printType || '').trim();
+    const oldPrinter = (oldO.printerName || '').trim(), newPrinter = (newO.printerName || '').trim();
+    const oldMaterial = (oldO.materialName || '').trim(), newMaterial = (newO.materialName || '').trim();
     const oldProd = (oldO.productionOrder || '').trim(), newProd = (newO.productionOrder || '').trim();
     const oldNotes = (oldO.notes || '').trim(), newNotes = (newO.notes || '').trim();
     const oldCreator = (oldO.creatorName || '').trim(), newCreator = (newO.creatorName || '').trim();
@@ -1355,6 +1570,9 @@ function _describeOrderChanges(oldO, newO) {
     if (oldReq !== newReq) changes.push(`заявка: «${oldReq || '—'}» → «${newReq || '—'}»`);
     if (oldKp !== newKp) changes.push(`КП: «${oldKp || '—'}» → «${newKp || '—'}»`);
     if (oldInv !== newInv) changes.push(`счёт: «${oldInv || '—'}» → «${newInv || '—'}»`);
+    if (oldPrintType !== newPrintType) changes.push(`тип печати: «${oldPrintType || '—'}» → «${newPrintType || '—'}»`);
+    if (oldPrinter !== newPrinter) changes.push(`принтер: «${oldPrinter || '—'}» → «${newPrinter || '—'}»`);
+    if (oldMaterial !== newMaterial) changes.push(`материал: «${oldMaterial || '—'}» → «${newMaterial || '—'}»`);
     if (oldProd !== newProd) changes.push(`заказ в пр-во: «${oldProd || '—'}» → «${newProd || '—'}»`);
     if (oldCreator !== newCreator) changes.push(`автор: ${oldCreator || '—'} → ${newCreator || '—'}`);
     if (oldNotes !== newNotes) {
@@ -1387,6 +1605,9 @@ function _describeOrderChanges(oldO, newO) {
         }
         if ((os.comment || '').trim() !== (ns.comment || '').trim()) {
             changes.push(`изменён комментарий этапа «${actLabel}»: «${(os.comment || '').trim() || '—'}» → «${(ns.comment || '').trim() || '—'}»`);
+        }
+        if (isStageCompleted(os) !== isStageCompleted(ns)) {
+            changes.push(`статус этапа «${actLabel}»: ${getStageStatusLabel(os)} → ${getStageStatusLabel(ns)}`);
         }
     }
     for (const os of oldList) {
@@ -1835,7 +2056,7 @@ function initCalendar() {
         editable: _isEditor(), eventDurationEditable: _isEditor(), eventStartEditable: _isEditor(), eventResizableFromStart: _isEditor(), selectable: _isEditor(),
         eventDisplay: 'block', dayMaxEventRows: 4, moreLinkClick: 'popover',
         eventOrder: function (a, b) {
-            const getPrio = (id) => { if (id === 'print_start') return 0; if (id === 'shipping') return 999; const idx = state.activities.findIndex(x => x.id === id); return 10 + (idx >= 0 ? idx : 999); };
+            const getPrio = (id) => { if (id === 'new_order') return -1; if (id === 'print_start') return 0; if (id === 'shipping') return 999; const idx = state.activities.findIndex(x => x.id === id); return 10 + (idx >= 0 ? idx : 999); };
             const diff = getPrio(a.extendedProps.activityId) - getPrio(b.extendedProps.activityId);
             if (diff !== 0) return diff;
             return (a.title || '').localeCompare(b.title || '');
@@ -1852,7 +2073,11 @@ function initCalendar() {
             const parts = [];
             if (p.customer) parts.push('Клиент: ' + p.customer);
             if (p.requestNumber) parts.push('Заявка: ' + p.requestNumber);
+            if (p.printType || p.printerName || p.materialName) {
+                parts.push('Печать: ' + [p.printType, p.printerName, p.materialName].filter(Boolean).join(' / '));
+            }
             if (p.activityName) parts.push('Этап: ' + p.activityName);
+            if (p.statusLabel) parts.push('Статус: ' + p.statusLabel);
             if (p.assignee) parts.push('Исполнитель: ' + p.assignee);
             if (p.comment) parts.push('Комментарий: ' + p.comment);
             if (p.orderNotes) parts.push('Заметка: ' + p.orderNotes);
@@ -1901,7 +2126,8 @@ function showDayEventsPopover(dayEl, dateStr) {
     popup.className = 'day-hover-popup';
     let html = `<div class="popup-date">📅 ${formatHumanDate(dateStr)} · ${allEvents.length} этап(ов)</div>`;
     for (const ev of allEvents) {
-        html += `<div class="popup-event" style="border-left-color:${ev.color};"><span class="time-tag">${escapeHtml(ev.activityShort || ev.activityName)}</span><strong>${escapeHtml(ev.title)}</strong><div class="who">Исполнитель: ${escapeHtml(ev.assignee)}${ev.comment ? '<br>💬 ' + escapeHtml(ev.comment) : ''}</div></div>`;
+        const stTag = ev.completed ? ' <span style="color:#475569;font-weight:700;">[✓ Выполнен]</span>' : '';
+        html += `<div class="popup-event" style="border-left-color:${ev.color};${ev.completed ? 'opacity:.75;background:#e2e8f0;' : ''}"><span class="time-tag">${escapeHtml(ev.activityShort || ev.activityName)}</span><strong>${escapeHtml(ev.title)}</strong>${stTag}<div class="who">Исполнитель: ${escapeHtml(ev.assignee)}${ev.comment ? '<br>💬 ' + escapeHtml(ev.comment) : ''}</div></div>`;
     }
     popup.innerHTML = html;
     document.body.appendChild(popup);
@@ -1966,7 +2192,8 @@ function getAllEventsForDate(dateStr) {
                 }
                 let stageLabel = act.shortName || act.name;
                 if (stage.activityId === 'print_start' && printStarts.length >= 2 && printMap[stage.id]) stageLabel = 'Запуск №' + printMap[stage.id];
-                result.push({ title: titleMain || stageLabel, color: act.color, activityName: act.name, activityShort: stageLabel, assignee: stage.assigneeName || '—', comment: stage.comment || '' });
+                const done = isStageCompleted(stage);
+                result.push({ title: (done ? '✓ ' : '') + (titleMain || stageLabel), color: done ? COMPLETED_STAGE_COLOR : act.color, completed: done, activityName: act.name, activityShort: stageLabel, assignee: stage.assigneeName || '—', comment: stage.comment || '' });
             }
         }
     }
@@ -1993,12 +2220,12 @@ function correctStageOrder(order) {
     }
     const lastShippingDate = shippings.length > 0 ? shippings.map(s => s.date).sort().reverse()[0] : null;
     for (const st of order.stages) {
-        if (st.activityId === 'print_start' || st.activityId === 'shipping') continue;
+        if (st.activityId === 'print_start' || st.activityId === 'shipping' || st.activityId === 'new_order' || st.activityId === 'maintenance') continue;
         if (st.date < firstPrintDate) {
             const oldDate = st.date; st.date = firstPrintDate;
             if (st.endDate && st.endDate < st.date) st.endDate = null;
             changes.push({ stage: st, oldDate, newDate: st.date, reason: 'раньше запуска' });
-        } else if (lastShippingDate && st.date > lastShippingDate) {
+        } else if (lastShippingDate && st.activityId !== 'delivery_to_office' && st.date > lastShippingDate) {
             const oldDate = st.date; st.date = lastShippingDate;
             if (st.endDate && st.endDate < st.date) st.endDate = null;
             changes.push({ stage: st, oldDate, newDate: st.date, reason: 'позже отгрузки' });
@@ -2028,7 +2255,7 @@ function buildEventsArray() {
     for (const order of state.orders) {
         if (!order || typeof order !== 'object') continue;
         if (filterCre && filterCre !== 'ALL' && order.creatorName !== filterCre) continue;
-        if (search) { const hay = [order.customer, order.requestNumber, order.kp, order.invoice, order.productionOrder, order.creatorName, order.notes].filter(Boolean).join(' ').toLowerCase(); if (!hay.includes(search)) continue; }
+        if (search) { const hay = [order.customer, order.requestNumber, order.kp, order.invoice, order.printType, order.printerName, order.materialName, order.productionOrder, order.creatorName, order.notes].filter(Boolean).join(' ').toLowerCase(); if (!hay.includes(search)) continue; }
         if (!Array.isArray(order.stages)) continue;
         const printStarts = order.stages.filter(s => s.activityId === 'print_start').sort((a,b) => a.date.localeCompare(b.date));
         const printMap = {}; printStarts.forEach((s, i) => { printMap[s.id] = i + 1; });
@@ -2039,24 +2266,35 @@ function buildEventsArray() {
             const isDimmed = state.activeFilter && state.activeFilter.type === 'activity' && stage.activityId !== state.activeFilter.value;
             const act = actMap[stage.activityId] || { name: stage.activityId, shortName: stage.activityId, color: '#64748b', icon: 'fa-circle' };
             const hasEnd = isValidISODate(stage.endDate) && stage.endDate > stage.date;
+            const completed = isStageCompleted(stage);
+            const isActiveNewOrder = isNewOrderActivity(stage.activityId) && !completed;
             let titleMain = '';
             if (order.customer || order.requestNumber) {
                 titleMain = state.titleMode === 'request' ? (order.requestNumber || '?') : (order.customer || '?');
             }
             let stageLabel = act.shortName || act.name;
             if (stage.activityId === 'print_start' && multiPrint && printMap[stage.id]) stageLabel = 'Запуск №' + printMap[stage.id];
-            const title = titleMain ? (titleMain + ' · ' + stageLabel) : stageLabel;
+            const prefix = completed ? '✓ ' : (isActiveNewOrder ? '❗ ' : '');
+            const title = prefix + (titleMain ? (titleMain + ' · ' + stageLabel) : stageLabel);
+            const bgColor = completed ? COMPLETED_STAGE_COLOR : act.color;
+            const classNames = [];
+            if (isDimmed) classNames.push('fc-event-dimmed');
+            if (completed) classNames.push('fc-event-completed');
+            if (isActiveNewOrder) classNames.push('fc-event-new-order-blink');
             const evObj = {
                 id: stage.id || uid(), title, start: stage.date, allDay: true,
-                backgroundColor: act.color, borderColor: act.color, textColor: '#ffffff',
+                backgroundColor: bgColor, borderColor: bgColor, textColor: '#ffffff',
                 extendedProps: {
                     orderId: order.id, activityId: stage.activityId, customer: order.customer, requestNumber: order.requestNumber,
+                    printType: order.printType || '', printerName: order.printerName || '', materialName: order.materialName || '',
                     activityName: act.name, assignee: stage.assigneeName || '—', creator: order.creatorName,
                     comment: stage.comment || '', orderNotes: order.notes || '',
+                    status: completed ? STAGE_STATUS_COMPLETED : STAGE_STATUS_PLANNED,
+                    statusLabel: getStageStatusLabel(stage),
                 },
             };
             if (hasEnd) evObj.end = addDays(stage.endDate, 1);
-            if (isDimmed) evObj.classNames = ['fc-event-dimmed'];
+            if (classNames.length) evObj.classNames = classNames;
             events.push(evObj);
         }
     }
@@ -2147,11 +2385,23 @@ function updateTitleToggleBtn() {
 }
 function renderKPIs() {
     const bar = document.getElementById('kpi-bar');
-    const counts = {}; for (const a of state.activities) counts[a.id] = 0;
-    for (const order of state.orders) for (const stage of (order.stages || [])) { if (stage && stage.date && counts[stage.activityId] !== undefined) counts[stage.activityId]++; }
+    const counts = {};
+    const activeNewOrderCounts = {};
+    for (const a of state.activities) { counts[a.id] = 0; activeNewOrderCounts[a.id] = 0; }
+    for (const order of state.orders) {
+        for (const stage of (order.stages || [])) {
+            if (stage && stage.date && counts[stage.activityId] !== undefined) {
+                counts[stage.activityId]++;
+                if (isNewOrderActivity(stage.activityId) && !isStageCompleted(stage)) {
+                    activeNewOrderCounts[stage.activityId]++;
+                }
+            }
+        }
+    }
     let html = `<div class="kpi-card" onclick="showKPIDetails('orders')" title="Все заказы"><div><div class="kpi-label">Заказов в плане</div><div class="kpi-value">${state.orders.length}</div></div><i class="fa-solid fa-file-invoice kpi-icon" style="color:var(--accent-blue);"></i></div>`;
     for (const act of state.activities) {
-        html += `<div class="kpi-card" onclick="showKPIDetails('${act.id}')" title="${escapeHtml(act.name)}"><div><div class="kpi-label">${escapeHtml(act.name)}</div><div class="kpi-value" style="color:${act.color};">${counts[act.id] || 0}</div></div><i class="fa-solid ${act.icon || 'fa-circle'} kpi-icon" style="color:${act.color};"></i></div>`;
+        const blinkCls = (isNewOrderActivity(act.id) && (activeNewOrderCounts[act.id] || 0) > 0) ? ' kpi-new-order-blink' : '';
+        html += `<div class="kpi-card${blinkCls}" onclick="showKPIDetails('${act.id}')" title="${escapeHtml(act.name)}"><div><div class="kpi-label">${escapeHtml(act.name)}</div><div class="kpi-value" style="color:${act.color};">${counts[act.id] || 0}</div></div><i class="fa-solid ${act.icon || 'fa-circle'} kpi-icon" style="color:${act.color};"></i></div>`;
     }
     bar.innerHTML = html;
 }
@@ -2172,15 +2422,24 @@ function showKPIDetails(type) {
         for (const order of state.orders) for (const stage of (order.stages || [])) { if (stage.activityId === type && stage.date) items.push({ order, stage }); }
         items.sort((a, b) => a.stage.date.localeCompare(b.stage.date));
         body.innerHTML = items.length === 0 ? '<p style="color:var(--text-muted);padding:20px;text-align:center;">Нет событий</p>'
-            : items.map(({ order, stage }) => `<div style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:4px;cursor:pointer;border-left:3px solid ${act.color};" onclick="closeModal('modal-details');openOrderModal('${order.id}')"><div style="display:flex;justify-content:space-between;"><strong style="font-size:12px;">${escapeHtml(order.customer || order.id)}</strong><span style="font-family:'JetBrains Mono',monospace;font-size:11px;">${escapeHtml(order.requestNumber || '')}</span></div><div style="font-size:11px;color:var(--text-secondary);">📅 ${stage.date}${stage.endDate ? ' → ' + stage.endDate : ''} · Исп: <strong>${escapeHtml(stage.assigneeName || '—')}</strong>${stage.comment ? '<br>💬 ' + escapeHtml(stage.comment) : ''}</div></div>`).join('');
+            : items.map(({ order, stage }) => {
+                const done = isStageCompleted(stage);
+                const borderCol = done ? COMPLETED_STAGE_COLOR : act.color;
+                const badge = done
+                    ? '<span class="stage-status-badge completed">✓ Выполнен</span>'
+                    : '<span class="stage-status-badge planned">Запланирован</span>';
+                return `<div style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:4px;cursor:pointer;border-left:3px solid ${borderCol};${done ? 'background:#f1f5f9;' : ''}" onclick="closeModal('modal-details');openOrderModal('${order.id}')"><div style="display:flex;justify-content:space-between;align-items:center;"><strong style="font-size:12px;">${escapeHtml(order.customer || order.id)}${badge}</strong><span style="font-family:'JetBrains Mono',monospace;font-size:11px;">${escapeHtml(order.requestNumber || '')}</span></div><div style="font-size:11px;color:var(--text-secondary);">📅 ${stage.date}${stage.endDate ? ' → ' + stage.endDate : ''} · Исп: <strong>${escapeHtml(stage.assigneeName || '—')}</strong>${stage.comment ? '<br>💬 ' + escapeHtml(stage.comment) : ''}</div></div>`;
+            }).join('');
     }
     document.getElementById('modal-details').classList.add('open');
 }
 function renderLegend() {
     const bar = document.getElementById('legend-bar');
+    const hasNewOrders = hasActiveNewOrderStages();
     const chips = state.activities.map(a => {
         const isActive = state.activeFilter && state.activeFilter.type === 'activity' && state.activeFilter.value === a.id;
-        return `<span class="legend-chip ${isActive ? 'active-filter' : ''}" style="background:${a.color}20;color:${a.color};border-color:${a.color}40;" onclick="toggleActivityFilter('${a.id}')"><i class="fa-solid ${a.icon || 'fa-circle'}" style="font-size:9px;"></i> ${escapeHtml(a.name)}</span>`;
+        const blinkCls = (isNewOrderActivity(a.id) && hasNewOrders) ? ' legend-new-order-blink' : '';
+        return `<span class="legend-chip ${isActive ? 'active-filter' : ''}${blinkCls}" style="background:${a.color}20;color:${a.color};border-color:${a.color}40;" onclick="toggleActivityFilter('${a.id}')"><i class="fa-solid ${a.icon || 'fa-circle'}" style="font-size:9px;"></i> ${escapeHtml(a.name)}</span>`;
     }).join('');
     bar.innerHTML = `<button class="legend-toggle" id="title-toggle-btn" onclick="toggleTitleMode()"></button><span style="width:1px;height:18px;background:var(--border);margin:0 4px;"></span>` + chips + `<span class="legend-chip" style="background:var(--bg-hover);color:var(--text-muted);margin-left:auto;" onclick="clearFilter()"><i class="fa-solid fa-xmark"></i> Сбросить</span>`;
     updateTitleToggleBtn();
@@ -2259,6 +2518,9 @@ function openOrderModal(orderId = null, opts = {}) {
         document.getElementById('order-request').value = order.requestNumber || '';
         document.getElementById('order-kp').value = order.kp || '';
         document.getElementById('order-invoice').value = order.invoice || '';
+        document.getElementById('order-print-type').value = order.printType !== undefined ? order.printType : DEFAULT_PRINT_TYPE;
+        document.getElementById('order-printer-name').value = order.printerName !== undefined ? order.printerName : DEFAULT_PRINTER_NAME;
+        document.getElementById('order-material-name').value = order.materialName !== undefined ? order.materialName : DEFAULT_MATERIAL_NAME;
         document.getElementById('order-production').value = order.productionOrder || '';
         document.getElementById('order-creator').value = order.creatorName;
         document.getElementById('order-notes').value = order.notes || '';
@@ -2268,6 +2530,9 @@ function openOrderModal(orderId = null, opts = {}) {
             document.getElementById('order-changelog-list').innerHTML = order.changeLog.slice(0, 12).map(l => `<div style="margin-top:2px;">• ${escapeHtml(l.user)}, ${escapeHtml(l.time)}: ${escapeHtml(l.text)}</div>`).join('');
         }
     } else {
+        document.getElementById('order-print-type').value = DEFAULT_PRINT_TYPE;
+        document.getElementById('order-printer-name').value = DEFAULT_PRINTER_NAME;
+        document.getElementById('order-material-name').value = DEFAULT_MATERIAL_NAME;
         if (opts.maintenance) {
             title.textContent = 'Профилактика принтера';
             addStageRow({ activityId: 'maintenance', date: today(), assigneeName: 'Юрий', comment: '' });
@@ -2279,10 +2544,12 @@ function openOrderModal(orderId = null, opts = {}) {
     if (!isE) {
         document.querySelectorAll('#form-order input, #form-order select, #form-order textarea').forEach(el => el.disabled = true);
         document.querySelectorAll('#stages-container .remove-stage').forEach(btn => btn.style.display = 'none');
+        document.querySelectorAll('#stages-container .complete-stage').forEach(btn => btn.disabled = true);
         document.querySelectorAll('#form-order .editor-only').forEach(el => el.style.display = 'none');
         document.querySelectorAll('#stages-container .drag-handle').forEach(el => el.style.display = 'none');
     } else {
         document.querySelectorAll('#form-order input, #form-order select, #form-order textarea').forEach(el => el.disabled = false);
+        document.querySelectorAll('#stages-container .complete-stage').forEach(btn => btn.disabled = false);
         document.querySelectorAll('#form-order .editor-only').forEach(el => el.style.display = '');
         document.querySelectorAll('#stages-container .drag-handle').forEach(el => el.style.display = '');
     }
@@ -2306,27 +2573,30 @@ function addStageRow(stage = null) {
     row.className = 'stage-row';
     row.draggable = false;
     row.dataset.stageId = (stage && stage.id) ? stage.id : uid();
+    const isCompleted = isStageCompleted(stage);
+    row.dataset.status = isCompleted ? STAGE_STATUS_COMPLETED : STAGE_STATUS_PLANNED;
+    row.dataset.writeoffNotified = isCompleted ? '1' : '0';
     const actOptions = state.activities.map(a => `<option value="${a.id}"${stage && stage.activityId === a.id ? ' selected' : ''}>${escapeHtml(a.name)}</option>`).join('');
     const activityId = stage ? stage.activityId : 'print_start';
     const defaultAssignee = (stage && stage.assigneeName) || _getDefaultAssignee(activityId);
     const empOptions = _visibleEmployees().map(e => `<option value="${escapeHtml(e.name)}"${e.name === defaultAssignee ? ' selected' : ''}>${escapeHtml(e.name)}</option>`).join('');
-    const currentAct = state.activities.find(a => a.id === activityId);
-    const color = currentAct ? currentAct.color : '#64748b';
-    row.style.background = color + '20';
     row.innerHTML = `
         <span class="drag-handle" title="Перетащите для изменения порядка">⋮⋮</span>
-        <div class="field"><label>Этап</label><select class="stage-activity" required>${actOptions}</select></div>
+        <div class="field"><label>Этап <span class="stage-status-badge ${isCompleted ? 'completed' : 'planned'}">${isCompleted ? '✓ Выполнен' : 'Запланирован'}</span></label><select class="stage-activity" required>${actOptions}</select></div>
         <div class="field"><label>Начало</label><input type="date" class="stage-date" value="${stage ? stage.date : defaultDate}" required></div>
         <div class="field"><label>Окончание</label><input type="date" class="stage-end" value="${stage ? (stage.endDate || '') : ''}"></div>
         <div class="field"><label>Исполнитель</label><select class="stage-assignee" required>${empOptions}</select></div>
         <div class="field"><label>Комментарий</label><input type="text" class="stage-comment" value="${escapeHtml(stage ? (stage.comment || '') : '')}" placeholder="Причина / примечание"></div>
-        <button type="button" class="remove-stage" onclick="this.closest('.stage-row').remove()">&times;</button>
+        <div class="stage-actions">
+            <button type="button" class="complete-stage${isCompleted ? ' is-done' : ''}" onclick="toggleStageCompleted(this)" title="${isCompleted ? 'Этап выполнен (нажмите, чтобы вернуть в «Запланирован»)' : 'Отметить этап как выполненный'}"><i class="fa-solid fa-check"></i></button>
+            <button type="button" class="remove-stage" onclick="this.closest('.stage-row').remove()" title="Удалить этап">&times;</button>
+        </div>
     `;
     container.appendChild(row);
+    _applyStageRowAppearance(row);
     const actSel = row.querySelector('.stage-activity');
     actSel.addEventListener('change', function() {
-        const newAct = state.activities.find(a => a.id === this.value);
-        row.style.background = (newAct ? newAct.color : '#64748b') + '20';
+        _applyStageRowAppearance(row);
         if (this.value === 'painting' || this.value === 'submit_to_paint' || this.value === 'take_from_paint') {
             const assigneeSel = row.querySelector('.stage-assignee');
             if (assigneeSel) { const s = [...assigneeSel.options].find(o => o.value === 'Сергей МАИ'); if (s) assigneeSel.value = 'Сергей МАИ'; }
@@ -2349,6 +2619,40 @@ function addStageRow(stage = null) {
         row.draggable = false;
         container.querySelectorAll('.stage-row.drag-over').forEach(el => el.classList.remove('drag-over'));
     });
+}
+function _applyStageRowAppearance(row) {
+    if (!row) return;
+    const isCompleted = row.dataset.status === STAGE_STATUS_COMPLETED;
+    const actId = row.querySelector('.stage-activity')?.value;
+    const act = state.activities.find(a => a.id === actId);
+    const color = act ? act.color : '#64748b';
+    row.classList.toggle('stage-completed', isCompleted);
+    row.style.background = isCompleted ? '#e2e8f0' : (color + '20');
+    const badge = row.querySelector('.stage-status-badge');
+    if (badge) {
+        badge.className = 'stage-status-badge ' + (isCompleted ? 'completed' : 'planned');
+        badge.textContent = isCompleted ? '✓ Выполнен' : 'Запланирован';
+    }
+    const btn = row.querySelector('.complete-stage');
+    if (btn) {
+        btn.classList.toggle('is-done', isCompleted);
+        btn.title = isCompleted ? 'Этап выполнен (нажмите, чтобы вернуть в «Запланирован»)' : 'Отметить этап как выполненный';
+    }
+}
+function toggleStageCompleted(btn) {
+    if (!_isEditor()) { showToast('Только просмотр', 'error'); return; }
+    const row = btn.closest('.stage-row');
+    if (!row) return;
+    const nextCompleted = row.dataset.status !== STAGE_STATUS_COMPLETED;
+    row.dataset.status = nextCompleted ? STAGE_STATUS_COMPLETED : STAGE_STATUS_PLANNED;
+    _applyStageRowAppearance(row);
+    const actId = row.querySelector('.stage-activity')?.value;
+    if (nextCompleted && isPackingActivity(actId)) {
+        row.dataset.writeoffNotified = '1';
+        showPackingWriteoffAlert();
+    } else if (!nextCompleted) {
+        row.dataset.writeoffNotified = '0';
+    }
 }
 function _initStagesDragDrop() {
     const container = document.getElementById('stages-container');
@@ -2409,6 +2713,7 @@ function handleOrderSubmit(e) {
     const creatorName = document.getElementById('order-creator').value;
     const stages = [];
     let error = null;
+    let shouldAlertPackingWriteoff = false;
     document.querySelectorAll('#stages-container .stage-row').forEach(row => {
         const stageId = row.dataset.stageId || uid();
         const activityId = row.querySelector('.stage-activity').value;
@@ -2416,9 +2721,14 @@ function handleOrderSubmit(e) {
         const endDate = row.querySelector('.stage-end').value || null;
         const assigneeName = row.querySelector('.stage-assignee').value;
         const comment = row.querySelector('.stage-comment').value.trim();
+        const status = row.dataset.status === STAGE_STATUS_COMPLETED ? STAGE_STATUS_COMPLETED : STAGE_STATUS_PLANNED;
+        if (status === STAGE_STATUS_COMPLETED && isPackingActivity(activityId) && row.dataset.writeoffNotified !== '1') {
+            shouldAlertPackingWriteoff = true;
+            row.dataset.writeoffNotified = '1';
+        }
         if (!date) { error = 'Укажите дату начала'; return; }
         if (endDate && endDate < date) { error = 'Дата окончания раньше начала'; return; }
-        stages.push({ id: stageId, activityId, date, endDate, assigneeName, comment });
+        stages.push({ id: stageId, activityId, date, endDate, assigneeName, comment, status });
     });
     if (error) { showToast(error, 'error'); return; }
     if (stages.length === 0) { showToast('Добавьте хотя бы один этап', 'error'); return; }
@@ -2428,6 +2738,9 @@ function handleOrderSubmit(e) {
         id: id || uid(), customer, requestNumber,
         kp: document.getElementById('order-kp').value.trim(),
         invoice: document.getElementById('order-invoice').value.trim(),
+        printType: document.getElementById('order-print-type').value.trim(),
+        printerName: document.getElementById('order-printer-name').value.trim(),
+        materialName: document.getElementById('order-material-name').value.trim(),
         productionOrder: document.getElementById('order-production').value.trim(),
         notes: document.getElementById('order-notes').value.trim(),
         creatorName, stages, createdAt: today(),
@@ -2467,6 +2780,7 @@ function handleOrderSubmit(e) {
         showToast('Заказ добавлен', 'success');
     }
     closeModal('modal-order'); renderAll();
+    if (shouldAlertPackingWriteoff) showPackingWriteoffAlert();
 }
 function deleteOrder() {
     if (!_isEditor()) { showToast('Только просмотр', 'error'); return; }
@@ -2671,6 +2985,7 @@ function validateData(data) {
 }
 function applyImportedData(data, fromYandex = false) {
     const currentUserName = state.currentUser?.name;
+    const prevOrdersSnapshot = Array.isArray(state.orders) ? state.orders : [];
     validateData(data);
     state.employees = data.employees;
     state.activities = data.activities;
@@ -2688,6 +3003,10 @@ function applyImportedData(data, fromYandex = false) {
     state.yandexClean = !!fromYandex;
     saveToLocalStorage();
     renderAll();
+    const newlyFoundNewOrders = _findNewlyAddedNewOrders(prevOrdersSnapshot, state.orders);
+    if (newlyFoundNewOrders.length > 0) {
+        setTimeout(() => showNewOrdersRegisteredAlert(newlyFoundNewOrders), 200);
+    }
     setTimeout(checkOldOrders, 600);
     showToast('Загружено: ' + state.orders.length + ' заказов, ' + state.activities.length + ' этапов', 'success');
     closeModal('modal-load');
@@ -2872,7 +3191,7 @@ function closeModal(id) {
 }
 document.querySelectorAll('.modal-overlay').forEach(ov => {
     ov.addEventListener('click', (e) => {
-        if (e.target === ov && ov.id !== 'modal-start' && ov.id !== 'modal-user-select' && ov.id !== 'modal-welcome-log') {
+        if (e.target === ov && ov.id !== 'modal-start' && ov.id !== 'modal-user-select' && ov.id !== 'modal-welcome-log' && ov.id !== 'modal-urgent-alert') {
             ov.classList.remove('open');
             if (ov.id === 'modal-password') _pendingLoginUser = null;
             if (ov.id === 'modal-comment') { const cb = _reasonCancelCb; _reasonCb = null; _reasonCancelCb = null; if (cb) cb(); }
@@ -2909,7 +3228,7 @@ function _ensureAllDefaults() {
     if (state.activities.length !== beforeA) changed = true;
 
     // 3. Дедупликация служебных этапов по имени (на случай разных id)
-    const defaultActivityNames = ['передать в окрашивание', 'забрать из окрашивания', 'профилактика принтера'];
+    const defaultActivityNames = ['новый заказ', 'передать в окрашивание', 'забрать из окрашивания', 'доставка до офиса', 'профилактика принтера'];
     const seenDefault = new Set();
     const beforeA2 = state.activities.length;
     state.activities = state.activities.filter(a => {
@@ -2922,7 +3241,11 @@ function _ensureAllDefaults() {
     });
     if (state.activities.length !== beforeA2) changed = true;
 
-    // 4. Добавляем отсутствующие этапы-ограничители
+    // 4. Добавляем отсутствующие обязательные этапы
+    if (!state.activities.some(a => a.id === 'new_order' || (a.name || '').toLowerCase().trim() === 'новый заказ')) {
+        state.activities.unshift({ id: 'new_order', name: 'НОВЫЙ ЗАКАЗ', shortName: 'НОВЫЙ ЗАКАЗ', color: '#ef4444', icon: 'fa-circle-exclamation', category: 'alert' });
+        changed = true;
+    }
     if (!state.activities.some(a => a.id === 'submit_to_paint')) {
         const idx = state.activities.findIndex(a => a.id === 'painting');
         const newAct = { id: 'submit_to_paint', name: 'Передать в окрашивание', shortName: 'В окрашивание', color: '#0891b2', icon: 'fa-arrow-right', category: 'manual' };
@@ -2933,6 +3256,12 @@ function _ensureAllDefaults() {
         const idx = state.activities.findIndex(a => a.id === 'painting');
         const newAct = { id: 'take_from_paint', name: 'Забрать из окрашивания', shortName: 'Из окрашивания', color: '#0e7490', icon: 'fa-arrow-left', category: 'manual' };
         if (idx >= 0) state.activities.splice(idx + 1, 0, newAct); else state.activities.push(newAct);
+        changed = true;
+    }
+    if (!state.activities.some(a => a.id === 'delivery_to_office' || (a.name || '').toLowerCase().trim() === 'доставка до офиса')) {
+        const idx = state.activities.findIndex(a => a.id === 'shipping');
+        const newAct = { id: 'delivery_to_office', name: 'ДОСТАВКА ДО ОФИСА', shortName: 'Доставка в офис', color: '#ec4899', icon: 'fa-car', category: 'manual' };
+        if (idx >= 0) state.activities.splice(idx, 0, newAct); else state.activities.push(newAct);
         changed = true;
     }
     if (!state.activities.some(a => a.id === 'maintenance')) {
