@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<title>3D-Print Календарь Аврора — v17 [241126175500]</title>
+<title>3D-Print Календарь Аврора — v17.1 [261126124500]</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -251,7 +251,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <img id="topLogoAT" class="top-logo" alt="Аврора Карбон" title="Аврора Карбон Технолоджи">
     </div>
     <div class="app-title-wrap">
-        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v17</span></div>
+        <div class="app-title">3D-Print Календарь Аврора <span style="font-size:10px;color:var(--text-muted);font-weight:600;">v17.1</span></div>
         <div class="app-subtitle">Планирование запусков, постобработки и отгрузок</div>
     </div>
 
@@ -327,13 +327,20 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
         <div class="accordion-header" onclick="toggleAccordion('acc-history')"><span><i class="fa-solid fa-code-branch" style="color:var(--accent-teal);margin-right:6px;"></i> История версий и информация</span><i class="fa-solid fa-chevron-down arrow"></i></div>
         <div class="accordion-body">
             <div style="display:flex;flex-wrap:wrap;gap:10px 24px;margin-bottom:10px;font-weight:600;color:var(--text-primary);">
-                <span>Версия: <strong>v17</strong></span>
-                <span>Штамп: <strong>241126175500</strong></span>
+                <span>Версия: <strong>v17.1</strong></span>
+                <span>Штамп: <strong>261126124500</strong></span>
                 <span>Формат: <strong>JSON MES-3D v17</strong></span>
                 <span>Автор: <strong>Фомин Антон</strong></span>
                 <span>Связь: <a href="mailto:a.fomin@avrora-3d.ru" style="color:var(--accent-blue);">a.fomin@avrora-3d.ru</a></span>
             </div>
             <div style="border-top:1px solid var(--border);padding-top:8px;">
+                <strong style="color:var(--text-primary);">[v17.1 — 261126124500]</strong>
+                <ul style="margin-top:4px;margin-bottom:8px;">
+                    <li><b>Исправлено:</b> выгрузка на Яндекс.Диск больше не «молчит» — при отсутствии токена кнопка «На Диск» показывает «НЕТ ТОКЕНА (⚙️)», а ошибки API (нет прав записи, путь не найден) выводятся с пояснением вместо общего «Проверьте интернет соединение».</li>
+                    <li><b>Новое:</b> после каждой выгрузки программа проверяет, что изменился именно общий файл по публичной ссылке. Если запись ушла в личную копию на вашем Диске — кнопка становится оранжевой с предупреждением «⚠ Пишется НЕ в общий файл».</li>
+                    <li><b>Новое:</b> в настройках Яндекс.Диска (⚙️) добавлена кнопка «Диагностика записи» — пошагово проверяет токен, путь к файлу и совпадение с общим файлом команды.</li>
+                    <li><b>Подсказка:</b> для совместной работы коллега должен поделиться папкой через «Предоставить доступ» с правом «Редактирование» — публичная ссылка даёт только чтение.</li>
+                </ul>
                 <strong style="color:var(--text-primary);">[v17 — 241126175500]</strong>
                 <ul style="margin-top:4px;margin-bottom:8px;">
                     <li><b>Новое:</b> в форму заказа под полями «КП» и «Счёт» добавлены поля «Тип печати» (по умолчанию <code>SLS</code>), «Название принтера» (по умолчанию <code>P360 TPM3D</code>) и «Название материала» (по умолчанию <code>PA12 GF30</code>).</li>
@@ -523,7 +530,7 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
     <div class="modal" style="max-width:680px;">
         <button class="close-btn" onclick="closeModal('modal-token')">&times;</button>
         <h2><i class="fa-brands fa-yandex" style="color:var(--yandex-red);margin-right:8px;"></i>Настройка Яндекс.Диска</h2>
-        <div class="yd-info-box"><div class="yd-info-title"><i class="fa-solid fa-circle-info"></i> Как это работает</div><ol><li><b>Скачивание</b> файла <code>proizvodstvo.json</code> работает <u>без токена</u> — по публичной ссылке.</li><li><b>Сохранение</b> на Диск требует OAuth-токен и права записи.</li></ol></div>
+        <div class="yd-info-box"><div class="yd-info-title"><i class="fa-solid fa-circle-info"></i> Как это работает</div><ol><li><b>Скачивание</b> файла <code>proizvodstvo.json</code> работает <u>без токена</u> — по публичной ссылке.</li><li><b>Сохранение</b> на Диск требует OAuth-токен и права записи.</li><li><b>Важно:</b> чтобы ваши изменения видели все, коллега должен поделиться с вами <u>папкой</u> через «Предоставить доступ» с правом <b>«Редактирование»</b> (не публичной ссылкой!), а вы — принять приглашение. Публичная ссылка даёт только чтение.</li></ol></div>
         <div class="yd-steps">
             <div class="yd-step-title">Client ID приложения</div>
             <div class="yd-step-hint">Откройте <a href="https://oauth.yandex.ru/" target="_blank" style="color:var(--accent-blue);font-weight:600;">oauth.yandex.ru</a>, скопируйте ClientID. Права: <code>cloud_api:disk.write</code>, <code>cloud_api:disk.read</code>.</div>
@@ -533,7 +540,8 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
             <div class="yd-step-title">Вставить токен</div>
             <div class="field" style="margin-bottom:10px;"><input type="text" id="yandex-token-input" placeholder="y0_AgAAAA... (или вся адресная строка)"></div>
             <div class="yd-step-title">Проверить подключение</div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><button class="btn btn-sm" onclick="checkYandexConnection()"><i class="fa-solid fa-plug-circle-check"></i> Проверить</button><div id="yandex-check-result" style="font-size:11px;"></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;"><button class="btn btn-sm" onclick="checkYandexConnection()"><i class="fa-solid fa-plug-circle-check"></i> Проверить токен</button><button class="btn btn-sm btn-yandex" onclick="diagnoseYandexWrite()"><i class="fa-solid fa-stethoscope"></i> Диагностика записи</button></div>
+            <div id="yandex-check-result" style="font-size:11px;margin-bottom:8px;"></div>
             <div class="yd-step-title">Путь к файлу</div>
             <div class="yd-step-hint"><b>Формат <code>disk:/папка/файл.json</code></b>. Ссылки вида <code>https://...</code> не работают.</div>
             <div class="field" style="margin-bottom:10px;"><input type="text" id="yandex-path-input" value="disk:/proizvodstvo/proizvodstvo.json"></div>
@@ -675,8 +683,8 @@ footer { background: var(--bg-panel); border-top: 1px solid var(--border); paddi
 /* ============================================================
    КОНСТАНТЫ
    ============================================================ */
-const APP_VERSION = 'v17';
-const APP_CODE = '241126175500';
+const APP_VERSION = 'v17.1';
+const APP_CODE = '261126124500';
 const DEFAULT_PRINT_TYPE = 'SLS';
 const DEFAULT_PRINTER_NAME = 'P360 TPM3D';
 const DEFAULT_MATERIAL_NAME = 'PA12 GF30';
@@ -1092,7 +1100,9 @@ function updateDirtyUI() {
     }
     const yBtn = document.getElementById('btn-yandex-save');
     if (yBtn) {
-        if (state.yandexClean) {
+        if (typeof _autoUploadWrongTarget !== 'undefined' && _autoUploadWrongTarget) {
+            yBtn.style.background = '#d97706'; yBtn.style.borderColor = '#d97706'; yBtn.style.color = '#fff';
+        } else if (state.yandexClean) {
             yBtn.style.background = '#16a34a'; yBtn.style.borderColor = '#16a34a'; yBtn.style.color = '#fff';
         } else {
             yBtn.style.background = '#dc2626'; yBtn.style.borderColor = '#dc2626'; yBtn.style.color = '#fff';
@@ -1167,6 +1177,7 @@ let _yandexSaveQueued = false;
 let _autoUploadTickTimer = null;
 let _autoUploadSecondsLeft = 10;
 let _autoUploadHasError = false;
+let _autoUploadWrongTarget = false;
 
 function updateAutoUploadButtonText(uploading = false) {
     const span = document.getElementById('btn-yandex-save-text');
@@ -1177,8 +1188,16 @@ function updateAutoUploadButtonText(uploading = false) {
     }
     const mode = getAutoUploadMode();
     const hasToken = !!localStorage.getItem(YANDEX_TOKEN_KEY);
-    if (!hasToken || mode === 'off') {
+    if (!hasToken) {
+        span.textContent = state.dirty ? 'На Диск · НЕТ ТОКЕНА (⚙️)' : 'На Диск · нет токена (⚙️)';
+        return;
+    }
+    if (mode === 'off') {
         span.textContent = 'На Диск';
+        return;
+    }
+    if (_autoUploadWrongTarget) {
+        span.textContent = '⚠ Пишется НЕ в общий файл (⚙️)';
         return;
     }
     if (state.dirty) {
@@ -1299,6 +1318,7 @@ function saveYandexSettings() {
     localStorage.setItem(YANDEX_AUTOUPLOAD, autoMode);
     localStorage.setItem(YANDEX_CHECK_INTERVAL_KEY, checkSec);
     closeModal('modal-token');
+    _autoUploadWrongTarget = false;
     restartRemoteCheckTimer();
     restartAutoUploadTimer();
     if (autoMode === 'instant' && state.dirty) scheduleInstantUpload();
@@ -1360,6 +1380,110 @@ async function _fetchRemoteMeta() {
         }
     }
     return null;
+}
+async function _fetchPublicMetaOnly() {
+    const proxyUrl = getYandexProxyUrl();
+    if (proxyUrl) {
+        try {
+            const sep = proxyUrl.includes('?') ? '&' : '?';
+            const r = await fetch(proxyUrl + sep + 'mode=meta&t=' + Date.now(), {
+                referrerPolicy: 'no-referrer',
+                credentials: 'omit',
+            });
+            if (r.ok) return await r.json();
+        } catch (e) {}
+    }
+    try {
+        const metaUrl = 'https://cloud-api.yandex.net/v1/disk/public/resources?public_key=' + encodeURIComponent(YANDEX_PUBLIC_URL);
+        const r = await fetch(metaUrl, { referrerPolicy: 'no-referrer', credentials: 'omit' });
+        if (r.ok) return await r.json();
+    } catch (e) {}
+    return null;
+}
+async function _verifyUploadTarget(diskPath, token, uploadedAtMs) {
+    // Проверяем, что наш PUT изменил именно ОБЩИЙ файл (тот, что скачивается по публичной ссылке).
+    // Возвращает true / false / null (не удалось проверить).
+    async function checkOnce() {
+        let authMeta = null;
+        try {
+            const r = await fetch('https://cloud-api.yandex.net/v1/disk/resources?path=' + encodeURIComponent(diskPath), {
+                headers: { 'Authorization': 'OAuth ' + token, 'Accept': 'application/json' },
+                referrerPolicy: 'no-referrer',
+                credentials: 'omit',
+            });
+            if (r.ok) authMeta = await r.json();
+        } catch (e) {}
+        const pubMeta = await _fetchPublicMetaOnly();
+        if (pubMeta && pubMeta.modified) {
+            const m = Date.parse(pubMeta.modified);
+            if (!isNaN(m) && m >= (uploadedAtMs - 5 * 60 * 1000)) return true; // общий файл только что изменился
+        }
+        if (authMeta && pubMeta && authMeta.resource_id && pubMeta.resource_id) {
+            return authMeta.resource_id === pubMeta.resource_id;
+        }
+        if (pubMeta && pubMeta.modified) return false; // общий файл старый — записали не туда
+        return null;
+    }
+    let res = await checkOnce();
+    if (res === false) {
+        await new Promise(r => setTimeout(r, 5000)); // даём Диску несколько секунд на обновление метаданных
+        res = await checkOnce();
+    }
+    return res;
+}
+async function diagnoseYandexWrite() {
+    const resultEl = document.getElementById('yandex-check-result');
+    if (!resultEl) return;
+    const lines = [];
+    const render = () => { resultEl.innerHTML = lines.join(''); };
+    const add = (ok, text) => {
+        const color = ok === null ? 'var(--accent-amber)' : (ok ? '#16a34a' : 'var(--accent-rose)');
+        const icon = ok === null ? '⚠' : (ok ? '✓' : '✗');
+        lines.push('<div style="margin-top:4px;color:' + color + ';font-weight:600;">' + icon + ' ' + text + '</div>');
+        render();
+    };
+    resultEl.innerHTML = '<span style="color:var(--text-muted);">⏳ Диагностика записи...</span>';
+    const token = extractYandexToken(document.getElementById('yandex-token-input').value || localStorage.getItem(YANDEX_TOKEN_KEY) || '');
+    const diskPath = normalizeYandexPath(document.getElementById('yandex-path-input').value || localStorage.getItem(YANDEX_PATH_KEY));
+    if (!token) {
+        resultEl.innerHTML = '';
+        add(false, 'Токен не задан — выгрузка невозможна. Скачивание работает и без токена (по публичной ссылке), поэтому обновления приходят, а ваши изменения не уходят.');
+        return;
+    }
+    let tokenOk = false;
+    try {
+        const r = await fetch('https://cloud-api.yandex.net/v1/disk/', { headers: { 'Authorization': 'OAuth ' + token, 'Accept': 'application/json' } });
+        if (r.ok) {
+            const d = await r.json();
+            tokenOk = true;
+            add(true, 'Токен действителен' + (d.user && d.user.login ? ' (аккаунт: ' + escapeHtml(d.user.login) + ')' : '') + '.');
+        } else {
+            add(false, 'Токен отклонён (HTTP ' + r.status + '). Получите новый: oauth.yandex.ru → права cloud_api:disk.write и cloud_api:disk.read.');
+        }
+    } catch (e) { add(false, 'Нет связи с API Диска: ' + escapeHtml(e.message)); }
+    if (!tokenOk) return;
+    let authMeta = null;
+    try {
+        const r = await fetch('https://cloud-api.yandex.net/v1/disk/resources?path=' + encodeURIComponent(diskPath), { headers: { 'Authorization': 'OAuth ' + token, 'Accept': 'application/json' } });
+        if (r.ok) {
+            authMeta = await r.json();
+            add(true, 'Файл найден на Диске этого аккаунта: ' + escapeHtml(diskPath) + ' (изменён: ' + escapeHtml(authMeta.modified || '?') + ')');
+        } else {
+            add(false, 'Путь ' + escapeHtml(diskPath) + ' НЕ найден (HTTP ' + r.status + '). Попросите коллегу поделиться с вами ПАПКОЙ через «Предоставить доступ» с правом «Редактирование» и примите приглашение — тогда папка появится на вашем Диске.');
+        }
+    } catch (e) { add(null, 'Не удалось проверить путь: ' + escapeHtml(e.message)); }
+    const pubMeta = await _fetchPublicMetaOnly();
+    if (pubMeta) add(true, 'Общий файл по публичной ссылке доступен (изменён: ' + escapeHtml(pubMeta.modified || '?') + ')');
+    else add(false, 'Не удалось получить общий файл по публичной ссылке — проверьте интернет/прокси.');
+    if (authMeta && pubMeta && authMeta.resource_id && pubMeta.resource_id) {
+        if (authMeta.resource_id === pubMeta.resource_id) {
+            add(true, 'Путь ведёт именно на ОБЩИЙ файл команды — ваши изменения будут видны всем.');
+        } else {
+            add(false, 'ВНИМАНИЕ: ' + escapeHtml(diskPath) + ' — это ВАША ЛИЧНАЯ КОПИЯ, а не общий файл команды. Ваши изменения никто не увидит. Примите приглашение в общую папку от коллеги.');
+        }
+    } else if (authMeta && pubMeta) {
+        add(null, 'Не удалось сравнить файлы напрямую. Сделайте пробное изменение и выгрузку: дата изменения общего файла выше должна обновиться.');
+    }
 }
 async function _fetchRemoteContent() {
     const proxyUrl = getYandexProxyUrl();
@@ -1465,7 +1589,11 @@ async function loadFromYandexDisk() {
 async function saveToYandexDisk(silent = false) {
     if (!_isEditor()) { if (!silent) showToast('Только просмотр', 'error'); return; }
     const token = localStorage.getItem(YANDEX_TOKEN_KEY);
-    if (!token) { if (!silent) { showToast('Не задан OAuth-токен', 'error', 6000); openTokenModal(); } return; }
+    if (!token) {
+        if (!silent) { showToast('Не задан OAuth-токен — откройте настройки (⚙️) и вставьте токен', 'error', 6000); openTokenModal(); }
+        else updateAutoUploadButtonText(false);
+        return;
+    }
     if (_yandexSaveInFlight) {
         _yandexSaveQueued = true;
         return;
@@ -1485,14 +1613,15 @@ async function saveToYandexDisk(silent = false) {
         if (!um.ok) {
             const err = await um.json().catch(() => ({}));
             const msg = err.message || err.description || ('HTTP ' + um.status);
-            if (um.status === 409) throw new Error('Путь не найден: ' + diskPath);
-            if (um.status === 401 || um.status === 403) throw new Error('Токен недействителен');
-            if (um.status === 507) throw new Error('Закончилось место');
+            if (um.status === 409 || um.status === 404) throw new Error('Путь ' + diskPath + ' не найден на вашем Диске. Попросите коллегу поделиться ПАПКОЙ с правом «Редактирование» (не публичной ссылкой) и примите приглашение.');
+            if (um.status === 401 || um.status === 403) throw new Error('Токен недействителен или нет права записи. Нужен новый токен с правами cloud_api:disk.write (⚙️ → Диагностика записи)');
+            if (um.status === 507) throw new Error('Закончилось место на Диске');
             throw new Error(msg);
         }
         const upMeta = await um.json();
         if (!upMeta.href) throw new Error('Нет ссылки для загрузки');
         if (!silent) showToast('Загрузка на Яндекс.Диск...', 'info');
+        const uploadedAtMs = Date.now();
         const put = await fetch(upMeta.href, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: json });
         if (!put.ok) throw new Error('HTTP ' + put.status);
         _autoUploadHasError = false;
@@ -1508,16 +1637,28 @@ async function saveToYandexDisk(silent = false) {
         } catch (e) {}
         addAuditLog('yandex_save', 'Данные сохранены на Яндекс.Диск: ' + diskPath);
         if (!silent) showToast('Файл сохранён на Диск', 'success', 4500);
+        _verifyUploadTarget(diskPath, token, uploadedAtMs).then(ok => {
+            if (ok === false) {
+                _autoUploadWrongTarget = true;
+                updateDirtyUI();
+                showToast('⚠ Запись прошла, но в ВАШУ копию файла, а не в общий файл команды — остальные НЕ увидят изменений. Откройте ⚙️ → «Диагностика записи».', 'error', 15000);
+                addAuditLog('yandex_save_warn', 'Файл записан в личную копию, а не в общий файл команды: ' + diskPath);
+            } else if (ok === true && _autoUploadWrongTarget) {
+                _autoUploadWrongTarget = false;
+                updateDirtyUI();
+                showToast('Запись идёт в общий файл команды — всё в порядке', 'success', 5000);
+            }
+        });
     } catch (e) {
         console.error('[Yandex save]', e);
         _autoUploadHasError = true;
         _autoUploadSecondsLeft = getAutoUploadIntervalSec() || 10;
-        if (silent) {
-            showConnectionErrorToast();
-        } else if (e.message === 'OFFLINE' || /Failed to fetch|NetworkError|Load failed/i.test(e.message || '')) {
-            showToast('Проверьте интернет соединение', 'error', 6000);
+        const isNetwork = e.message === 'OFFLINE' || /Failed to fetch|NetworkError|Load failed/i.test(e.message || '');
+        if (isNetwork) {
+            if (silent) showConnectionErrorToast();
+            else showToast('Проверьте интернет соединение', 'error', 6000);
         } else {
-            showToast('Ошибка: ' + e.message, 'error', 7000);
+            showToast('Не удалось сохранить на Диск: ' + e.message, 'error', 9000);
         }
     } finally {
         _yandexSaveInFlight = false;
